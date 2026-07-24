@@ -20,6 +20,9 @@ import {
   MessageCircle,
   ArrowRight,
   Clock,
+  CreditCard,
+  PhoneCall,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
@@ -66,6 +69,30 @@ const SERVICES = [
     color: "#059669",
     light: "#ecfdf5",
     grad: "linear-gradient(135deg,#059669,#10b981)",
+  },
+  {
+    label: "Data Card",
+    icon: CreditCard,
+    href: "/dashboard/data-card",
+    color: "#7c3aed",
+    light: "#f5f3ff",
+    grad: "linear-gradient(135deg,#7c3aed,#a855f7)",
+  },
+  {
+    label: "Recharge Card",
+    icon: PhoneCall,
+    href: "/dashboard/recharge-card",
+    color: "#16a34a",
+    light: "#f0fdf4",
+    grad: "linear-gradient(135deg,#16a34a,#22c55e)",
+  },
+  {
+    label: "Bulk SMS",
+    icon: MessageSquare,
+    href: "/dashboard/sms",
+    color: "#0891b2",
+    light: "#e0f2fe",
+    grad: "linear-gradient(135deg,#0891b2,#06b6d4)",
   },
 ];
 
