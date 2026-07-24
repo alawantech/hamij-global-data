@@ -25,7 +25,6 @@ import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 import NumericPinInput from "@/components/NumericPinInput";
-import ForgotPinOverlay from "@/components/ForgotPinOverlay";
 
 const SERVICES = [
   {
@@ -145,7 +144,6 @@ export default function DashboardPage() {
   const [pinStep, setPinStep] = useState(1); // 1: Enter PIN, 2: Confirm PIN
   const [pin, setPin] = useState("");
   const [pinLoading, setPinLoading] = useState(false);
-  const [showForgotPin, setShowForgotPin] = useState(false);
 
   const handlePinEntry = (pinValue) => {
     setPin(pinValue);
@@ -201,19 +199,12 @@ export default function DashboardPage() {
   return (
     <div style={{ background: "#f5f5f7", minHeight: "100vh" }}>
       {/* ── Forced PIN setup modal with custom keyboard ── */}
-      {showForgotPin && (
-        <ForgotPinOverlay
-          onClose={() => setShowForgotPin(false)}
-          onSuccess={() => { refreshUser(); }}
-        />
-      )}
       {user && !user.pinEnabled && pinStep === 1 && (
         <NumericPinInput
           title="Set Your Transaction PIN"
           description="Create a 4-digit PIN to authorize all transactions. This step is required."
           onSubmit={handlePinEntry}
           isLoading={pinLoading}
-          onForgotPin={() => setShowForgotPin(true)}
         />
       )}
 
@@ -228,7 +219,6 @@ export default function DashboardPage() {
             setPinStep(1);
             setPin("");
           }}
-          onForgotPin={() => setShowForgotPin(true)}
         />
       )}
       {/* â”€â”€ HERO HEADER â”€â”€ */}
