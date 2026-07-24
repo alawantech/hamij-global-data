@@ -310,7 +310,7 @@ export default function ForgotPasswordPage() {
         {step === 3 && (
           <NumericPasswordInput
             title="Set New Password"
-            description="Create a new 8-digit password for your account."
+            description="Create a new password for your account. Minimum 8 characters."
             onSubmit={handleNewPassword}
             isLoading={loading}
             onBack={() => setStep(2)}
@@ -321,7 +321,7 @@ export default function ForgotPasswordPage() {
         {step === 4 && (
           <NumericPasswordInput
             title="Confirm New Password"
-            description="Re-enter your new 8-digit password to confirm."
+            description="Re-enter your new password to confirm."
             onSubmit={handleConfirmPassword}
             isLoading={loading}
             onBack={() => { setStep(3); setNewPassword(""); }}

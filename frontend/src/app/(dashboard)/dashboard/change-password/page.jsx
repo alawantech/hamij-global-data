@@ -92,7 +92,7 @@ export default function ChangePasswordPage() {
         {step === 1 && !showForgot && (
           <NumericPasswordInput
             title="Enter Current Password"
-            description="Enter your current 8-digit password to continue."
+            description="Enter your current password to continue."
             onSubmit={handleCurrentPassword}
             isLoading={loading}
             onBack={() => router.back()}
@@ -102,7 +102,7 @@ export default function ChangePasswordPage() {
         {step === 2 && (
           <NumericPasswordInput
             title="Set New Password"
-            description="Create a new 8-digit password for your account."
+            description="Create a new password for your account. Minimum 8 characters."
             onSubmit={handleNewPassword}
             isLoading={loading}
             onBack={() => {
@@ -114,7 +114,7 @@ export default function ChangePasswordPage() {
         {step === 3 && (
           <NumericPasswordInput
             title="Confirm New Password"
-            description="Re-enter your new 8-digit password to confirm."
+            description="Re-enter your new password to confirm."
             onSubmit={handleConfirmPassword}
             isLoading={loading}
             onBack={() => {

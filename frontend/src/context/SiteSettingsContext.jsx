@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 const DEFAULT = {
-  sitename: "Gwarzo Data Sub",
+  sitename: "GUCHOR-MONIE",
   sitetitle: "",
   sitedesc:
     "Nigeria's most reliable VTU platform. Buy airtime, data, pay bills and more.",

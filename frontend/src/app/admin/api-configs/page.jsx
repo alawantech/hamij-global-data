@@ -589,7 +589,7 @@ export default function AdminApiConfigsPage() {
           }}
         >
           <strong>Provider Data Plans routing</strong> — Set the "Active Plan
-          Provider" slug below (e.g. <code>gwarzodata</code>) to route each data
+          Provider" slug below (e.g. <code>guchormonie</code>) to route each data
           type to your provider's plan group. Manage plans at{" "}
           <a
             href="/admin/provider-data-plans"
@@ -642,7 +642,7 @@ export default function AdminApiConfigsPage() {
                         [configKey]: e.target.value,
                       }))
                     }
-                    placeholder="slug (e.g. gwarzodata)"
+                    placeholder="slug (e.g. guchormonie)"
                     style={{
                       flex: 1,
                       padding: ".5rem .75rem",

@@ -410,7 +410,7 @@ export default function RegisterPage() {
         {step === 2 && (
           <NumericPasswordInput
             title="Set Your Password"
-            description="Create an 8-digit password for your account. Use only numbers 0-9."
+            description="Create a password for your account. Minimum 8 characters — use letters, numbers, or symbols."
             onSubmit={handlePasswordSubmit}
             isLoading={loading}
           />
@@ -420,7 +420,7 @@ export default function RegisterPage() {
         {step === 3 && (
           <NumericPasswordInput
             title="Confirm Your Password"
-            description="Re-enter your 8-digit password to confirm."
+            description="Re-enter your password to confirm."
             onSubmit={handleConfirmPasswordSubmit}
             isLoading={loading}
             onBack={() => {

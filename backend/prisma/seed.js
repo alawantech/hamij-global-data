@@ -715,7 +715,7 @@ async function main() {
     await prisma.siteSetting.create({
       data: {
         id: 1,
-        sitename: "Gwarzo Data Sub",
+        sitename: "GUCHOR-MONIE",
         siteurl: "http://localhost:3000",
         agentUpgradeFee: "5000",
         vendorUpgradeFee: "10000",
@@ -748,7 +748,7 @@ async function main() {
   if (settingsExist === 0) {
     await prisma.siteSetting.create({
       data: {
-        sitename: "Gwarzo Data Sub",
+        sitename: "GUCHOR-MONIE",
         sitedesc:
           "Nigeria's most reliable VTU platform. Buy airtime, data, pay bills and more.",
       },

@@ -19,7 +19,7 @@ ALTER TABLE "admins" ADD COLUMN "updatedAt" TIMESTAMPTZ DEFAULT NOW();
 -- Step 2: Migrate existing admin data (old username -> email, old token -> password)
 -- The existing admin has username 'admin' and token is the bcrypt hash
 UPDATE "admins" SET 
-  "email" = 'admin@gwarzodatasub.com',
+  "email" = 'admin@guchormonie.com',
   "password" = "token",
   "role_new" = 'super_admin',
   "permissions" = '["admin_manage","dashboard_view","users_view","users_edit","users_credit","users_debit","users_reset_pin","users_reset_password","transactions_view","transactions_edit","notifications_manage","issues_manage","messages_manage","networks_manage","data_plans_manage","provider_data_plans_manage","data_card_plans_manage","recharge_card_plans_manage","cable_plans_manage","electricity_manage","exam_providers_manage","airtime_discounts_manage","airtime_to_cash_manage","api_configs_manage","api_links_manage","settings_manage","blacklist_manage","upgrade_requests_manage","kyc_manage"]'::jsonb,

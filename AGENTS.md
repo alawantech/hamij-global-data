@@ -1,4 +1,4 @@
-# AGENTS.md — Gwarzo Data Sub Platform
+# AGENTS.md — GUCHOR-MONIE Platform
 
 > **Single source of truth for the entire project.**
 > Any AI agent working on this project MUST read this file first.
@@ -8,7 +8,7 @@
 
 ## 1. Project Overview
 
-**Gwarzo Data Sub** is a VTU (Virtual Top-Up) fintech platform where users buy airtime, data, cable TV, electricity, exam pins, bulk SMS, data cards, recharge cards, and convert airtime to cash.
+**GUCHOR-MONIE** is a VTU (Virtual Top-Up) fintech platform where users buy airtime, data, cable TV, electricity, exam pins, bulk SMS, data cards, recharge cards, and convert airtime to cash.
 
 ### Platforms
 | Platform | Tech Stack | Location |
@@ -19,7 +19,7 @@
 | Admin Panel | Next.js (part of frontend) | `frontend/src/app/admin/` |
 
 ### Live URL
-- **Production**: `https://gwarzodatasub.com`
+- **Production**: `https://guchormonie.com`
 
 ---
 
@@ -43,13 +43,13 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 - `DATABASE_URL` — PostgreSQL connection string
 - `JWT_SECRET` — Auth JWT secret
 - `MAILERSEND_API_KEY` — Email service API key
-- `MAILERSEND_FROM_EMAIL` — Sender email (`noreply@gwarzodatasub.com`)
+- `MAILERSEND_FROM_EMAIL` — Sender email (`noreply@guchormonie.com`)
 - `ADMIN_REFRESH_SECRET` — Refresh token JWT secret (falls back to `JWT_SECRET + "-refresh"`)
 - `COOKIE_SECRET` — Cookie parser secret
-- `FRONTEND_URL` — CORS origin (`https://gwarzodatasub.com`)
+- `FRONTEND_URL` — CORS origin (`https://guchormonie.com`)
 
 ### Key Environment Variables (Frontend `.env.local`)
-- `NEXT_PUBLIC_API_URL` — Backend API URL (`https://gwarzodatasub.com/api`)
+- `NEXT_PUBLIC_API_URL` — Backend API URL (`https://guchormonie.com/api`)
 
 ---
 
@@ -57,7 +57,7 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 
 ### Connection
 - **Host**: `localhost:5432`
-- **Database**: `gwarzo_data_sub`
+- **Database**: `guchor_monie`
 - **User**: `zedro_user`
 - **Password**: `ZedroVPS2026Secure`
 
@@ -344,7 +344,7 @@ These use `protectAdmin` from `auth.js` (cookie or Bearer fallback).
 
 ### MailerSend
 - **API**: `https://api.mailersend.com/v1/email`
-- **From**: `noreply@gwarzodatasub.com`
+- **From**: `noreply@guchormonie.com`
 - **Purpose**: OTP emails (login, password reset, PIN reset, login notifications)
 
 ### Cloudflare

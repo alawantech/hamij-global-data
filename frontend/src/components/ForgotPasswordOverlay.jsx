@@ -291,11 +291,11 @@ function PasswordEntry({ label, value, onChange }) {
       <div style={{ position: "relative" }}>
         <input
           type={showPin ? "text" : "password"}
-          inputMode="numeric"
-          maxLength={20}
+          maxLength={50}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Enter new password"
+          minLength={8}
           style={{
             width: "100%", padding: "0.75rem 2.5rem 0.75rem 1rem", borderRadius: "0.75rem",
             border: "2px solid #e2e8f0", fontSize: "1.1rem", fontWeight: 700,

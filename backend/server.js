@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, "127.0.0.1", () => {
   console.log(
-    `[Server] Gwarzo Data Sub V2 backend running on port ${PORT} (${process.env.NODE_ENV})`,
+    `[Server] GUCHOR-MONIE V2 backend running on port ${PORT} (${process.env.NODE_ENV})`,
   );
 });
 

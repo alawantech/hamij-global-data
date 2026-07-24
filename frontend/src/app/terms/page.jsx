@@ -6,22 +6,22 @@ const sections = [
   {
     title: "1. Acceptance of Terms",
     content:
-      "By accessing and using Gwarzo Data Sub's platform (website, mobile app), you acknowledge that you have read, understood, and agree to be bound by these Terms & Conditions. We reserve the right to modify these terms at any time. Continued use of our services constitutes acceptance of updated terms. Your use of Gwarzo Data Sub is at your sole discretion and risk.",
+      "By accessing and using GUCHOR-MONIE's platform (website, mobile app), you acknowledge that you have read, understood, and agree to be bound by these Terms & Conditions. We reserve the right to modify these terms at any time. Continued use of our services constitutes acceptance of updated terms. Your use of GUCHOR-MONIE is at your sole discretion and risk.",
   },
   {
     title: "2. Service Description",
     content:
-      "Gwarzo Data Sub provides Virtual Top-Up (VTU) services including: mobile airtime purchases, mobile data bundles, electricity bill payments, cable TV subscriptions, bulk SMS, result checker PINs (WAEC, NECO, NABTEB), data cards, recharge cards, and airtime-to-cash conversion. We act as an intermediary between you and network providers through third-party VTU providers. Services are available 24/7, subject to provider availability and system maintenance.",
+      "GUCHOR-MONIE provides Virtual Top-Up (VTU) services including: mobile airtime purchases, mobile data bundles, electricity bill payments, cable TV subscriptions, bulk SMS, result checker PINs (WAEC, NECO, NABTEB), data cards, recharge cards, and airtime-to-cash conversion. We act as an intermediary between you and network providers through third-party VTU providers. Services are available 24/7, subject to provider availability and system maintenance.",
   },
   {
     title: "3. User Eligibility & Registration",
     content:
-      "You must be at least 18 years old and legally capable of entering binding contracts. Registration requires your full name, email address, phone number, and a password. BVN or NIN verification (KYC) is optional and available separately after account creation. You are responsible for maintaining confidentiality of your account credentials. Gwarzo Data Sub reserves the right to suspend accounts providing false information or violating regulatory requirements.",
+      "You must be at least 18 years old and legally capable of entering binding contracts. Registration requires your full name, email address, phone number, and a password. BVN or NIN verification (KYC) is optional and available separately after account creation. You are responsible for maintaining confidentiality of your account credentials. GUCHOR-MONIE reserves the right to suspend accounts providing false information or violating regulatory requirements.",
   },
   {
     title: "4. Account Security & Authentication",
     content:
-      "You must protect your password and login credentials. Your account is protected by device recognition — when you log in from a new device, a one-time password (OTP) is sent to your registered email. Never share your PIN, OTP, or password with anyone, including Gwarzo Data Sub staff. We are not liable for unauthorized access resulting from your negligence. Report suspicious activity immediately to support@gwarzodatasub.com.",
+      "You must protect your password and login credentials. Your account is protected by device recognition — when you log in from a new device, a one-time password (OTP) is sent to your registered email. Never share your PIN, OTP, or password with anyone, including GUCHOR-MONIE staff. We are not liable for unauthorized access resulting from your negligence. Report suspicious activity immediately to support@guchormonie.com.",
   },
   {
     title: "5. Wallet & Fund Management",
@@ -31,7 +31,7 @@ const sections = [
   {
     title: "6. Transaction Processing & Services",
     content:
-      "All transactions are final once submitted. Airtime and data bundles are credited directly to the phone number within 2-5 minutes, subject to network provider processing times. Bill payments and cable subscriptions are processed within 30 minutes to 2 hours. Failed transactions due to network errors are automatically refunded to your wallet. You are responsible for providing correct recipient details. Gwarzo Data Sub is not liable for transactions sent to incorrect numbers.",
+      "All transactions are final once submitted. Airtime and data bundles are credited directly to the phone number within 2-5 minutes, subject to network provider processing times. Bill payments and cable subscriptions are processed within 30 minutes to 2 hours. Failed transactions due to network errors are automatically refunded to your wallet. You are responsible for providing correct recipient details. GUCHOR-MONIE is not liable for transactions sent to incorrect numbers.",
   },
   {
     title: "7. Fees & Charges",
@@ -51,12 +51,12 @@ const sections = [
   {
     title: "10. KYC Verification & Compliance",
     content:
-      "Gwarzo Data Sub complies with Nigeria Data Protection Act (NDPA 2023) and Central Bank of Nigeria (CBN) regulations. KYC verification using BVN or NIN is available as an optional step and may be required for certain services or higher transaction limits. KYC verification is processed through Monnify, which validates your BVN or NIN against your date of birth and name. Failure to complete verification when required may result in account limitations.",
+      "GUCHOR-MONIE complies with Nigeria Data Protection Act (NDPA 2023) and Central Bank of Nigeria (CBN) regulations. KYC verification using BVN or NIN is available as an optional step and may be required for certain services or higher transaction limits. KYC verification is processed through Monnify, which validates your BVN or NIN against your date of birth and name. Failure to complete verification when required may result in account limitations.",
   },
   {
     title: "11. Prohibited Activities",
     content:
-      "You agree not to: engage in fraud or deception; use stolen payment methods; attempt to hack our systems; resell services for profit without authorization; engage in money laundering or terrorist financing; use services for illegal purposes; transmit malware; impersonate Gwarzo Data Sub staff; manipulate system exploits; or abuse promotional offers. Violation results in account termination, fund forfeiture, and potential legal action.",
+      "You agree not to: engage in fraud or deception; use stolen payment methods; attempt to hack our systems; resell services for profit without authorization; engage in money laundering or terrorist financing; use services for illegal purposes; transmit malware; impersonate GUCHOR-MONIE staff; manipulate system exploits; or abuse promotional offers. Violation results in account termination, fund forfeiture, and potential legal action.",
   },
   {
     title: "12. Service Availability & Disclaimers",
@@ -66,12 +66,12 @@ const sections = [
   {
     title: "13. Limitation of Liability",
     content:
-      "To the fullest extent permitted by law, Gwarzo Data Sub is not liable for indirect, incidental, punitive, or consequential damages. This includes lost profits, data loss, business interruption, or emotional distress. Our liability is limited to the transaction amount in dispute. You use our services at your own risk.",
+      "To the fullest extent permitted by law, GUCHOR-MONIE is not liable for indirect, incidental, punitive, or consequential damages. This includes lost profits, data loss, business interruption, or emotional distress. Our liability is limited to the transaction amount in dispute. You use our services at your own risk.",
   },
   {
     title: "14. Dispute Resolution & Support",
     content:
-      "Contact our support team within 30 days of a disputed transaction. Provide transaction reference, date, amount, and dispute reason. We investigate and respond within 7 business days. Escalated disputes go to arbitration per Nigerian law. You can reach us via: Email: support@gwarzodatasub.com | WhatsApp: Available in-app | In-app support.",
+      "Contact our support team within 30 days of a disputed transaction. Provide transaction reference, date, amount, and dispute reason. We investigate and respond within 7 business days. Escalated disputes go to arbitration per Nigerian law. You can reach us via: Email: support@guchormonie.com | WhatsApp: Available in-app | In-app support.",
   },
   {
     title: "15. Account Termination",
@@ -81,37 +81,37 @@ const sections = [
   {
     title: "16. Indemnification",
     content:
-      "You agree to indemnify and hold harmless Gwarzo Data Sub from any claims, damages, losses, or expenses (including legal fees) arising from: your breach of these terms; your misuse of services; your violation of law; fraudulent activity on your account; or your disputes with third parties through our services.",
+      "You agree to indemnify and hold harmless GUCHOR-MONIE from any claims, damages, losses, or expenses (including legal fees) arising from: your breach of these terms; your misuse of services; your violation of law; fraudulent activity on your account; or your disputes with third parties through our services.",
   },
   {
     title: "17. Intellectual Property Rights",
     content:
-      "All content, logos, trademarks, designs, and materials on Gwarzo Data Sub are protected by copyright and intellectual property laws. You may not copy, reproduce, distribute, or transmit any content without express written permission. Unauthorized use of our intellectual property may result in legal action.",
+      "All content, logos, trademarks, designs, and materials on GUCHOR-MONIE are protected by copyright and intellectual property laws. You may not copy, reproduce, distribute, or transmit any content without express written permission. Unauthorized use of our intellectual property may result in legal action.",
   },
   {
     title: "18. Third-Party Services",
     content:
-      "Our platform uses the following third-party service providers to deliver our services: mySubwallet, Dorosub, First-sub, and MBC Data (VTU processing); Monnify (payment processing and KYC verification); and MailerSend (transactional emails). We are not responsible for their services, policies, or data practices. Review their privacy policies before engaging. Gwarzo Data Sub is not liable for third-party performance issues or service failures.",
+      "Our platform uses the following third-party service providers to deliver our services: mySubwallet, Dorosub, First-sub, and MBC Data (VTU processing); Monnify (payment processing and KYC verification); and MailerSend (transactional emails). We are not responsible for their services, policies, or data practices. Review their privacy policies before engaging. GUCHOR-MONIE is not liable for third-party performance issues or service failures.",
   },
   {
     title: "19. Governing Law & Jurisdiction",
     content:
-      "These Terms & Conditions are governed by Nigerian law and the Nigeria Data Protection Act (NDPA, 2023). Any disputes are subject to exclusive jurisdiction of Nigerian courts. By using Gwarzo Data Sub, you consent to Nigerian legal proceedings.",
+      "These Terms & Conditions are governed by Nigerian law and the Nigeria Data Protection Act (NDPA, 2023). Any disputes are subject to exclusive jurisdiction of Nigerian courts. By using GUCHOR-MONIE, you consent to Nigerian legal proceedings.",
   },
   {
     title: "20. Amendment & Modifications",
     content:
-      "Gwarzo Data Sub reserves the right to modify these terms at any time. Material changes are communicated via email, in-app notification, or website notice. Continued use after modifications indicates acceptance of updated terms. If you disagree with changes, you may stop using our services.",
+      "GUCHOR-MONIE reserves the right to modify these terms at any time. Material changes are communicated via email, in-app notification, or website notice. Continued use after modifications indicates acceptance of updated terms. If you disagree with changes, you may stop using our services.",
   },
   {
     title: "21. Severability & Entire Agreement",
     content:
-      "If any provision of these terms is found invalid or unenforceable, it will be modified to the minimum extent necessary or severed, while remaining provisions stay in effect. These Terms & Conditions, together with our Privacy Policy, constitute the entire agreement between you and Gwarzo Data Sub and supersede all prior understandings.",
+      "If any provision of these terms is found invalid or unenforceable, it will be modified to the minimum extent necessary or severed, while remaining provisions stay in effect. These Terms & Conditions, together with our Privacy Policy, constitute the entire agreement between you and GUCHOR-MONIE and supersede all prior understandings.",
   },
   {
     title: "22. Contact & Support",
     content:
-      "For questions, concerns, or disputes regarding these Terms & Conditions, contact us at: Email: support@gwarzodatasub.com | In-app WhatsApp Support: Available 24/7.",
+      "For questions, concerns, or disputes regarding these Terms & Conditions, contact us at: Email: support@guchormonie.com | In-app WhatsApp Support: Available 24/7.",
   },
 ];
 
@@ -160,7 +160,7 @@ export default function TermsPage() {
             G
           </div>
           <span style={{ fontWeight: 800, color: "white", fontSize: "1.1rem" }}>
-            Gwarzo<span style={{ color: "#38bdf8" }}>Data</span>
+            GUCHOR<span style={{ color: "#38bdf8" }}>MONIE</span>
           </span>
         </Link>
         <Link
@@ -213,7 +213,7 @@ export default function TermsPage() {
           }}
         >
           <p style={{ color: "#64748b", lineHeight: 1.8, fontSize: ".95rem" }}>
-            Gwarzo Data Sub is committed to transparent and fair service delivery. These Terms and Conditions outline the rights, responsibilities, and legal obligations of all users. By accessing our mobile app or website, you agree to comply with these terms in full. Please read them carefully.
+            GUCHOR-MONIE is committed to transparent and fair service delivery. These Terms and Conditions outline the rights, responsibilities, and legal obligations of all users. By accessing our mobile app or website, you agree to comply with these terms in full. Please read them carefully.
           </p>
         </div>
 
@@ -259,7 +259,7 @@ export default function TermsPage() {
       >
         <div style={{ marginBottom: "1.5rem", lineHeight: 1.8 }}>
           <p style={{ marginBottom: ".75rem" }}>
-            © {new Date().getFullYear()} Gwarzo Data Sub. All rights reserved.
+            © {new Date().getFullYear()} GUCHOR-MONIE. All rights reserved.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", fontSize: ".8rem", marginTop: "1rem", flexWrap: "wrap" }}>
             <Link href="/privacy" style={{ color: "rgba(255,255,255,.5)", textDecoration: "none", borderRight: "1px solid rgba(255,255,255,.2)", paddingRight: ".75rem" }}>Privacy Policy</Link>
@@ -267,7 +267,7 @@ export default function TermsPage() {
           </div>
         </div>
         <p style={{ color: "rgba(255,255,255,.3)", fontSize: ".7rem", marginTop: "1rem" }}>
-          For support or legal inquiries: support@gwarzodatasub.com
+          For support or legal inquiries: support@guchormonie.com
         </p>
       </footer>
     </div>

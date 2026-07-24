@@ -72,7 +72,7 @@ const CARDS = [
     icon: Database,
     color: "#2563eb",
     title: "Provider Data Plans",
-    desc: "Create and manage data plans per provider (GwarzoData, Legitdataway, etc.) with separate groups",
+    desc: "Create and manage data plans per provider (GUCHORMONIE, Legitdataway, etc.) with separate groups",
     href: "/admin/provider-data-plans",
   },
   {

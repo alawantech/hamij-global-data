@@ -6,7 +6,7 @@ import AppLogo from "@/components/AppLogo";
 
 export default function AboutPage() {
   const settings = useSiteSettings();
-  const siteName = settings.sitename || "Gwarzo Data Sub";
+  const siteName = settings.sitename || "GUCHOR-MONIE";
   const siteInitial = siteName.charAt(0).toUpperCase();
   const logoUrl = settings.logoUrl || "";
   const team = [

@@ -434,7 +434,7 @@ export default function LoginPage() {
             <NumericPasswordInput
               key={passwordResetKey}
               title="Enter Your Password"
-              description={`Enter your 8-digit password for ${identifier}`}
+              description={`Enter your password for ${identifier}`}
               onSubmit={handlePasswordSubmit}
               isLoading={loading}
               onBack={() => {

@@ -195,7 +195,7 @@ async function getVirtualAccounts(req, res) {
         bankName: "Wema Bank",
         bankCode: "035",
         accountNumber: user.paystackWemaAccount,
-        accountName: `GWARZODATASUB/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
+        accountName: `GUCHORMONIE/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
         status: "active",
       });
     }
@@ -205,7 +205,7 @@ async function getVirtualAccounts(req, res) {
         bankName: "Paystack Titan",
         bankCode: "titan-paystack",
         accountNumber: user.paystackTitanAccount,
-        accountName: `GWARZODATASUB/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
+        accountName: `GUCHORMONIE/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
         status: "active",
       });
     }

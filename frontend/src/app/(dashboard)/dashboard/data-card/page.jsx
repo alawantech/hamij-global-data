@@ -367,7 +367,7 @@ export default function DataCardPage() {
               Data Card
             </h1>
             <p style={{ color: "rgba(255,255,255,.6)", fontSize: ".75rem" }}>
-              GwarzoData · Scratch card data pins
+              GUCHORMONIE · Scratch card data pins
             </p>
           </div>
         </div>

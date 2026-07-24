@@ -16,7 +16,7 @@ import AppLogo from "@/components/AppLogo";
 
 export default function ContactPage() {
   const settings = useSiteSettings();
-  const siteName = settings.sitename || "Gwarzo Data Sub";
+  const siteName = settings.sitename || "GUCHOR-MONIE";
   const siteInitial = siteName.charAt(0).toUpperCase();
   const logoUrl = settings.logoUrl || "";
   const [form, setForm] = useState({
@@ -232,7 +232,7 @@ export default function ContactPage() {
 
             {/* Email */}
             {(() => {
-              const emailVal = settings.email || "support@gwarzodata.ng";
+              const emailVal = settings.email || "support@guchormonie.ng";
               return (
                 <a
                   href={`mailto:${emailVal}`}

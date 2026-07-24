@@ -26,7 +26,7 @@ If behavior changes, add an "Update Log" entry and update the relevant "Currentl
 
 ## 1) High-level goal (What we want to achieve)
 
-**Gwarzo Data Sub** is a multi-surface VTU (Virtual Top-Up) fintech platform where users buy airtime, data, cable TV, electricity, exam pins, bulk SMS, data cards, recharge cards, and convert airtime to cash.
+**GUCHOR-MONIE** is a multi-surface VTU (Virtual Top-Up) fintech platform where users buy airtime, data, cable TV, electricity, exam pins, bulk SMS, data cards, recharge cards, and convert airtime to cash.
 
 ### Platforms
 | Platform | Tech Stack | Location |
@@ -37,7 +37,7 @@ If behavior changes, add an "Update Log" entry and update the relevant "Currentl
 | Admin Panel | Next.js (part of frontend) | `frontend/src/app/admin/` |
 
 ### Live URL
-- **Production**: `https://gwarzodatasub.com`
+- **Production**: `https://guchormonie.com`
 
 ---
 
@@ -192,7 +192,7 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 
 ### Connection
 - **Host**: `localhost:5432`
-- **Database**: `gwarzo_data_sub`
+- **Database**: `guchor_monie`
 - **User**: `zedro_user`
 - **Password**: `ZedroVPS2026Secure`
 
@@ -230,18 +230,18 @@ ssh root@187.124.165.15 "cd /var/www/zedro-v2/backend && npx prisma db push --sk
 
 ### Backend `.env`
 ```
-DATABASE_URL=postgresql://zedro_user:ZedroVPS2026Secure@localhost:5432/gwarzo_data_sub
+DATABASE_URL=postgresql://zedro_user:ZedroVPS2026Secure@localhost:5432/guchor_monie
 JWT_SECRET=<secret>
 MAILERSEND_API_KEY=<key>
-MAILERSEND_FROM_EMAIL=noreply@gwarzodatasub.com
+MAILERSEND_FROM_EMAIL=noreply@guchormonie.com
 ADMIN_REFRESH_SECRET=<secret>
 COOKIE_SECRET=<secret>
-FRONTEND_URL=https://gwarzodatasub.com
+FRONTEND_URL=https://guchormonie.com
 ```
 
 ### Frontend `.env.local`
 ```
-NEXT_PUBLIC_API_URL=https://gwarzodatasub.com/api
+NEXT_PUBLIC_API_URL=https://guchormonie.com/api
 ```
 
 ---
@@ -332,7 +332,7 @@ git push origin main
 
 ### MailerSend
 - **API**: `https://api.mailersend.com/v1/email`
-- **From**: `noreply@gwarzodatasub.com`
+- **From**: `noreply@guchormonie.com`
 - **Purpose**: OTP emails (login, password reset, PIN reset, login notifications)
 
 ### Cloudflare

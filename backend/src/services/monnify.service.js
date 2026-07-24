@@ -104,7 +104,7 @@ async function createReservedAccount({ userId, firstname, lastname, email, bvn, 
   const settings = await prisma.siteSetting.findFirst({
     select: { sitename: true },
   });
-  const siteName = settings?.sitename || "Gwarzo Data Sub";
+  const siteName = settings?.sitename || "GUCHOR-MONIE";
 
   // accountReference must be unique — use userId + timestamp
   const accountReference = `ZDR-USER-${userId}-${Date.now()}`;

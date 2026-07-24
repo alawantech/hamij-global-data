@@ -87,7 +87,7 @@ function detectAuthType(host) {
   const directTokenHosts = [
     "dorosub.com",
     "legitdataway.com",
-    "gwarzodata.com",
+    "guchormonie.com",
   ];
   if (basicHosts.some((h) => host.includes(h))) return "basic";
   if (directTokenHosts.some((h) => host.includes(h))) return "direct_token";
@@ -1209,7 +1209,7 @@ async function sendBulkSms({ phone, message, senderName, ref, apiConfigs }) {
 }
 
 // ---------------------------------------------------------
-// Purchase Data Card (Legitdataway / GwarzoData)
+// Purchase Data Card (Legitdataway / GUCHORMONIE)
 // ---------------------------------------------------------
 async function purchaseDataCard({
   networkId,

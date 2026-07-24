@@ -641,7 +641,7 @@ export default function ProfilePage() {
             paddingBottom: ".5rem",
           }}
         >
-          Gwarzo Data Sub v2.0
+          GUCHOR-MONIE v2.0
         </p>
       </div>
     </div>
