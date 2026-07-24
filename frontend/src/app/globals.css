@@ -556,6 +556,7 @@ select {
   );
   top: -60px;
   right: -40px;
+  pointer-events: none;
 }
 .wallet-card::after {
   content: "";
@@ -570,6 +571,7 @@ select {
   );
   bottom: -50px;
   left: -20px;
+  pointer-events: none;
 }
 
 /* ═══════════════════════════════════════════
