@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -23,8 +23,12 @@ import {
   CreditCard,
   PhoneCall,
   MessageSquare,
+  Gift,
+  Users,
+  ChevronLeft,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 import NumericPinInput from "@/components/NumericPinInput";
@@ -172,6 +176,32 @@ export default function DashboardPage() {
   const [pin, setPin] = useState("");
   const [pinLoading, setPinLoading] = useState(false);
 
+  const settings = useSiteSettings();
+  const bonusPercent = parseFloat(settings?.referralBonusPercent || 0);
+
+  const [banners, setBanners] = useState([]);
+  const [activeBanner, setActiveBanner] = useState(0);
+  const bannerTimer = useRef(null);
+
+  const startBannerTimer = useCallback(() => {
+    clearInterval(bannerTimer.current);
+    if (banners.length > 1) {
+      bannerTimer.current = setInterval(() => {
+        setActiveBanner((prev) => (prev + 1) % banners.length);
+      }, 4000);
+    }
+  }, [banners.length]);
+
+  useEffect(() => {
+    startBannerTimer();
+    return () => clearInterval(bannerTimer.current);
+  }, [startBannerTimer]);
+
+  const goToBanner = (idx) => {
+    setActiveBanner(idx);
+    startBannerTimer();
+  };
+
   const handlePinEntry = (pinValue) => {
     setPin(pinValue);
     setPinStep(2); // Move to confirmation step
@@ -205,9 +235,13 @@ export default function DashboardPage() {
       api
         .get("/user/notifications")
         .catch(() => ({ data: { data: { notifications: [] } } })),
-    ]).then(([txRes, notifRes]) => {
+      api
+        .get("/public/banners")
+        .catch(() => ({ data: { data: { banners: [] } } })),
+    ]).then(([txRes, notifRes, bannerRes]) => {
       setTransactions((txRes.data.data?.transactions || []).slice(0, 5));
       setNotifications(notifRes.data.data?.notifications || []);
+      setBanners(bannerRes.data.data?.banners || []);
     });
 
   useEffect(() => {
@@ -674,88 +708,349 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* â”€â”€ PROMO BANNER â”€â”€ */}
-            <div
+            {/* ── PROMOTIONAL BANNERS CAROUSEL ── */}
+            {banners.length > 0 && (
+              <div
+                style={{
+                  marginBottom: "1.25rem",
+                  borderRadius: "1.25rem",
+                  overflow: "hidden",
+                  position: "relative",
+                  boxShadow:
+                    "0 4px 20px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    transition: "transform .4s cubic-bezier(.4,0,.2,1)",
+                    transform: `translateX(-${activeBanner * 100}%)`,
+                  }}
+                >
+                  {banners.map((b) => (
+                    <a
+                      key={b.id}
+                      href={b.link || "#"}
+                      target={b.link ? "_blank" : undefined}
+                      rel={b.link ? "noopener noreferrer" : undefined}
+                      style={{
+                        minWidth: "100%",
+                        display: "block",
+                        textDecoration: "none",
+                      }}
+                      onClick={(e) => {
+                        if (!b.link) e.preventDefault();
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          aspectRatio: "21/9",
+                          maxHeight: 220,
+                          background: "#e2e8f0",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={b.imageUrl}
+                          alt={b.title || "Promotion"}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                          }}
+                        />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+                {banners.length > 1 && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 12,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      display: "flex",
+                      gap: 6,
+                      background: "rgba(0,0,0,.35)",
+                      backdropFilter: "blur(8px)",
+                      borderRadius: 20,
+                      padding: "5px 10px",
+                    }}
+                  >
+                    {banners.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => goToBanner(i)}
+                        style={{
+                          width: i === activeBanner ? 20 : 7,
+                          height: 7,
+                          borderRadius: 4,
+                          border: "none",
+                          cursor: "pointer",
+                          transition: "all .3s",
+                          background:
+                            i === activeBanner
+                              ? "white"
+                              : "rgba(255,255,255,.45)",
+                          padding: 0,
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+                {banners.length > 1 && (
+                  <>
+                    <button
+                      onClick={() =>
+                        goToBanner(
+                          (activeBanner - 1 + banners.length) % banners.length,
+                        )
+                      }
+                      className="banner-nav-btn"
+                      style={{
+                        position: "absolute",
+                        left: 8,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: "rgba(0,0,0,.3)",
+                        backdropFilter: "blur(4px)",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity: 0,
+                        transition: "opacity .2s",
+                      }}
+                    >
+                      <ChevronLeft size={16} color="white" />
+                    </button>
+                    <button
+                      onClick={() =>
+                        goToBanner((activeBanner + 1) % banners.length)
+                      }
+                      className="banner-nav-btn"
+                      style={{
+                        position: "absolute",
+                        right: 8,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: "rgba(0,0,0,.3)",
+                        backdropFilter: "blur(4px)",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity: 0,
+                        transition: "opacity .2s",
+                      }}
+                    >
+                      <ChevronRight size={16} color="white" />
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* ── REFERRAL PROMO CARD ── */}
+            <Link
+              href="/dashboard/referrals"
               style={{
-                background: "linear-gradient(135deg,#312e81,#4f46e5)",
-                borderRadius: "1.25rem",
-                padding: "1.25rem 1.5rem",
+                display: "block",
+                textDecoration: "none",
                 marginBottom: "1.25rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
+                borderRadius: "1.25rem",
                 overflow: "hidden",
                 position: "relative",
-                boxShadow: "0 4px 16px rgba(79,70,229,.3)",
+                background:
+                  "linear-gradient(135deg,#4f46e5,#6366f1,#7c3aed)",
+                padding: "1.5rem",
+                boxShadow:
+                  "0 4px 20px rgba(79,70,229,.25), 0 0 0 1px rgba(255,255,255,.08)",
+                transition: "transform .15s, box-shadow .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 30px rgba(79,70,229,.35), 0 0 0 1px rgba(255,255,255,.12)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 20px rgba(79,70,229,.25), 0 0 0 1px rgba(255,255,255,.08)";
               }}
             >
               <div
                 style={{
                   position: "absolute",
-                  width: 180,
-                  height: 180,
+                  width: 140,
+                  height: 140,
                   borderRadius: "50%",
-                  background: "rgba(255,255,255,.06)",
-                  right: -40,
-                  top: -60,
+                  background: "rgba(255,255,255,.1)",
+                  top: -40,
+                  right: -30,
+                  pointerEvents: "none",
                 }}
               />
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <p
-                  style={{
-                    color: "rgba(255,255,255,.6)",
-                    fontSize: ".7rem",
-                    fontWeight: 600,
-                    letterSpacing: ".06em",
-                    textTransform: "uppercase",
-                    marginBottom: ".25rem",
-                  }}
-                >
-                  Best Prices
-                </p>
-                <p
-                  style={{
-                    color: "white",
-                    fontWeight: 800,
-                    fontSize: "1rem",
-                    letterSpacing: "-.01em",
-                  }}
-                >
-                  Buy data & airtime at cheap prices
-                </p>
-                <p
-                  style={{
-                    color: "rgba(255,255,255,.6)",
-                    fontSize: ".8rem",
-                    marginTop: ".25rem",
-                  }}
-                >
-                  Works on all networks
-                </p>
-              </div>
-              <Link
-                href="/dashboard/data"
+              <div
                 style={{
-                  background: "rgba(255,255,255,.18)",
-                  border: "1px solid rgba(255,255,255,.25)",
-                  borderRadius: "10px",
-                  padding: ".6rem 1.125rem",
-                  color: "white",
-                  fontWeight: 700,
-                  fontSize: ".8rem",
+                  position: "absolute",
+                  width: 100,
+                  height: 100,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,.07)",
+                  bottom: -30,
+                  left: -20,
+                  pointerEvents: "none",
+                }}
+              />
+
+              <div
+                style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: ".35rem",
-                  flexShrink: 0,
+                  gap: "1rem",
                   position: "relative",
                   zIndex: 1,
                 }}
               >
-                Buy <ArrowRight size={14} />
-              </Link>
-            </div>
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 16,
+                    background: "rgba(255,255,255,.18)",
+                    border: "1px solid rgba(255,255,255,.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    animation: "refPulse 2s ease-in-out infinite",
+                  }}
+                >
+                  <Gift size={26} color="white" />
+                </div>
 
-            {/* â”€â”€ RECENT TRANSACTIONS â”€â”€ */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: ".4rem",
+                      marginBottom: ".15rem",
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: "white",
+                        fontWeight: 900,
+                        fontSize: "1.75rem",
+                        lineHeight: 1,
+                        letterSpacing: "-.03em",
+                      }}
+                    >
+                      {bonusPercent > 0 ? bonusPercent : "\u2014"}
+                    </span>
+                    <span
+                      style={{
+                        color: "white",
+                        fontWeight: 800,
+                        fontSize: "1rem",
+                        marginTop: 4,
+                      }}
+                    >
+                      %
+                    </span>
+                    <span
+                      style={{
+                        background: "rgba(255,255,255,.2)",
+                        color: "white",
+                        fontSize: ".6rem",
+                        fontWeight: 800,
+                        letterSpacing: ".08em",
+                        padding: "2px 8px",
+                        borderRadius: 20,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Commission
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      color: "white",
+                      fontWeight: 800,
+                      fontSize: "1rem",
+                      marginBottom: ".2rem",
+                    }}
+                  >
+                    Refer & Earn
+                  </p>
+                  <p
+                    style={{
+                      color: "rgba(255,255,255,.8)",
+                      fontSize: ".78rem",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    Share your phone number. When friends fund their wallet for
+                    the first time, you earn{" "}
+                    {bonusPercent > 0 ? bonusPercent : "0"}% instantly.
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: "rgba(255,255,255,.18)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <ChevronRight size={18} color="white" />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: ".4rem",
+                  marginTop: "1rem",
+                  paddingTop: ".75rem",
+                  borderTop: "1px solid rgba(255,255,255,.15)",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
+                <Users size={12} color="rgba(255,255,255,.85)" />
+                <span
+                  style={{
+                    color: "rgba(255,255,255,.9)",
+                    fontSize: ".72rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  Share your code · Earn on every referral
+                </span>
+              </div>
+            </Link>
+
             <div
               style={{
                 background: "white",

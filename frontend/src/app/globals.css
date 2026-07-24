@@ -94,6 +94,13 @@ select {
 /* ═══════════════════════════════════════════
    ANIMATIONS
 ═══════════════════════════════════════════ */
+@keyframes refPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.banner-nav-btn:hover {
+  opacity: 1 !important;
+}
 @keyframes spin {
   to {
     transform: rotate(360deg);
