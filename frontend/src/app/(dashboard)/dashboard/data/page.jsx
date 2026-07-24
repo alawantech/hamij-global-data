@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Wifi, ChevronLeft, CheckCircle2, Phone, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Wifi, ChevronLeft, CheckCircle2, Phone, Lock, Eye, EyeOff, ArrowRight, RotateCcw } from "lucide-react";
 import NetworkIcon, { getNetworkMeta } from "@/components/NetworkIcon";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
