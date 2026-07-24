@@ -368,7 +368,7 @@ export default function SmsPage() {
             </label>
             <input
               type="text"
-              placeholder="e.g. GUCHORMONIE"
+              placeholder="e.g. GwarzoData"
               value={senderName}
               onChange={(e) => setSenderName(e.target.value)}
               maxLength={11}
@@ -537,7 +537,7 @@ export default function SmsPage() {
                   maxLength={4}
                   placeholder="••••"
                   value={pin}
-                  onChange={(e) => setPin(e.target.value)}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                   style={{
                     width: "100%",
                     border: "1.5px solid #e4e4e7",

@@ -680,6 +680,7 @@ export default function AdminUsersPage() {
                   </p>
                   <input
                     type="text"
+                    inputMode="numeric"
                     maxLength={4}
                     placeholder="New 4-digit PIN (or leave blank for 1234)"
                     value={newPin}

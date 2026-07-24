@@ -368,7 +368,7 @@ export default function RechargeCardPage() {
               Recharge Card
             </h1>
             <p style={{ color: "rgba(255,255,255,.6)", fontSize: ".75rem" }}>
-              GUCHORMONIE · Scratch card airtime pins
+              GwarzoData · Scratch card airtime pins
             </p>
           </div>
         </div>
@@ -777,7 +777,7 @@ export default function RechargeCardPage() {
                     maxLength={4}
                     placeholder="••••"
                     value={pin}
-                    onChange={(e) => setPin(e.target.value)}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                     style={{
                       width: "100%",
                       border: "1.5px solid #e4e4e7",

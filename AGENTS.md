@@ -1,4 +1,4 @@
-# AGENTS.md — GUCHOR-MONIE Platform
+# AGENTS.md — Gwarzo Data Sub Platform
 
 > **Single source of truth for the entire project.**
 > Any AI agent working on this project MUST read this file first.
@@ -8,7 +8,7 @@
 
 ## 1. Project Overview
 
-**GUCHOR-MONIE** is a VTU (Virtual Top-Up) fintech platform where users buy airtime, data, cable TV, electricity, exam pins, bulk SMS, data cards, recharge cards, and convert airtime to cash.
+**Gwarzo Data Sub** is a VTU (Virtual Top-Up) fintech platform where users buy airtime, data, cable TV, electricity, exam pins, bulk SMS, data cards, recharge cards, and convert airtime to cash.
 
 ### Platforms
 | Platform | Tech Stack | Location |
@@ -19,7 +19,7 @@
 | Admin Panel | Next.js (part of frontend) | `frontend/src/app/admin/` |
 
 ### Live URL
-- **Production**: `https://guchormonie.com`
+- **Production**: `https://gwarzodatasub.com`
 
 ---
 
@@ -43,13 +43,13 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 - `DATABASE_URL` — PostgreSQL connection string
 - `JWT_SECRET` — Auth JWT secret
 - `MAILERSEND_API_KEY` — Email service API key
-- `MAILERSEND_FROM_EMAIL` — Sender email (`noreply@guchormonie.com`)
+- `MAILERSEND_FROM_EMAIL` — Sender email (`noreply@gwarzodatasub.com`)
 - `ADMIN_REFRESH_SECRET` — Refresh token JWT secret (falls back to `JWT_SECRET + "-refresh"`)
 - `COOKIE_SECRET` — Cookie parser secret
-- `FRONTEND_URL` — CORS origin (`https://guchormonie.com`)
+- `FRONTEND_URL` — CORS origin (`https://gwarzodatasub.com`)
 
 ### Key Environment Variables (Frontend `.env.local`)
-- `NEXT_PUBLIC_API_URL` — Backend API URL (`https://guchormonie.com/api`)
+- `NEXT_PUBLIC_API_URL` — Backend API URL (`https://gwarzodatasub.com/api`)
 
 ---
 
@@ -57,7 +57,7 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 
 ### Connection
 - **Host**: `localhost:5432`
-- **Database**: `guchor_monie`
+- **Database**: `gwarzo_data_sub`
 - **User**: `zedro_user`
 - **Password**: `ZedroVPS2026Secure`
 
@@ -344,7 +344,7 @@ These use `protectAdmin` from `auth.js` (cookie or Bearer fallback).
 
 ### MailerSend
 - **API**: `https://api.mailersend.com/v1/email`
-- **From**: `noreply@guchormonie.com`
+- **From**: `noreply@gwarzodatasub.com`
 - **Purpose**: OTP emails (login, password reset, PIN reset, login notifications)
 
 ### Cloudflare
@@ -469,6 +469,7 @@ git push origin main
 | 2026-07-17 | Added beautiful downloadable Receipts: backend `GET /user/transactions/:ref` now returns derived `category`; web success purchase redirects to `/dashboard/transactions/[ref]?new=1` which renders a celebratory Receipt (print/download via popup, copy ref, Buy Another). Web transactions list gained a service-category filter chip row. Mobile: new `TransactionReceiptScreen` reachable after purchase and from history (tap any transaction); receipt shows full details, copy ref, share. All 8 purchase screens wired to navigate to Receipt on success. | §4, §6, §13 |
 | 2026-07-17 | Wallet funding visibility: admin transactions page gained a "Wallet Funding" service filter so admin can see manual (Wallet Credit) + automatic (Monnify/Paystack Wallet Funding) funding. Airtime-to-Cash now creates a PENDING transaction in the user's history on submit ("Mark as Transferred"); admin Verify & Credit flips it to Successful (wallet payout also credits wallet + updates balances; bank payout marked successful without credit); Reject flips to Failed. Added `atc` category + Airtime→Cash filter chip on web and mobile. | §4, §6, §13 |
 | 2026-07-17 | Branded logos for all services: MTN/Glo/Airtel/9mobile real brand logos on airtime + data screens (web SVGs + mobile styled circles); DStv/GoTV/StarTimes cable logos; WAEC/NECO/NABTEB exam logos; all 12 electricity DISCO logos. New components: `NetworkIcon.jsx` (web, updated with SVGs), `NetworkLogo.js` (mobile), `ProviderIcon.jsx` (web), `ProviderLogo.js` (mobile). Backend `logoUrl` field exposed on networks. | §4, §6, §13 |
+| 2026-07-24 | Refactored web data page to 2-step flow: Step 1 (network → plan type → plan → phone number → Continue), Step 2 (order summary + transaction PIN with "Forgot PIN?" link using `ForgotPinOverlay`). Added `ArrowRight` icon import, step indicator progress bar. | §6, §13 |
 
 ---
 
