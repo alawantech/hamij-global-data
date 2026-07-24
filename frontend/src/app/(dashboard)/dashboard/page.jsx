@@ -628,86 +628,9 @@ export default function DashboardPage() {
         {/* Two-column layout on desktop */}
         <div className="dash-cols">
           {/* â”€â”€ LEFT / MAIN COLUMN â”€â”€ */}
+
+
           <div className="dash-col-main">
-            {/* â”€â”€ SERVICES GRID â”€â”€ */}
-            <div
-              style={{
-                background: "white",
-                borderRadius: "1.5rem",
-                padding: "1.25rem 1.25rem 1rem",
-                marginBottom: "1.25rem",
-                boxShadow:
-                  "0 4px 20px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "1.125rem",
-                }}
-              >
-                <h2
-                  style={{
-                    fontWeight: 800,
-                    fontSize: "1rem",
-                    color: "#09090b",
-                    letterSpacing: "-.01em",
-                  }}
-                >
-                  Quick Services
-                </h2>
-                <Link
-                  href="/dashboard/services"
-                  style={{
-                    fontSize: ".75rem",
-                    fontWeight: 600,
-                    color: "#4f46e5",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: ".2rem",
-                  }}
-                >
-                  See all <ChevronRight size={13} />
-                </Link>
-              </div>
-
-              <div className="svc-grid">
-                {SERVICES.map(({ label, icon: Icon, href, color, light }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="svc-btn"
-                    style={{ gap: ".5rem" }}
-                  >
-                    <div
-                      className="svc-icon"
-                      style={{
-                        background: light,
-                        width: 52,
-                        height: 52,
-                        borderRadius: 16,
-                      }}
-                    >
-                      <Icon size={23} color={color} strokeWidth={1.75} />
-                    </div>
-                    <span
-                      style={{
-                        fontSize: ".72rem",
-                        fontWeight: 700,
-                        color: "#3f3f46",
-                        textAlign: "center",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {label}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
             {/* ── PROMOTIONAL BANNERS CAROUSEL ── */}
             {banners.length > 0 && (
               <div
@@ -862,6 +785,84 @@ export default function DashboardPage() {
                 )}
               </div>
             )}
+            {/* â”€â”€ SERVICES GRID â”€â”€ */}
+            <div
+              style={{
+                background: "white",
+                borderRadius: "1.5rem",
+                padding: "1.25rem 1.25rem 1rem",
+                marginBottom: "1.25rem",
+                boxShadow:
+                  "0 4px 20px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "1.125rem",
+                }}
+              >
+                <h2
+                  style={{
+                    fontWeight: 800,
+                    fontSize: "1rem",
+                    color: "#09090b",
+                    letterSpacing: "-.01em",
+                  }}
+                >
+                  Quick Services
+                </h2>
+                <Link
+                  href="/dashboard/services"
+                  style={{
+                    fontSize: ".75rem",
+                    fontWeight: 600,
+                    color: "#4f46e5",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: ".2rem",
+                  }}
+                >
+                  See all <ChevronRight size={13} />
+                </Link>
+              </div>
+
+              <div className="svc-grid">
+                {SERVICES.map(({ label, icon: Icon, href, color, light }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="svc-btn"
+                    style={{ gap: ".5rem" }}
+                  >
+                    <div
+                      className="svc-icon"
+                      style={{
+                        background: light,
+                        width: 52,
+                        height: 52,
+                        borderRadius: 16,
+                      }}
+                    >
+                      <Icon size={23} color={color} strokeWidth={1.75} />
+                    </div>
+                    <span
+                      style={{
+                        fontSize: ".72rem",
+                        fontWeight: 700,
+                        color: "#3f3f46",
+                        textAlign: "center",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
 
             {/* ── REFERRAL PROMO CARD ── */}
             <Link
