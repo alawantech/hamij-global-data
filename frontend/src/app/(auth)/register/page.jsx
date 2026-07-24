@@ -2,12 +2,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle, User, Mail, Phone, Gift } from "lucide-react";
+import { ArrowRight, CheckCircle, User, Mail, Phone, Gift, Lock, Eye, EyeOff } from "lucide-react";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import AppLogo from "@/components/AppLogo";
-import NumericPasswordInput from "@/components/NumericPasswordInput";
 
 const PERKS = [
   "Free account — no monthly fees",
@@ -19,7 +18,7 @@ const PERKS = [
 export default function RegisterPage() {
   const router = useRouter();
   const { refreshUser } = useAuth();
-  const [step, setStep] = useState(1); // 1: User details, 2: Password, 3: Confirm password
+  const [step, setStep] = useState(1); // 1: User details, 2: Password + Confirm
   const [userDetails, setUserDetails] = useState({
     fullname: "",
     email: "",
@@ -27,6 +26,9 @@ export default function RegisterPage() {
     referral: "",
   });
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleUserDetailsChange = (e) => {
@@ -79,19 +81,20 @@ export default function RegisterPage() {
     }
   };
 
-  const handlePasswordSubmit = (passwordValue) => {
-    // User has entered password on step 2, move to step 3 for confirmation
-    setPassword(passwordValue);
-    setStep(3);
-  };
-
-  const handleConfirmPasswordSubmit = async (confirmValue) => {
-    if (password !== confirmValue) {
-      toast.error("Passwords do not match");
-      setStep(2);
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
       return;
     }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    doRegister();
+  };
 
+  const doRegister = async () => {
     setLoading(true);
     try {
       await api.post("/auth/register", {
@@ -406,28 +409,75 @@ export default function RegisterPage() {
           </form>
         )}
 
-        {/* Step 2: Password */}
+        {/* Step 2: Password + Confirm Password */}
         {step === 2 && (
-          <NumericPasswordInput
-            title="Set Your Password"
-            description="Create a password for your account. Minimum 8 characters — use letters, numbers, or symbols."
-            onSubmit={handlePasswordSubmit}
-            isLoading={loading}
-          />
-        )}
+          <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: ".875rem" }}>
+            <div>
+              <label style={labelStyle}>Password</label>
+              <div style={{ position: "relative" }}>
+                <Lock size={18} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8", pointerEvents: "none" }} />
+                <input
+                  className="form-input"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password (min 8 characters)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={8}
+                  required
+                  style={{ paddingLeft: "2.75rem", paddingRight: "2.75rem" }}
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: ".75rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4, color: "#94a3b8", display: "flex", alignItems: "center" }} tabIndex={-1}>
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
-        {/* Step 3: Confirm Password */}
-        {step === 3 && (
-          <NumericPasswordInput
-            title="Confirm Your Password"
-            description="Re-enter your password to confirm."
-            onSubmit={handleConfirmPasswordSubmit}
-            isLoading={loading}
-            onBack={() => {
-              setStep(2);
-              setPassword("");
-            }}
-          />
+            <div>
+              <label style={labelStyle}>Confirm Password</label>
+              <div style={{ position: "relative" }}>
+                <Lock size={18} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8", pointerEvents: "none" }} />
+                <input
+                  className="form-input"
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  minLength={8}
+                  required
+                  style={{ paddingLeft: "2.75rem", paddingRight: "2.75rem" }}
+                />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: "absolute", right: ".75rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4, color: "#94a3b8", display: "flex", alignItems: "center" }} tabIndex={-1}>
+                  {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {confirmPassword && password !== confirmPassword && (
+                <p style={{ fontSize: ".75rem", color: "#ef4444", marginTop: ".35rem" }}>Passwords do not match</p>
+              )}
+            </div>
+
+            <p style={{ fontSize: ".75rem", color: "#94a3b8", lineHeight: 1.5 }}>
+              Minimum 8 characters — use letters, numbers, or symbols.
+            </p>
+
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={loading || !password || !confirmPassword}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: ".5rem",
+                opacity: loading || !password || !confirmPassword ? 0.5 : 1,
+              }}
+            >
+              {loading ? "Creating Account..." : "Create Account"}
+            </button>
+
+            <button type="button" onClick={() => { setStep(1); setPassword(""); setConfirmPassword(""); }} style={{ background: "none", border: "none", color: "#64748b", fontSize: ".8rem", cursor: "pointer", display: "flex", alignItems: "center", gap: ".25rem", margin: "0 auto" }}>
+              <ArrowRight size={15} style={{ transform: "rotate(180deg)" }} /> Back to details
+            </button>
+          </form>
         )}
 
       </div>
