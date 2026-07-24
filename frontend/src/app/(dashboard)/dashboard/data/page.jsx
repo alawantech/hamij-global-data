@@ -125,7 +125,7 @@ export default function DataPage() {
     return (
       <div style={{ minHeight: "100vh", background: "#f5f5f7" }}>
         <div className="grad-bg" style={{ padding: "3rem 1.25rem 2rem" }}>
-          <button className="back-btn" onClick={() => router.push("/dashboard')}>
+          <button className="back-btn" onClick={() => router.push("/dashboard")}>
             <ChevronLeft size={20} color="white" />
           </button>
         </div>
