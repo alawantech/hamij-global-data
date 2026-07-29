@@ -290,7 +290,7 @@ CREATE TABLE "api_links" (
 -- CreateTable
 CREATE TABLE "site_settings" (
     "id" SERIAL NOT NULL,
-    "sitename" TEXT NOT NULL DEFAULT 'Zedro',
+    "sitename" TEXT NOT NULL DEFAULT 'Guchor Data',
     "siteurl" TEXT NOT NULL DEFAULT 'https://yourdomain.com',
     "agentUpgradeFee" TEXT NOT NULL DEFAULT '500',
     "vendorUpgradeFee" TEXT NOT NULL DEFAULT '1000',

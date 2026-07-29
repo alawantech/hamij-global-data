@@ -1,7 +1,7 @@
 {
-  "name": "zedro-v2-backend",
+  "name": "guchor-backend",
   "version": "2.0.0",
-  "description": "Zedro VTU Platform — Node.js / Express / PostgreSQL / Prisma",
+  "description": "Guchor Data VTU Platform — Node.js / Express / PostgreSQL / Prisma",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

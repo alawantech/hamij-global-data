@@ -567,7 +567,7 @@ export default function LoginPage() {
             marginTop: "2rem",
           }}
         >
-          © {new Date().getFullYear()} Gwarzo Data Sub — Secure & Encrypted
+          © {new Date().getFullYear()} Guchor Data — Secure & Encrypted
         </p>
       </div>
 

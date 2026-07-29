@@ -1,4 +1,4 @@
-# Zedro V2 — Project Master Documentation
+# Guchor Data — Project Master Documentation
 
 > **Single source of truth for the entire project.**
 > Any AI agent working on this project MUST read this file first.
@@ -55,7 +55,7 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 | Name | Port | Start Command |
 |------|------|---------------|
 | `frontend` | 3000 | `next start` (in `frontend/`) |
-| `zedro-backend` | 5000 | `node server.js` (in `backend/`) |
+| `guchor-backend` | 5000 | `node server.js` (in `backend/`) |
 
 ---
 
@@ -157,7 +157,7 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 ### Cloudflare
 - [x] Free plan, SSL Full
 - [x] 5 WAF rules (skip admin routes, bot filtering)
-- [x] DNS A record → 187.124.165.15
+- [x] DNS A record → 162.35.162.189
 
 ---
 
@@ -182,7 +182,7 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 `dashboard_view`, `users_view`, `users_edit`, `users_credit`, `users_debit`, `users_reset_pin`, `users_reset_password`, `transactions_view`, `transactions_edit`, `notifications_manage`, `issues_manage`, `messages_manage`, `networks_manage`, `data_plans_manage`, `provider_data_plans_manage`, `data_card_plans_manage`, `recharge_card_plans_manage`, `cable_plans_manage`, `electricity_manage`, `exam_providers_manage`, `airtime_discounts_manage`, `airtime_to_cash_manage`, `api_configs_manage`, `api_links_manage`, `settings_manage`, `blacklist_manage`, `upgrade_requests_manage`, `kyc_manage`, `admin_manage`
 
 ### Super Admin
-- **Email**: `gwarzodata90@gmail.com`
+- **Email**: `guchordata90@gmail.com`
 - **Password**: `Admin@12345`
 - **Role**: `super_admin` (bypasses all permission checks)
 
@@ -193,15 +193,15 @@ Browser/Mobile → Cloudflare (DDoS/WAF) → Nginx (SSL/Proxy)
 ### Connection
 - **Host**: `localhost:5432`
 - **Database**: `guchor_monie`
-- **User**: `zedro_user`
-- **Password**: `ZedroVPS2026Secure`
+- **User**: `guchor_user`
+- **Password**: `GuchorDB2026Secure`
 
 ### Schema Location
 `backend/prisma/schema.prisma`
 
 ### Push Schema to DB
 ```bash
-ssh root@187.124.165.15 "cd /var/www/zedro-v2/backend && npx prisma db push --skip-generate && npx prisma generate"
+ssh root@162.35.162.189 "cd /var/www/guchor-monie/backend && npx prisma db push --skip-generate && npx prisma generate"
 ```
 
 ### Key Models
@@ -230,7 +230,7 @@ ssh root@187.124.165.15 "cd /var/www/zedro-v2/backend && npx prisma db push --sk
 
 ### Backend `.env`
 ```
-DATABASE_URL=postgresql://zedro_user:ZedroVPS2026Secure@localhost:5432/guchor_monie
+DATABASE_URL=postgresql://guchor_user:GuchorDB2026Secure@localhost:5432/guchor_monie
 JWT_SECRET=<secret>
 MAILERSEND_API_KEY=<key>
 MAILERSEND_FROM_EMAIL=noreply@guchormonie.com
@@ -249,31 +249,31 @@ NEXT_PUBLIC_API_URL=https://guchormonie.com/api
 ## 8) Deployment
 
 ### Server
-- **IP**: `187.124.165.15`
-- **SSH**: `ssh root@187.124.165.15`
-- **App Directory**: `/var/www/zedro-v2`
+- **IP**: `162.35.162.189`
+- **SSH**: `ssh root@162.35.162.189`
+- **App Directory**: `/var/www/guchor-monie`
 - **Deploy User**: `deploy` (passwordless sudo)
 
 ### Deploy Commands
 
 **Full deploy (backend + frontend + schema):**
 ```bash
-ssh root@187.124.165.15 "cd /var/www/zedro-v2 && git pull && cd backend && npx prisma db push --skip-generate && npx prisma generate && cd ../frontend && npm run build && pm2 restart frontend && pm2 restart zedro-backend"
+ssh root@162.35.162.189 "cd /var/www/guchor-monie && git pull && cd backend && npx prisma db push --skip-generate && npx prisma generate && cd ../frontend && npm run build && pm2 restart frontend && pm2 restart guchor-backend"
 ```
 
 **Backend only (no schema change):**
 ```bash
-ssh root@187.124.165.15 "cd /var/www/zedro-v2 && git pull && pm2 restart zedro-backend"
+ssh root@162.35.162.189 "cd /var/www/guchor-monie && git pull && pm2 restart guchor-backend"
 ```
 
 **Frontend only:**
 ```bash
-ssh root@187.124.165.15 "cd /var/www/zedro-v2 && git pull && cd frontend && npm run build && pm2 restart frontend"
+ssh root@162.35.162.189 "cd /var/www/guchor-monie && git pull && cd frontend && npm run build && pm2 restart frontend"
 ```
 
 **After schema change:**
 ```bash
-ssh root@187.124.165.15 "cd /var/www/zedro-v2 && git pull && cd backend && npx prisma db push --skip-generate && npx prisma generate && cd ../frontend && npm run build && pm2 restart frontend && pm2 restart zedro-backend"
+ssh root@162.35.162.189 "cd /var/www/guchor-monie && git pull && cd backend && npx prisma db push --skip-generate && npx prisma generate && cd ../frontend && npm run build && pm2 restart frontend && pm2 restart guchor-backend"
 ```
 
 ### **CRITICAL: Frontend requires `npm run build`**
@@ -282,7 +282,7 @@ The frontend runs `next start` (production build). Every frontend change MUST:
 2. `cd frontend && npm run build`
 3. `pm2 restart frontend`
 
-Backend changes only need `pm2 restart zedro-backend` (plain Node.js).
+Backend changes only need `pm2 restart guchor-backend` (plain Node.js).
 
 ### Nginx Config
 ```nginx
@@ -326,7 +326,7 @@ git push origin main
 
 ### mySubwallet API
 - **Base URL**: `https://api.mysubwallet.ng/api/`
-- **Auth**: POST Basic auth (`gwarzodata:4632Je#@!$`) → `AccessToken` → `Token ${AccessToken}`
+- **Auth**: POST Basic auth (`guchordata:4632Je#@!$`) → `AccessToken` → `Token ${AccessToken}`
 - **Data format**: Auth token in header, string `plan_type` for data/recharge cards
 - **API Key (Base64)**: `Z3dhcnpvZGF0YTo0NjMySmVAIyQ=`
 
@@ -339,7 +339,7 @@ git push origin main
 - **Plan**: Free
 - **SSL**: Full
 - **WAF**: 5 rules (skip admin routes, bot filtering)
-- **DNS**: A record → `187.124.165.15`
+- **DNS**: A record → `162.35.162.189`
 
 ### Monnify
 - **Purpose**: Dedicated virtual accounts for wallet funding

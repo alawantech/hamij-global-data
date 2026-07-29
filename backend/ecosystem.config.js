@@ -16,9 +16,9 @@
 module.exports = {
   apps: [
     {
-      name: "zedro-backend",
+      name: "guchor-backend",
       script: "server.js",
-      cwd: "/var/www/zedro-v2/backend", // ← change to your VPS path
+      cwd: "/var/www/guchor-monie/backend", // ← change to your VPS path
       instances: 1,
       exec_mode: "fork",
 
