@@ -13,13 +13,13 @@ function cookieOptions() {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     signed: true,
-    maxAge: 30 * 60 * 1000, // 30 minutes
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   };
 }
 
 function signToken(id, type) {
   return jwt.sign({ id, type }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "30m",
+    expiresIn: process.env.JWT_EXPIRES_IN || "30d",
   });
 }
 
