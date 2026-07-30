@@ -136,24 +136,27 @@ async function purchaseAirtime({
 
   let host, apiKey, apiSecret, authType, networkId;
 
-  // ── 1. Try new provider system ─────────────────────────
-  const activeProvider = await getActiveProviderForService(serviceKey);
-  if (activeProvider) {
-    host = activeProvider.service.serviceUrl || activeProvider.provider.baseUrl;
-    apiKey = activeProvider.provider.apiKey;
-    apiSecret = activeProvider.provider.apiSecret;
-    authType = activeProvider.provider.authType;
-    networkId =
-      activeProvider.service.networkCode ||
-      (airtimeType === "VTU" ? network.vtuId : network.sharesellId);
-  } else {
-    // ── 2. Fall back to legacy ApiConfig ────────────────
-    const typeSuffix = airtimeType === "VTU" ? "Vtu" : "Sharesell";
-    host = apiConfigs[`${networkName}${typeSuffix}Provider`];
-    apiKey = apiConfigs[`${networkName}${typeSuffix}Key`];
+  // ── 1. Try admin configs page first (admin-managed) ────
+  const typeSuffix = airtimeType === "VTU" ? "Vtu" : "Sharesell";
+  host = apiConfigs[`${networkName}${typeSuffix}Provider`];
+  apiKey = apiConfigs[`${networkName}${typeSuffix}Key`];
+
+  if (host && apiKey) {
     apiSecret = "";
     networkId = airtimeType === "VTU" ? network.vtuId : network.sharesellId;
     authType = detectAuthType(host);
+  } else {
+    // ── 2. Fall back to new provider system ──────────────
+    const activeProvider = await getActiveProviderForService(serviceKey);
+    if (activeProvider) {
+      host = activeProvider.service.serviceUrl || activeProvider.provider.baseUrl;
+      apiKey = activeProvider.provider.apiKey;
+      apiSecret = activeProvider.provider.apiSecret;
+      authType = activeProvider.provider.authType;
+      networkId =
+        activeProvider.service.networkCode ||
+        (airtimeType === "VTU" ? network.vtuId : network.sharesellId);
+    }
   }
 
   if (!host || !apiKey) {
@@ -496,38 +499,22 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
 
   let host, apiKey, apiSecret, authType, extNetworkId, planCode;
 
-  // ── 1. Try new provider system ─────────────────────────
-  const activeProvider = await getActiveProviderForService(serviceKey);
-  if (activeProvider) {
-    host = activeProvider.service.serviceUrl || activeProvider.provider.baseUrl;
-    apiKey = activeProvider.provider.apiKey;
-    apiSecret = activeProvider.provider.apiSecret;
-    authType = activeProvider.provider.authType;
-    extNetworkId =
-      activeProvider.service.networkCode || plan.network.networkCode;
+  // ── 1. Try admin configs page first (admin-managed) ────
+  const typeSuffixMap = {
+    SME: "Sme",
+    SME2: "Sme2",
+    Gifting: "Gifting",
+    Corporate: "Corporate",
+    Coupon: "Coupon",
+    Awoof: "Awoof",
+  };
+  const typeSuffix = typeSuffixMap[plan.type] || "Sme";
+  host = apiConfigs[`${networkName}${typeSuffix}Provider`];
+  apiKey = apiConfigs[`${networkName}${typeSuffix}Api`];
 
-    // Look up per-provider plan code override
-    const planCodeRecord = await getProviderPlanCode(
-      activeProvider.service.id,
-      plan.id,
-    );
-    planCode = planCodeRecord ? planCodeRecord.providerCode : plan.planCode;
-  } else {
-    // ── 2. Fall back to legacy ApiConfig ────────────────
-    const typeSuffixMap = {
-      SME: "Sme",
-      SME2: "Sme2",
-      Gifting: "Gifting",
-      Corporate: "Corporate",
-      Coupon: "Coupon",
-      Awoof: "Awoof",
-    };
-    const typeSuffix = typeSuffixMap[plan.type] || "Sme";
-    host = apiConfigs[`${networkName}${typeSuffix}Provider`];
-    apiKey = apiConfigs[`${networkName}${typeSuffix}Api`];
+  if (host && apiKey) {
     apiSecret = "";
     authType = detectAuthType(host);
-    // Look up per-provider network ID; fall back to general network code
     const legacyProviderSlug = apiConfigs[`${typeKey}DataProvider`] || "";
     let providerNetId = "";
     if (legacyProviderSlug && plan.networkId) {
@@ -544,6 +531,22 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
     extNetworkId =
       providerNetId || plan.networkCode || plan.network.networkCode;
     planCode = plan.planCode;
+  } else {
+    // ── 2. Fall back to new provider system ──────────────
+    const activeProvider = await getActiveProviderForService(serviceKey);
+    if (activeProvider) {
+      host = activeProvider.service.serviceUrl || activeProvider.provider.baseUrl;
+      apiKey = activeProvider.provider.apiKey;
+      apiSecret = activeProvider.provider.apiSecret;
+      authType = activeProvider.provider.authType;
+      extNetworkId =
+        activeProvider.service.networkCode || plan.network.networkCode;
+      const planCodeRecord = await getProviderPlanCode(
+        activeProvider.service.id,
+        plan.id,
+      );
+      planCode = planCodeRecord ? planCodeRecord.providerCode : plan.planCode;
+    }
   }
 
   if (!host || !apiKey) {

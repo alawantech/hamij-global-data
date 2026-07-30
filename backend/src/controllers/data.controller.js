@@ -334,30 +334,11 @@ async function purchase(req, res) {
         apiResponseLog: null,
       });
 
-      // Look up the plan's provider API Link for the correct URL/key
-      let providerUrl, providerKey;
-      if (plan.providerId) {
-        const dataProvider = await prisma.dataProvider.findUnique({
-          where: { id: plan.providerId },
-        });
-        if (dataProvider) {
-          const apiLink = await prisma.apiLink.findFirst({
-            where: { name: dataProvider.name, type: "Data" },
-          });
-          if (apiLink) {
-            providerUrl = apiLink.value;
-            providerKey = apiLink.apiKey;
-          }
-        }
-      }
-
       const result = await vtuService.purchaseData({
         plan,
         phone,
         ref,
         apiConfigs,
-        providerUrl,
-        providerKey,
       });
       await TransactionModel.updateStatus(
         ref,
