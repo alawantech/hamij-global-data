@@ -69,6 +69,23 @@ async function isBlacklisted(phone) {
 }
 
 // ---------------------------------------------------------
+// Extract actual API error message from error detail
+// ---------------------------------------------------------
+function extractApiError(errDetail) {
+  if (!errDetail) return null;
+  try {
+    const parsed = JSON.parse(errDetail);
+    return parsed.message || parsed.msg || parsed.error || parsed.detail || null;
+  } catch {
+    if (errDetail.startsWith("Request failed with status code")) return null;
+    if (errDetail.includes("ECONNREFUSED")) return null;
+    if (errDetail.includes("ENOTFOUND")) return null;
+    if (errDetail.includes("timeout")) return "Request timed out. Please try again.";
+    return errDetail.length < 200 ? errDetail : null;
+  }
+}
+
+// ---------------------------------------------------------
 // Detect auth type from legacy provider URL (backward compat)
 // ---------------------------------------------------------
 function detectAuthType(host) {
@@ -87,7 +104,7 @@ function detectAuthType(host) {
   const directTokenHosts = [
     "dorosub.com",
     "legitdataway.com",
-    "guchordata.com",
+    "gwarzodata.com",
   ];
   if (basicHosts.some((h) => host.includes(h))) return "basic";
   if (directTokenHosts.some((h) => host.includes(h))) return "direct_token";
@@ -260,7 +277,7 @@ async function purchaseAirtimeDirectToken({
     console.error("[VTU] purchaseAirtimeDirectToken error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
@@ -347,7 +364,7 @@ async function purchaseAirtimeBasicAuth({
     console.error("[VTU] purchaseAirtimeBasicAuth error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
@@ -400,7 +417,7 @@ async function purchaseAirtimeSubWallet({
       console.error("[VTU] purchaseAirtimeSubWallet token error:", errDetail);
       return {
         status: "fail",
-        msg: "Service connection error.",
+        msg: extractApiError(errDetail) || "Failed to get access token from provider.",
         apiResponseLog: errDetail,
       };
     }
@@ -428,7 +445,7 @@ async function purchaseAirtimeSubWallet({
     console.error("[VTU] purchaseAirtimeSubWallet error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
@@ -475,7 +492,7 @@ async function purchaseAirtimeVTPass({
     console.error("[VTU] purchaseAirtimeVTPass error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
@@ -658,7 +675,7 @@ async function purchaseDataDirectToken({
     console.error("[VTU] purchaseDataDirectToken error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
@@ -703,7 +720,7 @@ async function purchaseDataToken({
     console.error("[VTU] purchaseDataToken error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
@@ -746,7 +763,7 @@ async function purchaseDataBasicAuth({
     console.error("[VTU] purchaseDataBasicAuth error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
@@ -800,7 +817,7 @@ async function purchaseDataSubWallet({
       console.error("[VTU] purchaseDataSubWallet token error:", errDetail);
       return {
         status: "fail",
-        msg: "Service connection error.",
+        msg: extractApiError(errDetail) || "Failed to get access token from provider.",
         apiResponseLog: errDetail,
       };
     }
@@ -828,7 +845,7 @@ async function purchaseDataSubWallet({
     console.error("[VTU] purchaseDataSubWallet error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
@@ -1161,7 +1178,7 @@ async function purchaseExamPin({ provider, quantity, ref, apiConfigs }) {
     console.error("[VTU] purchaseExamPin error:", errDetail);
     return {
       status: "fail",
-      msg: "Service connection error.",
+      msg: extractApiError(errDetail) || "Service connection error.",
       apiResponseLog: errDetail,
     };
   }
