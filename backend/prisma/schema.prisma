@@ -400,7 +400,7 @@ model ApiLink {
 
 model SiteSetting {
   id                   Int    @id @default(autoincrement())
-  sitename             String @default("GUCHOR-MONIE")
+  sitename             String @default("GUCHOR DATA")
   siteurl              String @default("https://yourdomain.com")
   vendorUpgradeFee     String @default("1000")
   apiDocumentation     String @default("")

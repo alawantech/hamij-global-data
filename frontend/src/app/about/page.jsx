@@ -6,7 +6,7 @@ import AppLogo from "@/components/AppLogo";
 
 export default function AboutPage() {
   const settings = useSiteSettings();
-  const siteName = settings.sitename || "GUCHOR-MONIE";
+  const siteName = settings.sitename || "GUCHOR DATA";
   const siteInitial = siteName.charAt(0).toUpperCase();
   const logoUrl = settings.logoUrl || "";
   const team = [
@@ -102,7 +102,7 @@ export default function AboutPage() {
               icon: Zap,
               color: "#f59e0b",
               title: "Our Mission",
-              desc: "To provide the fastest, cheapest, and most reliable VTU platform in Nigeria — putting more money back in your pocket on every recharge.",
+              desc: "To provide the fastest, cheapest, and most reliable VTU platform in Nigeria — putting more value back in your pocket on every recharge.",
             },
             {
               icon: Shield,

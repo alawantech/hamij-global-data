@@ -27,7 +27,7 @@ async function fetchSiteSettings() {
 export async function generateMetadata(): Promise<Metadata> {
   const s = await fetchSiteSettings();
 
-  const siteName = s.sitename || "GUCHOR-MONIE";
+  const siteName = s.sitename || "GUCHOR DATA";
   // sitetitle = browser-tab-specific title; falls back to sitename
   const browserTitle = s.sitetitle?.trim() ? s.sitetitle.trim() : siteName;
   const desc =

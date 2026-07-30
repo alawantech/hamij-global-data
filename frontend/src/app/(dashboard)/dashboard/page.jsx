@@ -466,7 +466,7 @@ export default function DashboardPage() {
                   >
                     <Plus size={17} color="white" />
                   </div>
-                  <span>Add Money</span>
+                  <span>Fund Wallet</span>
                 </button>
                 <button
                   className="quick-chip"

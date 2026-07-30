@@ -1,8 +1,8 @@
 const axios = require("axios");
 
 const MAILERSEND_API_KEY = process.env.MAILERSEND_API_KEY;
-const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@guchormonie.com";
-const MAILERSEND_FROM_NAME = process.env.MAILERSEND_FROM_NAME || "GUCHOR-MONIE";
+const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@guchordata.com";
+const MAILERSEND_FROM_NAME = process.env.MAILERSEND_FROM_NAME || "GUCHOR DATA";
 
 const PURPOSE_CONFIG = {
   login: {
@@ -47,7 +47,7 @@ async function sendOtpEmail({ to, otpCode, expiresInMinutes = 20, purpose = "log
         <table width="100%" maxWidth="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
           <tr>
             <td style="background:linear-gradient(135deg,#0f172a,#1e3a8a);padding:32px 24px;text-align:center;">
-              <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:800;">GUCHOR-MONIE</h1>
+              <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:800;">GUCHOR DATA</h1>
               <p style="color:rgba(255,255,255,0.7);font-size:13px;margin:6px 0 0;">${config.headerLabel}</p>
             </td>
           </tr>

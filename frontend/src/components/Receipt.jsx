@@ -111,13 +111,13 @@ export default function ReceiptView({ tx, showPrint = true }) {
         .brand{text-align:center;font-weight:800;color:#4f46e5;font-size:15px;margin-bottom:4px}
       </style></head>
       <body><div class="card">
-        <div class="brand">GUCHOR-MONIE</div>
+        <div class="brand">GUCHOR DATA</div>
         <div class="head"><div class="check">✓</div>
         <div style="font-weight:700;color:#475569;font-size:13px">${label} Receipt</div>
         <div class="amt">${isDebit ? "-" : "+"}${fmtNaira(tx.amount)}</div>
         <span class="badge">${st.label}</span></div>
         ${rows}
-        <div class="foot">Thank you for using GUCHOR-MONIE.<br/>Receipt generated ${new Date().toLocaleString("en-NG")}</div>
+        <div class="foot">Thank you for using GUCHOR DATA.<br/>Receipt generated ${new Date().toLocaleString("en-NG")}</div>
       </div>
       <script>window.onload=function(){setTimeout(function(){window.print()},300);};</script>
       </body></html>`);

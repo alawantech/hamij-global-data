@@ -26,7 +26,7 @@ If behavior changes, add an "Update Log" entry and update the relevant "Currentl
 
 ## 1) High-level goal (What we want to achieve)
 
-**GUCHOR-MONIE** is a multi-surface VTU (Virtual Top-Up) fintech platform where users buy airtime, data, cable TV, electricity, exam pins, bulk SMS, data cards, recharge cards, and convert airtime to cash.
+**GUCHOR DATA** is a multi-surface VTU (Virtual Top-Up) fintech platform where users buy airtime, data, cable TV, electricity, exam pins, bulk SMS, data cards, recharge cards, and convert airtime to cash.
 
 ### Platforms
 | Platform | Tech Stack | Location |
@@ -37,7 +37,7 @@ If behavior changes, add an "Update Log" entry and update the relevant "Currentl
 | Admin Panel | Next.js (part of frontend) | `frontend/src/app/admin/` |
 
 ### Live URL
-- **Production**: `https://guchormonie.com`
+- **Production**: `https://guchordata.com`
 
 ---
 
@@ -233,15 +233,15 @@ ssh root@162.35.162.189 "cd /var/www/guchor-monie/backend && npx prisma db push 
 DATABASE_URL=postgresql://guchor_user:GuchorDB2026Secure@localhost:5432/guchor_monie
 JWT_SECRET=<secret>
 MAILERSEND_API_KEY=<key>
-MAILERSEND_FROM_EMAIL=noreply@guchormonie.com
+MAILERSEND_FROM_EMAIL=noreply@guchordata.com
 ADMIN_REFRESH_SECRET=<secret>
 COOKIE_SECRET=<secret>
-FRONTEND_URL=https://guchormonie.com
+FRONTEND_URL=https://guchordata.com
 ```
 
 ### Frontend `.env.local`
 ```
-NEXT_PUBLIC_API_URL=https://guchormonie.com/api
+NEXT_PUBLIC_API_URL=https://guchordata.com/api
 ```
 
 ---
@@ -332,7 +332,7 @@ git push origin main
 
 ### MailerSend
 - **API**: `https://api.mailersend.com/v1/email`
-- **From**: `noreply@guchormonie.com`
+- **From**: `noreply@guchordata.com`
 - **Purpose**: OTP emails (login, password reset, PIN reset, login notifications)
 
 ### Cloudflare

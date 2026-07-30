@@ -87,7 +87,7 @@ function detectAuthType(host) {
   const directTokenHosts = [
     "dorosub.com",
     "legitdataway.com",
-    "guchormonie.com",
+    "guchordata.com",
   ];
   if (basicHosts.some((h) => host.includes(h))) return "basic";
   if (directTokenHosts.some((h) => host.includes(h))) return "direct_token";

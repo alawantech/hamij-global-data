@@ -483,8 +483,8 @@ async function sendLoginNotification({ admin, ip, userAgent }) {
   try {
     const axios = require("axios");
     const MAILERSEND_API_KEY = process.env.MAILERSEND_API_KEY;
-    const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@guchormonie.com";
-    const MAILERSEND_FROM_NAME = process.env.MAILERSEND_FROM_NAME || "GUCHOR-MONIE";
+    const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@guchordata.com";
+    const MAILERSEND_FROM_NAME = process.env.MAILERSEND_FROM_NAME || "GUCHOR DATA";
 
     const html = `
 <!DOCTYPE html>
@@ -496,7 +496,7 @@ async function sendLoginNotification({ admin, ip, userAgent }) {
       <table width="100%" maxWidth="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
         <tr>
           <td style="background:linear-gradient(135deg,#0f172a,#1e3a8a);padding:32px 24px;text-align:center;">
-            <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:800;">GUCHOR-MONIE</h1>
+            <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:800;">GUCHOR DATA</h1>
             <p style="color:rgba(255,255,255,0.7);font-size:13px;margin:6px 0 0;">New Login Detected</p>
           </td>
         </tr>
@@ -528,7 +528,7 @@ async function sendLoginNotification({ admin, ip, userAgent }) {
     await axios.post("https://api.mailersend.com/v1/email", {
       from: { email: MAILERSEND_FROM_EMAIL, name: MAILERSEND_FROM_NAME },
       to: [{ email: admin.email }],
-      subject: "New Login Alert — GUCHOR-MONIE Admin",
+      subject: "New Login Alert — GUCHOR DATA Admin",
       html,
       text: `New login detected from IP: ${ip}. Device: ${userAgent || "Unknown"}. If this wasn't you, change your password immediately.`,
     }, {

@@ -109,7 +109,7 @@ export default function AdminLoginPage() {
         <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
           <div style={{ width: 60, height: 60, borderRadius: 18, background: "linear-gradient(135deg,#2563eb,#06b6d4)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem", fontWeight: 900, color: "white", fontSize: 26 }}>Z</div>
           <h1 style={{ color: "white", fontWeight: 900, fontSize: "1.75rem", letterSpacing: "-.03em" }}>Admin Panel</h1>
-          <p style={{ color: "rgba(255,255,255,.4)", fontSize: ".875rem", marginTop: ".375rem" }}>GUCHOR-MONIE Management</p>
+          <p style={{ color: "rgba(255,255,255,.4)", fontSize: ".875rem", marginTop: ".375rem" }}>GUCHOR DATA Management</p>
         </div>
 
         <div style={{ background: "#1e293b", borderRadius: "1.5rem", padding: "2rem", border: "1px solid rgba(255,255,255,.06)" }}>

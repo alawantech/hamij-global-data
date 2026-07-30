@@ -2,7 +2,7 @@ const axios = require("axios");
 
 // Generic API Provider
 // Handles: direct_token, basic, token auth types
-// Used for: dorosub.com, legitdataway.com, guchormonie.com, n3tdata247.com, etc.
+// Used for: dorosub.com, legitdataway.com, guchordata.com, n3tdata247.com, etc.
 
 class GenericProvider {
   constructor(apiKey, authType = "direct_token") {

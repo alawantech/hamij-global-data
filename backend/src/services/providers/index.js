@@ -56,7 +56,7 @@ function detectAuthType(host) {
     "rabdata360.com", "nabatulu", "dorosub.com",
   ];
   const directTokenHosts = [
-    "legitdataway.com", "guchormonie.com",
+    "legitdataway.com", "guchordata.com",
   ];
 
   if (basicHosts.some((h) => hostLower.includes(h))) return "basic";

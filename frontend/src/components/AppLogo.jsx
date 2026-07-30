@@ -19,7 +19,7 @@ export default function AppLogo({
   subtitle = null,
 }) {
   const settings = useSiteSettings();
-  const siteName = settings?.sitename || "GUCHOR-MONIE";
+  const siteName = settings?.sitename || "GUCHOR DATA";
   const logoUrl = settings?.logoUrl || "";
 
   const tileRadius = Math.round(logoHeight * 0.22);
