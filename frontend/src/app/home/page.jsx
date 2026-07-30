@@ -30,6 +30,7 @@ import {
   MessageSquare,
   PhoneCall,
   Send,
+  LogOut,
 } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
 import { useAuth } from "@/context/AuthContext";
@@ -348,6 +349,7 @@ export default function LandingPage() {
   var setOpenFaq = openFaqState[1];
   var authObj = useAuth();
   var user = authObj.user;
+  var logout = authObj.logout;
   var router = useRouter();
   var settings = useSiteSettings();
 
@@ -453,9 +455,14 @@ export default function LandingPage() {
 
           <div style={{ display: "flex", alignItems: "center", gap: ".75rem" }}>
             {user ? (
-              <button type="button" onClick={function() { router.push("/dashboard"); }} className="lp-cta-btn" style={{ border: "none", borderRadius: 999, padding: ".8rem 1.25rem", background: "linear-gradient(135deg,#0ea5e9,#2563eb)", color: "white", fontWeight: 700, cursor: "pointer" }}>
-                Dashboard
-              </button>
+              <React.Fragment>
+                <button type="button" onClick={function() { router.push("/dashboard"); }} className="lp-cta-btn" style={{ border: "none", borderRadius: 999, padding: ".8rem 1.25rem", background: "linear-gradient(135deg,#0ea5e9,#2563eb)", color: "white", fontWeight: 700, cursor: "pointer" }}>
+                  Dashboard
+                </button>
+                <button type="button" onClick={function() { logout(); router.push("/home"); }} style={{ border: "1px solid rgba(148,163,184,0.25)", borderRadius: 999, padding: ".8rem 1rem", background: "transparent", color: "rgba(226,232,240,0.8)", fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: ".4rem", fontSize: ".88rem" }}>
+                  <LogOut size={15} /> Log out
+                </button>
+              </React.Fragment>
             ) : (
               <React.Fragment>
                 <Link href="/login" className="lp-nav-links" style={{ color: "rgba(226,232,240,0.78)", textDecoration: "none", fontWeight: 600, fontSize: ".92rem" }}>
@@ -485,9 +492,14 @@ export default function LandingPage() {
             </div>
             <div style={{ display: "grid", gap: ".75rem", marginTop: "1rem" }}>
               {user ? (
-                <button type="button" onClick={function() { setMenuOpen(false); router.push("/dashboard"); }} style={{ border: "none", borderRadius: 14, padding: ".9rem 1rem", background: "linear-gradient(135deg,#0ea5e9,#2563eb)", color: "white", fontWeight: 700, cursor: "pointer" }}>
-                  Go to dashboard
-                </button>
+                <React.Fragment>
+                  <button type="button" onClick={function() { setMenuOpen(false); router.push("/dashboard"); }} style={{ border: "none", borderRadius: 14, padding: ".9rem 1rem", background: "linear-gradient(135deg,#0ea5e9,#2563eb)", color: "white", fontWeight: 700, cursor: "pointer" }}>
+                    Go to dashboard
+                  </button>
+                  <button type="button" onClick={function() { setMenuOpen(false); logout(); router.push("/home"); }} style={{ border: "1px solid rgba(148,163,184,0.25)", borderRadius: 14, padding: ".9rem 1rem", background: "transparent", color: "rgba(226,232,240,0.8)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: ".4rem" }}>
+                    <LogOut size={16} /> Log out
+                  </button>
+                </React.Fragment>
               ) : (
                 <React.Fragment>
                   <Link href="/login" onClick={function() { setMenuOpen(false); }} style={{ textDecoration: "none", textAlign: "center", borderRadius: 14, padding: ".9rem 1rem", background: "rgba(148,163,184,0.1)", color: "white", fontWeight: 700 }}>
