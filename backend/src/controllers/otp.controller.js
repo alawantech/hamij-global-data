@@ -219,7 +219,7 @@ async function verifyOtp(req, res) {
   if (user.regStatus === 3) return sendError(res, "Account suspended.", 403);
 
   const token = jwt.sign({ id: user.id, type: user.type }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "30m",
+    expiresIn: process.env.JWT_EXPIRES_IN || "30d",
   });
 
   const cookieOpts = {
@@ -227,7 +227,7 @@ async function verifyOtp(req, res) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     signed: true,
-    maxAge: 30 * 60 * 1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   };
 
   res.cookie("auth_token", token, cookieOpts);

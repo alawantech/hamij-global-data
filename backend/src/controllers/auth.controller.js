@@ -240,7 +240,13 @@ function logout(req, res) {
       }
     } catch {}
   }
-  res.clearCookie("auth_token");
+  res.clearCookie("auth_token", {
+    signed: true,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
   return sendSuccess(res, {}, "Logged out successfully.");
 }
 
