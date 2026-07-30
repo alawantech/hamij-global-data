@@ -133,11 +133,14 @@ model Network {
 }
 
 model DataProvider {
-  id     Int                @id @default(autoincrement())
-  name   String             @unique
-  slug   String             @unique
-  status String             @default("On")
-  plans  ProviderDataPlan[]
+  id       Int                @id @default(autoincrement())
+  name     String             @unique
+  slug     String             @unique
+  status   String             @default("On")
+  apiUrl   String             @default("")
+  apiKey   String             @default("")
+  authType String             @default("basic")
+  plans    ProviderDataPlan[]
 
   @@map("data_providers")
 }

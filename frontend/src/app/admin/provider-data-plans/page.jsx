@@ -1,11 +1,17 @@
 ﻿"use client";
 import { useEffect, useState, useCallback } from "react";
-import { Plus, Edit2, Trash2, X, ChevronDown, ChevronRight, Link2 } from "lucide-react";
+import { Plus, Edit2, Trash2, X, ChevronDown, ChevronRight, Link2, Save } from "lucide-react";
 import adminApi from "@/lib/adminApi";
 import toast from "react-hot-toast";
 import RequirePermission from "@/components/RequirePermission";
 
 const PLAN_TYPES = ["SME", "SME2", "Gifting", "Corporate", "Coupon", "Awoof"];
+const AUTH_TYPES = [
+  { value: "basic", label: "Basic Auth (2-step)" },
+  { value: "direct_token", label: "Direct Token" },
+  { value: "subwallet", label: "SubWallet" },
+  { value: "token", label: "Token" },
+];
 
 const EMPTY_PLAN = {
   providerId: "",
@@ -30,57 +36,39 @@ function slugify(s) {
 }
 
 export default function DataPlansPage() {
-  const [apiProviders, setApiProviders] = useState([]);
-  const [selectedApiProvider, setSelectedApiProvider] = useState(null);
-  const [activeDataProvider, setActiveDataProvider] = useState(null);
+  const [dataProviders, setDataProviders] = useState([]);
+  const [activeProvider, setActiveProvider] = useState(null);
   const [plans, setPlans] = useState([]);
   const [networks, setNetworks] = useState([]);
   const [expandedGroups, setExpandedGroups] = useState({});
   const [planModal, setPlanModal] = useState(null);
   const [planForm, setPlanForm] = useState(EMPTY_PLAN);
   const [loading, setLoading] = useState(false);
-  const [resolving, setResolving] = useState(false);
+  const [providerModal, setProviderModal] = useState(false);
+  const [providerForm, setProviderForm] = useState({ name: "", slug: "", apiUrl: "", apiKey: "", authType: "basic" });
+  const [savingProvider, setSavingProvider] = useState(false);
 
-  const loadApiProviders = useCallback(() => {
-    adminApi.get("/admin/api-links").then((r) => {
-      const all = r.data.data?.links || r.data.data?.apiLinks || [];
-      const dataOnes = all.filter((l) => l.type === "Data");
-      setApiProviders(dataOnes);
-    }).catch(() => {});
+  const loadProviders = useCallback(() => {
+    adminApi.get("/admin/data-providers")
+      .then((r) => setDataProviders(r.data.data?.providers || []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
-    loadApiProviders();
+    loadProviders();
     adminApi.get("/admin/networks").then((r) => setNetworks(r.data.data?.networks || [])).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (!selectedApiProvider) { setActiveDataProvider(null); setPlans([]); return; }
-    const name = selectedApiProvider.name;
-    const slug = slugify(name);
-    setResolving(true);
-    adminApi.get("/admin/data-providers").then(async (r) => {
-      const list = r.data.data?.providers || [];
-      let dp = list.find((p) => p.slug === slug || p.name === name);
-      if (!dp) {
-        const res = await adminApi.post("/admin/data-providers", { name, slug, status: "On" });
-        dp = res.data.data?.provider;
-      }
-      setActiveDataProvider(dp);
-    }).catch(() => toast.error("Could not resolve provider"))
-      .finally(() => setResolving(false));
-  }, [selectedApiProvider]);
-
   const loadPlans = useCallback(() => {
-    if (!activeDataProvider) return;
+    if (!activeProvider) return;
     setLoading(true);
-    adminApi.get("/admin/provider-data-plans", { params: { providerId: activeDataProvider.id } })
+    adminApi.get("/admin/provider-data-plans", { params: { providerId: activeProvider.id } })
       .then((r) => setPlans(r.data.data?.plans || []))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [activeDataProvider]);
+  }, [activeProvider]);
 
-  useEffect(() => { loadPlans(); }, [activeDataProvider]);
+  useEffect(() => { loadPlans(); }, [activeProvider]);
 
   const grouped = {};
   plans.forEach((p) => {
@@ -96,7 +84,7 @@ export default function DataPlansPage() {
   const toggleGroup = (key) => setExpandedGroups((e) => ({ ...e, [key]: !e[key] }));
 
   const openAddPlan = (networkId, type) => {
-    setPlanForm({ ...EMPTY_PLAN, providerId: String(activeDataProvider?.id || ""), networkId: networkId ? String(networkId) : "", type: type || "SME" });
+    setPlanForm({ ...EMPTY_PLAN, providerId: String(activeProvider?.id || ""), networkId: networkId ? String(networkId) : "", type: type || "SME" });
     setPlanModal("add");
   };
 
@@ -124,6 +112,57 @@ export default function DataPlansPage() {
     catch { toast.error("Failed"); }
   };
 
+  const saveProviderCredentials = async () => {
+    if (!activeProvider) return;
+    setSavingProvider(true);
+    try {
+      await adminApi.put(`/admin/data-providers/${activeProvider.id}`, {
+        apiUrl: activeProvider.apiUrl || "",
+        apiKey: activeProvider.apiKey || "",
+        authType: activeProvider.authType || "basic",
+      });
+      toast.success("Provider credentials saved");
+      loadProviders();
+    } catch {
+      toast.error("Failed to save credentials");
+    } finally {
+      setSavingProvider(false);
+    }
+  };
+
+  const openAddProvider = () => {
+    setProviderForm({ name: "", slug: "", apiUrl: "", apiKey: "", authType: "basic" });
+    setProviderModal(true);
+  };
+
+  const saveNewProvider = async () => {
+    if (!providerForm.name || !providerForm.slug) {
+      toast.error("Name and slug are required"); return;
+    }
+    try {
+      const res = await adminApi.post("/admin/data-providers", providerForm);
+      const newProvider = res.data.data?.provider;
+      toast.success("Provider created");
+      setProviderModal(false);
+      loadProviders();
+      if (newProvider) setActiveProvider(newProvider);
+    } catch (err) {
+      toast.error(err?.response?.data?.msg || "Failed");
+    }
+  };
+
+  const deleteProvider = async (id) => {
+    if (!confirm("Delete this provider?")) return;
+    try {
+      await adminApi.delete(`/admin/data-providers/${id}`);
+      toast.success("Deleted");
+      if (activeProvider?.id === id) setActiveProvider(null);
+      loadProviders();
+    } catch (err) {
+      toast.error(err?.response?.data?.msg || "Failed");
+    }
+  };
+
   const inputStyle = { width: "100%", padding: ".625rem .875rem", border: "1px solid #e2e8f0", borderRadius: ".75rem", fontFamily: "inherit", fontSize: ".875rem", outline: "none", boxSizing: "border-box" };
   const labelStyle = { display: "block", fontSize: ".78rem", fontWeight: 600, color: "#475569", marginBottom: ".3rem" };
   const modalOverlay = { position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" };
@@ -133,64 +172,146 @@ export default function DataPlansPage() {
     <RequirePermission permission="data_plans_manage">
     <div style={{ minHeight: "100vh" }}>
       <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#0f172a", letterSpacing: "-.03em", margin: 0 }}>Data Plans</h1>
-        <p style={{ color: "#64748b", fontSize: ".875rem", marginTop: ".25rem" }}>Select a provider from your configured API Providers to manage its data plans.</p>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#0f172a", letterSpacing: "-.03em", margin: 0 }}>Data Providers & Plans</h1>
+        <p style={{ color: "#64748b", fontSize: ".875rem", marginTop: ".25rem" }}>Manage data providers and their plans. Configure API credentials for each provider.</p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: "1.5rem", alignItems: "start" }}>
-        {/* Provider Sidebar from API Providers */}
+        {/* Provider Sidebar */}
         <div style={{ background: "white", borderRadius: "1.25rem", border: "1px solid #f1f5f9", boxShadow: "0 2px 8px rgba(0,0,0,.05)", overflow: "hidden" }}>
-          <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid #f1f5f9", display: "flex", alignItems: "center", gap: ".5rem" }}>
-            <Link2 size={14} color="#64748b" />
-            <p style={{ margin: 0, fontWeight: 700, fontSize: ".8rem", color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em" }}>Data API Providers</p>
+          <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid #f1f5f9", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
+              <Link2 size={14} color="#64748b" />
+              <p style={{ margin: 0, fontWeight: 700, fontSize: ".8rem", color: "#64748b", textTransform: "uppercase", letterSpacing: ".05em" }}>Providers</p>
+            </div>
+            <button onClick={openAddProvider} style={{ ...btnBase, background: "#2563eb", color: "white", padding: ".3rem .6rem", fontSize: ".72rem" }}>
+              <Plus size={12} /> Add
+            </button>
           </div>
-          {apiProviders.length === 0 ? (
+          {dataProviders.length === 0 ? (
             <div style={{ padding: "2rem 1.25rem", textAlign: "center", color: "#94a3b8", fontSize: ".82rem", lineHeight: 1.6 }}>
-              No Data providers found.<br />
-              Go to <a href="/admin/api-links" style={{ color: "#2563eb" }}>API Providers</a> and add one with type <strong>Data</strong>.
+              No providers yet.<br />
+              <button onClick={openAddProvider} style={{ ...btnBase, background: "#2563eb", color: "white", marginTop: ".75rem", display: "inline-flex" }}>
+                <Plus size={13} /> Create Provider
+              </button>
             </div>
           ) : (
-            apiProviders.map((p) => (
-              <div key={p.id} onClick={() => setSelectedApiProvider(p)} style={{ padding: ".875rem 1.25rem", cursor: "pointer", borderBottom: "1px solid #f8fafc", background: selectedApiProvider?.id === p.id ? "#eff6ff" : "transparent", borderLeft: selectedApiProvider?.id === p.id ? "3px solid #2563eb" : "3px solid transparent", transition: "background .15s" }}>
-                <div style={{ fontWeight: 700, fontSize: ".875rem", color: selectedApiProvider?.id === p.id ? "#1d4ed8" : "#1e293b" }}>{p.name}</div>
-                <div style={{ fontSize: ".72rem", color: "#94a3b8", marginTop: ".15rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.value || "No URL set"}</div>
-              </div>
-            ))
+            dataProviders.map((p) => {
+              const isActive = activeProvider?.id === p.id;
+              const hasCreds = p.apiUrl && p.apiKey;
+              return (
+                <div key={p.id} style={{ display: "flex", alignItems: "center", borderBottom: "1px solid #f8fafc" }}>
+                  <div
+                    onClick={() => setActiveProvider(p)}
+                    style={{
+                      flex: 1, padding: ".875rem 1.25rem", cursor: "pointer",
+                      background: isActive ? "#eff6ff" : "transparent",
+                      borderLeft: isActive ? "3px solid #2563eb" : "3px solid transparent",
+                      transition: "background .15s",
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, fontSize: ".875rem", color: isActive ? "#1d4ed8" : "#1e293b" }}>
+                      {p.name}
+                      <span style={{ fontSize: ".65rem", fontWeight: 600, marginLeft: ".4rem", padding: "1px 6px", borderRadius: "999px", background: p.status === "On" ? "#dcfce7" : "#fee2e2", color: p.status === "On" ? "#166534" : "#991b1b" }}>{p.status}</span>
+                    </div>
+                    <div style={{ fontSize: ".72rem", color: "#94a3b8", marginTop: ".15rem" }}>
+                      {hasCreds ? (
+                        <span style={{ color: "#16a34a" }}>✓ API configured</span>
+                      ) : (
+                        <span style={{ color: "#f59e0b" }}>⚠ No API credentials</span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); deleteProvider(p.id); }}
+                    style={{ border: "none", background: "none", cursor: "pointer", color: "#cbd5e1", padding: ".5rem", marginRight: ".25rem" }}
+                    title="Delete provider"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
 
         {/* Plans Area */}
         <div>
-          {!selectedApiProvider ? (
+          {!activeProvider ? (
             <div style={{ background: "white", borderRadius: "1.25rem", border: "1px solid #f1f5f9", padding: "4rem", textAlign: "center", color: "#94a3b8" }}>
               Select a provider from the left to manage its data plans.
             </div>
-          ) : resolving ? (
-            <div style={{ background: "white", borderRadius: "1.25rem", border: "1px solid #f1f5f9", padding: "3rem", textAlign: "center", color: "#94a3b8" }}>Setting up provider...</div>
           ) : (
             <>
-              <div style={{ background: "white", borderRadius: "1.25rem", border: "1px solid #f1f5f9", padding: "1.25rem 1.5rem", marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <h2 style={{ margin: 0, fontWeight: 800, fontSize: "1.1rem", color: "#1e293b" }}>{selectedApiProvider.name}</h2>
-                  <p style={{ margin: ".2rem 0 0", fontSize: ".8rem", color: "#64748b" }}>
-                    slug: <code style={{ background: "#f8fafc", padding: "1px 6px", borderRadius: "4px" }}>{activeDataProvider?.slug}</code>
-                    {selectedApiProvider.value && <> · <span style={{ color: "#94a3b8" }}>{selectedApiProvider.value}</span></>}
-                  </p>
+              {/* Provider header with API credentials */}
+              <div style={{ background: "white", borderRadius: "1.25rem", border: "1px solid #f1f5f9", padding: "1.25rem 1.5rem", marginBottom: "1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                  <div>
+                    <h2 style={{ margin: 0, fontWeight: 800, fontSize: "1.1rem", color: "#1e293b" }}>{activeProvider.name}</h2>
+                    <p style={{ margin: ".2rem 0 0", fontSize: ".8rem", color: "#64748b" }}>
+                      slug: <code style={{ background: "#f8fafc", padding: "1px 6px", borderRadius: "4px" }}>{activeProvider.slug}</code>
+                    </p>
+                  </div>
+                  <button onClick={() => openAddPlan(null, null)} style={{ ...btnBase, background: "#2563eb", color: "white" }}>
+                    <Plus size={15} /> Add Plan
+                  </button>
                 </div>
-                <button onClick={() => openAddPlan(null, null)} style={{ ...btnBase, background: "#2563eb", color: "white" }}>
-                  <Plus size={15} /> Add Plan
-                </button>
-              </div>
 
-              <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "1rem", padding: "1rem 1.25rem", marginBottom: "1rem", fontSize: ".82rem", color: "#92400e" }}>
-                <strong>Activate:</strong> Go to <a href="/admin/api-configs?tab=Data" style={{ color: "#b45309", fontWeight: 700 }}>API Config → Data tab</a> and set "Active Plan Provider" for each type to <strong>{activeDataProvider?.slug}</strong>.
+                {/* API Credentials Section */}
+                <div style={{ background: "#f8fafc", borderRadius: ".875rem", padding: "1rem", border: "1px solid #e2e8f0" }}>
+                  <div style={{ fontWeight: 700, fontSize: ".8rem", color: "#475569", marginBottom: ".75rem", textTransform: "uppercase", letterSpacing: ".04em" }}>
+                    API Credentials
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".75rem" }}>
+                    <div style={{ gridColumn: "span 2" }}>
+                      <label style={labelStyle}>API URL</label>
+                      <input
+                        value={activeProvider.apiUrl || ""}
+                        onChange={(e) => setActiveProvider({ ...activeProvider, apiUrl: e.target.value })}
+                        placeholder="https://api.provider.com/data"
+                        style={inputStyle}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>API Key</label>
+                      <input
+                        value={activeProvider.apiKey || ""}
+                        onChange={(e) => setActiveProvider({ ...activeProvider, apiKey: e.target.value })}
+                        placeholder="Your API key"
+                        style={inputStyle}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Auth Type</label>
+                      <select
+                        value={activeProvider.authType || "basic"}
+                        onChange={(e) => setActiveProvider({ ...activeProvider, authType: e.target.value })}
+                        style={inputStyle}
+                      >
+                        {AUTH_TYPES.map((a) => (
+                          <option key={a.value} value={a.value}>{a.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: ".75rem" }}>
+                    <button
+                      onClick={saveProviderCredentials}
+                      disabled={savingProvider}
+                      style={{ ...btnBase, background: savingProvider ? "#94a3b8" : "#2563eb", color: "white", padding: ".4rem 1rem" }}
+                    >
+                      <Save size={13} />
+                      {savingProvider ? "Saving…" : "Save Credentials"}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {loading ? (
                 <div style={{ background: "white", borderRadius: "1.25rem", padding: "3rem", textAlign: "center", color: "#94a3b8" }}>Loading plans...</div>
               ) : groups.length === 0 ? (
                 <div style={{ background: "white", borderRadius: "1.25rem", border: "1px solid #f1f5f9", padding: "4rem", textAlign: "center", color: "#94a3b8" }}>
-                  No plans yet for {selectedApiProvider.name}.<br />
+                  No plans yet for {activeProvider.name}.<br />
                   <button onClick={() => openAddPlan(null, null)} style={{ ...btnBase, background: "#2563eb", color: "white", marginTop: "1rem", display: "inline-flex" }}>
                     <Plus size={15} /> Add First Plan
                   </button>
@@ -255,12 +376,13 @@ export default function DataPlansPage() {
         </div>
       </div>
 
+      {/* Plan Modal */}
       {planModal && (
         <div style={modalOverlay} onClick={() => setPlanModal(null)}>
           <div style={modalBox} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
               <h3 style={{ margin: 0, fontWeight: 800, fontSize: "1.1rem" }}>
-                {planModal === "add" ? `Add Plan — ${selectedApiProvider?.name}` : "Edit Plan"}
+                {planModal === "add" ? `Add Plan — ${activeProvider?.name}` : "Edit Plan"}
               </h3>
               <button onClick={() => setPlanModal(null)} style={{ border: "none", background: "none", cursor: "pointer", color: "#64748b" }}><X size={20} /></button>
             </div>
@@ -313,6 +435,75 @@ export default function DataPlansPage() {
             <div style={{ display: "flex", gap: ".75rem", justifyContent: "flex-end", marginTop: "1.5rem" }}>
               <button onClick={() => setPlanModal(null)} style={{ ...btnBase, background: "#f1f5f9", color: "#475569" }}>Cancel</button>
               <button onClick={savePlan} style={{ ...btnBase, background: "#2563eb", color: "white" }}>{planModal === "add" ? "Add Plan" : "Save Changes"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Provider Modal */}
+      {providerModal && (
+        <div style={modalOverlay} onClick={() => setProviderModal(false)}>
+          <div style={modalBox} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+              <h3 style={{ margin: 0, fontWeight: 800, fontSize: "1.1rem" }}>New Data Provider</h3>
+              <button onClick={() => setProviderModal(false)} style={{ border: "none", background: "none", cursor: "pointer", color: "#64748b" }}><X size={20} /></button>
+            </div>
+            <div style={{ display: "grid", gap: ".875rem" }}>
+              <div>
+                <label style={labelStyle}>Provider Name</label>
+                <input
+                  value={providerForm.name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setProviderForm((f) => ({ ...f, name, slug: f.slug || slugify(name) }));
+                  }}
+                  placeholder="e.g. Dorosub"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Slug</label>
+                <input
+                  value={providerForm.slug}
+                  onChange={(e) => setProviderForm((f) => ({ ...f, slug: e.target.value }))}
+                  placeholder="e.g. dorosub"
+                  style={{ ...inputStyle, fontFamily: "monospace" }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>API URL</label>
+                <input
+                  value={providerForm.apiUrl}
+                  onChange={(e) => setProviderForm((f) => ({ ...f, apiUrl: e.target.value }))}
+                  placeholder="https://api.provider.com/data"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>API Key</label>
+                <input
+                  value={providerForm.apiKey}
+                  onChange={(e) => setProviderForm((f) => ({ ...f, apiKey: e.target.value }))}
+                  placeholder="Your API key"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Auth Type</label>
+                <select
+                  value={providerForm.authType}
+                  onChange={(e) => setProviderForm((f) => ({ ...f, authType: e.target.value }))}
+                  style={inputStyle}
+                >
+                  {AUTH_TYPES.map((a) => (
+                    <option key={a.value} value={a.value}>{a.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: ".75rem", justifyContent: "flex-end", marginTop: "1.5rem" }}>
+              <button onClick={() => setProviderModal(false)} style={{ ...btnBase, background: "#f1f5f9", color: "#475569" }}>Cancel</button>
+              <button onClick={saveNewProvider} style={{ ...btnBase, background: "#2563eb", color: "white" }}>Create Provider</button>
             </div>
           </div>
         </div>

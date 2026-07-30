@@ -217,6 +217,7 @@ export default function AdminApiConfigsPage() {
   const [netTab, setNetTab] = useState("mtn");
   const [visible, setVisible] = useState({});
   const [apiLinks, setApiLinks] = useState([]);
+  const [dataProviders, setDataProviders] = useState([]);
 
   // Apply tab from query param (?tab=Data, ?tab=Airtime, ?tab=Services, ?tab=Payment, ?tab=Messaging)
   useEffect(() => {
@@ -228,6 +229,10 @@ export default function AdminApiConfigsPage() {
     adminApi
       .get("/admin/api-links")
       .then((r) => setApiLinks(r.data.data?.links || []))
+      .catch(() => {});
+    adminApi
+      .get("/admin/data-providers")
+      .then((r) => setDataProviders(r.data.data?.providers || []))
       .catch(() => {});
   };
 
@@ -573,10 +578,42 @@ export default function AdminApiConfigsPage() {
   const renderDataTab = () => {
     const net = netTab;
     const netMeta = NETWORKS.find((n) => n.id === net);
+    const activeProviders = dataProviders.filter((p) => p.status === "On");
+
+    const toggleProvider = (netName, typeId, providerSlug) => {
+      const configKey = `${netName}${typeId}EnabledProviders`;
+      const current = (formData[configKey] || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const idx = current.indexOf(providerSlug);
+      if (idx >= 0) {
+        current.splice(idx, 1);
+      } else {
+        current.push(providerSlug);
+      }
+      setField(configKey, current.join(","));
+    };
+
+    const saveProviders = async (typeId) => {
+      const configKey = `${net}${typeId}EnabledProviders`;
+      setSavingId(`providers_${typeId}`);
+      try {
+        await adminApi.post("/admin/api-configs", {
+          name: configKey,
+          value: formData[configKey] || "",
+        });
+        toast.success("Saved successfully");
+      } catch {
+        toast.error("Failed to save");
+      } finally {
+        setSavingId(null);
+      }
+    };
+
     return (
       <div>
         {renderNetTabs()}
-        {/* Active plan provider per type (global, not per network) */}
         <div
           style={{
             background: "#eff6ff",
@@ -588,9 +625,9 @@ export default function AdminApiConfigsPage() {
             color: "#1d4ed8",
           }}
         >
-          <strong>Provider Data Plans routing</strong> — Set the "Active Plan
-          Provider" slug below (e.g. <code>guchordata</code>) to route each data
-          type to your provider's plan group. Manage plans at{" "}
+          <strong>Data Providers</strong> — Check the providers active for each
+          network and data type. Each provider must have its API URL and key
+          configured at{" "}
           <a
             href="/admin/provider-data-plans"
             style={{ color: "#2563eb", textDecoration: "underline" }}
@@ -599,119 +636,234 @@ export default function AdminApiConfigsPage() {
           </a>
           .
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
-            gap: ".75rem",
-            marginBottom: "1rem",
-          }}
-        >
+        {activeProviders.length === 0 && (
+          <div
+            style={{
+              background: "#fef3c7",
+              border: "1px solid #fde68a",
+              borderRadius: "1rem",
+              padding: "1rem 1.25rem",
+              marginBottom: "1rem",
+              fontSize: ".83rem",
+              color: "#92400e",
+            }}
+          >
+            No active data providers found.{" "}
+            <a
+              href="/admin/provider-data-plans"
+              style={{ color: "#92400e", fontWeight: 700, textDecoration: "underline" }}
+            >
+              Create providers first →
+            </a>
+          </div>
+        )}
+        <div style={{ display: "grid", gap: "1rem" }}>
           {DATA_TYPES.map((type) => {
-            const configKey = `${type.id.charAt(0).toLowerCase() + type.id.slice(1)}DataProvider`;
-            const val = formData[configKey] || "";
+            const configKey = `${net}${type.id}EnabledProviders`;
+            const selected = (formData[configKey] || "")
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+            const isSaving = savingId === `providers_${type.id}`;
             return (
               <div
-                key={configKey}
+                key={`${net}_${type.id}`}
                 style={{
                   background: "white",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: ".875rem",
-                  padding: ".875rem 1rem",
+                  borderRadius: "1rem",
+                  border: "1.5px solid #e2e8f0",
+                  overflow: "hidden",
                 }}
               >
-                <label
+                <div
                   style={{
-                    display: "block",
-                    fontSize: ".73rem",
-                    fontWeight: 700,
-                    color: "#64748b",
-                    marginBottom: ".4rem",
-                    textTransform: "uppercase",
-                    letterSpacing: ".04em",
+                    padding: ".875rem 1.25rem",
+                    background: `${netMeta.color}12`,
+                    borderBottom: "1.5px solid #e2e8f0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                   }}
                 >
-                  {type.label} Provider
-                </label>
-                <div style={{ display: "flex", gap: ".5rem" }}>
-                  <input
-                    value={val}
-                    onChange={(e) =>
-                      setFormData((c) => ({
-                        ...c,
-                        [configKey]: e.target.value,
-                      }))
-                    }
-                    placeholder="slug (e.g. guchordata)"
+                  <div
                     style={{
-                      flex: 1,
-                      padding: ".5rem .75rem",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: ".625rem",
-                      fontFamily: "monospace",
-                      fontSize: ".8rem",
-                      outline: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: ".625rem",
                     }}
-                  />
+                  >
+                    <div
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        background: netMeta.color,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontWeight: 800,
+                        fontSize: ".9rem",
+                        color: "#0f172a",
+                      }}
+                    >
+                      {netMeta.label} — {type.label}
+                    </span>
+                    {selected.length > 0 && (
+                      <span
+                        style={{
+                          fontSize: ".72rem",
+                          fontWeight: 600,
+                          color: "#16a34a",
+                          background: "#dcfce7",
+                          padding: ".15rem .5rem",
+                          borderRadius: "1rem",
+                        }}
+                      >
+                        {selected.length} active
+                      </span>
+                    )}
+                  </div>
                   <button
-                    onClick={async () => {
-                      try {
-                        const response = await adminApi.post("/admin/api-configs", {
-                          name: configKey,
-                          value: formData[configKey] || "",
-                        });
-                        // Ensure the value is updated from server response
-                        if (response.data?.data?.config?.value !== undefined) {
-                          setFormData((f) => ({
-                            ...f,
-                            [configKey]: response.data.data.config.value,
-                          }));
-                        }
-                        toast.success("Saved successfully");
-                        // Reload all configs to ensure sync
-                        loadConfigs();
-                      } catch (error) {
-                        console.error("Save error:", error);
-                        toast.error(error.response?.data?.message || "Failed to save");
-                      }
-                    }}
+                    onClick={() => saveProviders(type.id)}
+                    disabled={!!savingId}
                     style={{
-                      border: "none",
-                      background: "#2563eb",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: ".4rem",
+                      background: isSaving ? "#94a3b8" : netMeta.color,
                       color: "white",
+                      border: "none",
                       borderRadius: ".625rem",
-                      padding: ".5rem .75rem",
-                      cursor: "pointer",
+                      padding: ".4rem 1rem",
+                      cursor: savingId ? "not-allowed" : "pointer",
                       fontWeight: 700,
                       fontSize: ".78rem",
                       fontFamily: "inherit",
+                      opacity: savingId && !isSaving ? 0.5 : 1,
                     }}
                   >
-                    Save
+                    <Save size={13} />
+                    {isSaving ? "Saving…" : "Save"}
                   </button>
+                </div>
+                <div
+                  style={{
+                    padding: "1rem 1.25rem",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                    gap: ".75rem",
+                  }}
+                >
+                  {activeProviders.length === 0 ? (
+                    <p style={{ color: "#94a3b8", fontSize: ".83rem", margin: 0 }}>
+                      No providers available
+                    </p>
+                  ) : (
+                    activeProviders.map((prov) => {
+                      const checked = selected.includes(prov.slug);
+                      return (
+                        <label
+                          key={prov.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: ".625rem",
+                            padding: ".625rem .875rem",
+                            borderRadius: ".75rem",
+                            border: checked
+                              ? `2px solid ${netMeta.color}`
+                              : "2px solid #e2e8f0",
+                            background: checked ? `${netMeta.color}08` : "#f8fafc",
+                            cursor: "pointer",
+                            transition: "all .15s",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              toggleProvider(net, type.id, prov.slug)
+                            }
+                            style={{ display: "none" }}
+                          />
+                          <div
+                            style={{
+                              width: 18,
+                              height: 18,
+                              borderRadius: 4,
+                              border: checked
+                                ? `2px solid ${netMeta.color}`
+                                : "2px solid #cbd5e1",
+                              background: checked ? netMeta.color : "white",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {checked && (
+                              <span style={{ color: "white", fontSize: "11px", fontWeight: 900 }}>
+                                ✓
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div
+                              style={{
+                                fontWeight: 700,
+                                fontSize: ".83rem",
+                                color: "#0f172a",
+                                lineHeight: 1.2,
+                              }}
+                            >
+                              {prov.name}
+                            </div>
+                            {prov.apiUrl && (
+                              <div
+                                style={{
+                                  fontSize: ".68rem",
+                                  color: "#64748b",
+                                  marginTop: "2px",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {prov.apiUrl}
+                              </div>
+                            )}
+                            {!prov.apiUrl && (
+                              <div
+                                style={{
+                                  fontSize: ".68rem",
+                                  color: "#f59e0b",
+                                  marginTop: "2px",
+                                }}
+                              >
+                                ⚠ No API URL configured
+                              </div>
+                            )}
+                          </div>
+                          {prov.apiKey && (
+                            <span
+                              style={{
+                                fontSize: ".65rem",
+                                color: "#16a34a",
+                                fontWeight: 600,
+                              }}
+                            >
+                              Has key
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             );
           })}
-        </div>
-        <div style={{ display: "grid", gap: "1rem" }}>
-          {DATA_TYPES.map((type) =>
-            renderSectionCard({
-              id: `${net}_${type.id}`,
-              label: `${netMeta.label} — ${type.label}`,
-              color: netMeta.color,
-              columns: 2,
-              fields: [
-                {
-                  key: `${net}${type.id}Provider`,
-                  label: "Provider",
-                  providerType: "Data",
-                  apiKeyField: `${net}${type.id}Api`,
-                },
-                { key: `${net}${type.id}Api`, label: "API Key", secret: true },
-              ],
-            })
-          )}
         </div>
       </div>
     );

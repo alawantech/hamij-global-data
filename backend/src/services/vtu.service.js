@@ -41,7 +41,7 @@ async function getDataPlan(planId, source) {
   if (source === "provider") {
     return prisma.providerDataPlan.findUnique({
       where: { id: parseInt(planId) },
-      include: { network: true },
+      include: { network: true, provider: true },
     });
   }
   return prisma.dataPlan.findUnique({
@@ -499,30 +499,21 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
 
   let host, apiKey, apiSecret, authType, extNetworkId, planCode;
 
-  // ── 1. Try admin configs page first (admin-managed) ────
-  const typeSuffixMap = {
-    SME: "Sme",
-    SME2: "Sme2",
-    Gifting: "Gifting",
-    Corporate: "Corporate",
-    Coupon: "Coupon",
-    Awoof: "Awoof",
-  };
-  const typeSuffix = typeSuffixMap[plan.type] || "Sme";
-  host = apiConfigs[`${networkName}${typeSuffix}Provider`];
-  apiKey = apiConfigs[`${networkName}${typeSuffix}Api`];
-
-  if (host && apiKey) {
-    apiSecret = "";
-    authType = detectAuthType(host);
-    const legacyProviderSlug = apiConfigs[`${typeKey}DataProvider`] || "";
+  // ── 1. Use plan's own provider credentials (checkbox-based system) ──
+  if (plan.provider && plan.provider.apiUrl && plan.provider.apiKey) {
+    const prov = plan.provider;
+    host = prov.apiUrl;
+    apiKey = prov.apiKey;
+    apiSecret = prov.apiSecret || "";
+    authType = prov.authType || detectAuthType(host);
+    const slug = prov.slug || "";
     let providerNetId = "";
-    if (legacyProviderSlug && plan.networkId) {
+    if (slug && plan.networkId) {
       const ps = await prisma.networkProviderSetting.findUnique({
         where: {
           networkId_providerSlug: {
             networkId: plan.networkId,
-            providerSlug: legacyProviderSlug,
+            providerSlug: slug,
           },
         },
       });
@@ -532,20 +523,54 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
       providerNetId || plan.networkCode || plan.network.networkCode;
     planCode = plan.planCode;
   } else {
-    // ── 2. Fall back to new provider system ──────────────
-    const activeProvider = await getActiveProviderForService(serviceKey);
-    if (activeProvider) {
-      host = activeProvider.service.serviceUrl || activeProvider.provider.baseUrl;
-      apiKey = activeProvider.provider.apiKey;
-      apiSecret = activeProvider.provider.apiSecret;
-      authType = activeProvider.provider.authType;
+    // ── 2. Fallback: admin configs page (legacy per-network+type) ────
+    const typeSuffixMap = {
+      SME: "Sme",
+      SME2: "Sme2",
+      Gifting: "Gifting",
+      Corporate: "Corporate",
+      Coupon: "Coupon",
+      Awoof: "Awoof",
+    };
+    const typeSuffix = typeSuffixMap[plan.type] || "Sme";
+    host = apiConfigs[`${networkName}${typeSuffix}Provider`];
+    apiKey = apiConfigs[`${networkName}${typeSuffix}Api`];
+
+    if (host && apiKey) {
+      apiSecret = "";
+      authType = detectAuthType(host);
+      const legacyProviderSlug = apiConfigs[`${typeKey}DataProvider`] || "";
+      let providerNetId = "";
+      if (legacyProviderSlug && plan.networkId) {
+        const ps = await prisma.networkProviderSetting.findUnique({
+          where: {
+            networkId_providerSlug: {
+              networkId: plan.networkId,
+              providerSlug: legacyProviderSlug,
+            },
+          },
+        });
+        if (ps) providerNetId = ps.extNetworkId || "";
+      }
       extNetworkId =
-        activeProvider.service.networkCode || plan.network.networkCode;
-      const planCodeRecord = await getProviderPlanCode(
-        activeProvider.service.id,
-        plan.id,
-      );
-      planCode = planCodeRecord ? planCodeRecord.providerCode : plan.planCode;
+        providerNetId || plan.networkCode || plan.network.networkCode;
+      planCode = plan.planCode;
+    } else {
+      // ── 3. Fall back to ProviderService system ──────────────
+      const activeProvider = await getActiveProviderForService(serviceKey);
+      if (activeProvider) {
+        host = activeProvider.service.serviceUrl || activeProvider.provider.baseUrl;
+        apiKey = activeProvider.provider.apiKey;
+        apiSecret = activeProvider.provider.apiSecret;
+        authType = activeProvider.provider.authType;
+        extNetworkId =
+          activeProvider.service.networkCode || plan.network.networkCode;
+        const planCodeRecord = await getProviderPlanCode(
+          activeProvider.service.id,
+          plan.id,
+        );
+        planCode = planCodeRecord ? planCodeRecord.providerCode : plan.planCode;
+      }
     }
   }
 
@@ -1212,7 +1237,7 @@ async function sendBulkSms({ phone, message, senderName, ref, apiConfigs }) {
 }
 
 // ---------------------------------------------------------
-// Purchase Data Card (Legitdataway / GUCHORMONIE)
+// Purchase Data Card (Legitdataway / GwarzoData)
 // ---------------------------------------------------------
 async function purchaseDataCard({
   networkId,

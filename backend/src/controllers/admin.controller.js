@@ -648,11 +648,18 @@ exports.getDataProviders = async (req, res) => {
 
 exports.createDataProvider = async (req, res) => {
   try {
-    const { name, slug, status } = req.body;
+    const { name, slug, status, apiUrl, apiKey, authType } = req.body;
     if (!name || !slug) return fail(res, "Name and slug are required.", 400);
     const slugNorm = slug.toLowerCase().replace(/[^a-z0-9-]/g, "");
     const provider = await prisma.dataProvider.create({
-      data: { name, slug: slugNorm, status: status || "On" },
+      data: {
+        name,
+        slug: slugNorm,
+        status: status || "On",
+        apiUrl: apiUrl || "",
+        apiKey: apiKey || "",
+        authType: authType || "basic",
+      },
     });
     return ok(res, { provider });
   } catch (e) {
@@ -664,10 +671,16 @@ exports.createDataProvider = async (req, res) => {
 
 exports.updateDataProvider = async (req, res) => {
   try {
-    const { name, status } = req.body;
+    const { name, status, apiUrl, apiKey, authType } = req.body;
+    const data = {};
+    if (name !== undefined) data.name = name;
+    if (status !== undefined) data.status = status;
+    if (apiUrl !== undefined) data.apiUrl = apiUrl;
+    if (apiKey !== undefined) data.apiKey = apiKey;
+    if (authType !== undefined) data.authType = authType;
     const provider = await prisma.dataProvider.update({
       where: { id: parseInt(req.params.id) },
-      data: { ...(name && { name }), ...(status && { status }) },
+      data,
     });
     return ok(res, { provider });
   } catch (e) {

@@ -49,19 +49,37 @@ async function getPlans(req, res) {
   const apiConfigs = await vtuService.getApiConfigs();
   const configMap = Object.fromEntries(Object.entries(apiConfigs));
 
-  // Determine which types have configured providers (supports comma-separated slugs)
+  // Look up network name for per-network+type enabled providers
+  const networkRecord = await prisma.network.findUnique({
+    where: { id: parseInt(network) },
+    select: { name: true },
+  });
+  const netName = networkRecord ? networkRecord.name.toLowerCase() : "";
+
+  // Determine which types have configured providers
+  // Priority: per-network+type (e.g. mtnSmeEnabledProviders) → global (smeDataProvider)
   const providerTypes = typesToCheck.filter((t) => {
     const key = typeKeyMap[t] || t.toLowerCase();
-    const val = configMap[`${key}DataProvider`];
-    return !!val && val.trim().length > 0;
+    const typeUpper = t.charAt(0).toUpperCase() + t.slice(1);
+    // Check per-network+type first
+    const perNetKey = `${netName}${typeUpper}EnabledProviders`;
+    if (configMap[perNetKey] && configMap[perNetKey].trim().length > 0) return true;
+    // Fallback to global slug
+    const globalKey = `${key}DataProvider`;
+    return !!configMap[globalKey] && configMap[globalKey].trim().length > 0;
   });
 
   if (providerTypes.length > 0) {
-    // Collect ALL slugs from all selected providers (comma-separated)
+    // Collect ALL slugs: per-network+type first, then global fallback
     const allSlugs = new Set();
     for (const t of providerTypes) {
       const key = typeKeyMap[t] || t.toLowerCase();
-      const raw = configMap[`${key}DataProvider`] || "";
+      const typeUpper = t.charAt(0).toUpperCase() + t.slice(1);
+      const perNetKey = `${netName}${typeUpper}EnabledProviders`;
+      const perNetVal = configMap[perNetKey] || "";
+      const globalVal = configMap[`${key}DataProvider`] || "";
+      // Prefer per-network if set, else use global
+      const raw = perNetVal.trim().length > 0 ? perNetVal : globalVal;
       raw
         .split(",")
         .map((s) => s.trim())
