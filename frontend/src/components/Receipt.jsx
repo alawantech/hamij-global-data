@@ -303,35 +303,57 @@ export default function ReceiptView({ tx, showPrint = true }) {
   const isDebit = parseFloat(tx.oldbal || 0) > parseFloat(tx.newbal || 0);
 
   const parsedDesc = parseServicedesc(tx.servicedesc || "", tx.servicename, tx.apiResponseLog);
-  const details = [
-    { label: "Reference", value: tx.transref || tx.ref || "\u2014", mono: true },
-    { label: "Service", value: tx.servicename || label },
-    parsedDesc.token && { label: "Token", value: parsedDesc.token },
-    parsedDesc.description && { label: "Provider", value: parsedDesc.description },
-    parsedDesc.meterNumber && { label: "Meter Number", value: parsedDesc.meterNumber, mono: true },
-    parsedDesc.meterType && { label: "Meter Type", value: parsedDesc.meterType },
-    parsedDesc.customerName && { label: "Customer Name", value: parsedDesc.customerName },
-    parsedDesc.address && { label: "Address", value: parsedDesc.address },
-    {
-      label: "Amount",
-      value: `${isDebit ? "-" : "+"}${fmtNaira(tx.amount)}`,
-      highlight: true,
-      color: isDebit ? "#dc2626" : "#059669",
-    },
-    { label: "Status", value: st.label },
-    { label: "Previous Balance", value: fmtNaira(tx.oldbal) },
-    { label: "New Balance", value: fmtNaira(tx.newbal) },
-    {
-      label: "Date",
-      value: new Date(tx.date || tx.createdAt).toLocaleString("en-NG", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-  ].filter(Boolean);
+  const isElectricity = tx.servicename === "Electricity";
+  const details = isElectricity
+    ? [
+        parsedDesc.token && { label: "Token", value: parsedDesc.token },
+        { label: "Transaction ID", value: tx.transref || tx.ref || "\u2014", mono: true },
+        { label: "Status", value: st.label },
+        parsedDesc.description && { label: "Product", value: parsedDesc.description },
+        {
+          label: "Amount",
+          value: fmtNaira(tx.amount),
+          highlight: true,
+          color: "#09090b",
+        },
+        parsedDesc.meterNumber && { label: "Meter", value: parsedDesc.meterNumber, mono: true },
+        parsedDesc.meterType && { label: "Meter Type", value: parsedDesc.meterType },
+        parsedDesc.customerName && { label: "Customer Name", value: parsedDesc.customerName },
+        parsedDesc.address && { label: "Customer Address", value: parsedDesc.address },
+        {
+          label: "Date",
+          value: new Date(tx.date || tx.createdAt).toLocaleString("en-NG", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ].filter(Boolean)
+    : [
+        { label: "Reference", value: tx.transref || tx.ref || "\u2014", mono: true },
+        { label: "Service", value: tx.servicename || label },
+        { label: "Description", value: tx.servicedesc || "\u2014" },
+        {
+          label: "Amount",
+          value: `${isDebit ? "-" : "+"}${fmtNaira(tx.amount)}`,
+          highlight: true,
+          color: isDebit ? "#dc2626" : "#059669",
+        },
+        { label: "Previous Balance", value: fmtNaira(tx.oldbal) },
+        { label: "New Balance", value: fmtNaira(tx.newbal) },
+        {
+          label: "Date",
+          value: new Date(tx.date || tx.createdAt).toLocaleString("en-NG", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ].filter(Boolean);
 
   const copy = (text) => {
     navigator.clipboard.writeText(text).then(() => toast.success("Copied!"));
