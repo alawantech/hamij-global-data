@@ -242,6 +242,40 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
   return trimmedCanvas;
 }
 
+function parseServicedesc(desc, servicename) {
+  if (!desc || desc === "\u2014") return { description: desc || "\u2014" };
+  if (servicename !== "Electricity") return { description: desc };
+
+  const parts = desc.split(" | ").map((p) => p.trim());
+  if (parts.length <= 1) return { description: desc };
+
+  const first = parts[0];
+  const rest = parts.slice(1);
+
+  const meterTypes = ["Prepaid", "Postpaid"];
+  let meterType = "";
+  let providerName = first;
+  for (const mt of meterTypes) {
+    if (first.includes(mt)) {
+      meterType = mt;
+      providerName = first.replace(mt, "").replace(/\s*-\s*\d+/, "").trim();
+      break;
+    }
+  }
+  if (!providerName) providerName = first;
+
+  const meterMatch = first.match(/(\d{10,})/);
+  const meterNumber = meterMatch ? meterMatch[1] : undefined;
+
+  return {
+    description: providerName || undefined,
+    meterNumber,
+    meterType: meterType || undefined,
+    customerName: rest[0] || undefined,
+    address: rest[1] || undefined,
+  };
+}
+
 export default function ReceiptView({ tx, showPrint = true }) {
   const [downloading, setDownloading] = useState(false);
   const settings = useSiteSettings();
@@ -252,10 +286,15 @@ export default function ReceiptView({ tx, showPrint = true }) {
   const st = SvcStatus(tx.status);
   const isDebit = parseFloat(tx.oldbal || 0) > parseFloat(tx.newbal || 0);
 
+  const parsedDesc = parseServicedesc(tx.servicedesc || "", tx.servicename);
   const details = [
     { label: "Reference", value: tx.transref || tx.ref || "\u2014", mono: true },
     { label: "Service", value: tx.servicename || label },
-    { label: "Description", value: tx.servicedesc || "\u2014" },
+    parsedDesc.description && { label: "Description", value: parsedDesc.description },
+    parsedDesc.meterNumber && { label: "Meter Number", value: parsedDesc.meterNumber },
+    parsedDesc.meterType && { label: "Meter Type", value: parsedDesc.meterType },
+    parsedDesc.customerName && { label: "Customer Name", value: parsedDesc.customerName },
+    parsedDesc.address && { label: "Address", value: parsedDesc.address },
     {
       label: "Amount",
       value: `${isDebit ? "-" : "+"}${fmtNaira(tx.amount)}`,
@@ -274,7 +313,7 @@ export default function ReceiptView({ tx, showPrint = true }) {
         minute: "2-digit",
       }),
     },
-  ];
+  ].filter(Boolean);
 
   const copy = (text) => {
     navigator.clipboard.writeText(text).then(() => toast.success("Copied!"));
