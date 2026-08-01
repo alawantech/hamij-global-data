@@ -242,30 +242,45 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
   return trimmedCanvas;
 }
 
-function parseServicedesc(desc, servicename) {
+function parseServicedesc(desc, servicename, apiResponseLog) {
   if (!desc || desc === "\u2014") return { description: desc || "\u2014" };
+
+  // Extract token from apiResponseLog for electricity
+  let token = undefined;
+  if (apiResponseLog && servicename === "Electricity") {
+    try {
+      const parsed = typeof apiResponseLog === "string" ? JSON.parse(apiResponseLog) : apiResponseLog;
+      if (parsed.token) token = parsed.token;
+    } catch {}
+  }
+
   if (servicename !== "Electricity") return { description: desc };
 
   const parts = desc.split(" | ").map((p) => p.trim());
-  if (parts.length <= 1) return { description: desc };
+  const first = parts[0] || desc;
+  const rest = parts.length > 1 ? parts.slice(1) : [];
 
-  const first = parts[0];
-  const rest = parts.slice(1);
-
+  // Extract meter type
   const meterTypes = ["Prepaid", "Postpaid"];
   let meterType = "";
   let providerName = first;
   for (const mt of meterTypes) {
-    if (first.includes(mt)) {
+    if (first.toLowerCase().includes(mt.toLowerCase())) {
       meterType = mt;
-      providerName = first.replace(mt, "").replace(/\s*-\s*\d+/, "").trim();
+      providerName = first.replace(new RegExp(mt, "i"), "").replace(/\s*-\s*\d+/, "").trim();
       break;
     }
   }
-  if (!providerName) providerName = first;
 
+  // Extract meter number (10+ digits)
   const meterMatch = first.match(/(\d{10,})/);
   const meterNumber = meterMatch ? meterMatch[1] : undefined;
+
+  // Clean provider name
+  if (!providerName || providerName === first) {
+    // Remove meter number from provider name if present
+    providerName = first.replace(/\d{10,}/, "").replace(/\s*-\s*$/, "").trim();
+  }
 
   return {
     description: providerName || undefined,
@@ -273,6 +288,7 @@ function parseServicedesc(desc, servicename) {
     meterType: meterType || undefined,
     customerName: rest[0] || undefined,
     address: rest[1] || undefined,
+    token,
   };
 }
 
@@ -286,12 +302,13 @@ export default function ReceiptView({ tx, showPrint = true }) {
   const st = SvcStatus(tx.status);
   const isDebit = parseFloat(tx.oldbal || 0) > parseFloat(tx.newbal || 0);
 
-  const parsedDesc = parseServicedesc(tx.servicedesc || "", tx.servicename);
+  const parsedDesc = parseServicedesc(tx.servicedesc || "", tx.servicename, tx.apiResponseLog);
   const details = [
     { label: "Reference", value: tx.transref || tx.ref || "\u2014", mono: true },
     { label: "Service", value: tx.servicename || label },
-    parsedDesc.description && { label: "Description", value: parsedDesc.description },
-    parsedDesc.meterNumber && { label: "Meter Number", value: parsedDesc.meterNumber },
+    parsedDesc.token && { label: "Token", value: parsedDesc.token },
+    parsedDesc.description && { label: "Provider", value: parsedDesc.description },
+    parsedDesc.meterNumber && { label: "Meter Number", value: parsedDesc.meterNumber, mono: true },
     parsedDesc.meterType && { label: "Meter Type", value: parsedDesc.meterType },
     parsedDesc.customerName && { label: "Customer Name", value: parsedDesc.customerName },
     parsedDesc.address && { label: "Address", value: parsedDesc.address },
@@ -301,6 +318,7 @@ export default function ReceiptView({ tx, showPrint = true }) {
       highlight: true,
       color: isDebit ? "#dc2626" : "#059669",
     },
+    { label: "Status", value: st.label },
     { label: "Previous Balance", value: fmtNaira(tx.oldbal) },
     { label: "New Balance", value: fmtNaira(tx.newbal) },
     {
