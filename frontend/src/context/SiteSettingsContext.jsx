@@ -34,7 +34,15 @@ export function SiteSettingsProvider({ children }) {
       .then((r) => r.json())
       .then((d) => {
         if (d.data?.settings) {
-          setSettings((prev) => ({ ...prev, ...d.data.settings }));
+          const s = d.data.settings;
+          const v = s.updatedAt ? new Date(s.updatedAt).getTime() : Date.now();
+          const bust = (url) =>
+            url && typeof url === "string"
+              ? `${url}${url.includes("?") ? "&" : "?"}v=${v}`
+              : url || "";
+          s.logoUrl = bust(s.logoUrl);
+          s.faviconUrl = bust(s.faviconUrl);
+          setSettings((prev) => ({ ...prev, ...s }));
         }
       })
       .catch(() => {});

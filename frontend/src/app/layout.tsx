@@ -36,6 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = s.siteurl || "";
   const faviconUrl = s.faviconUrl?.trim() || undefined;
   const logoUrl = s.logoUrl?.trim() || undefined;
+  const v = s.updatedAt ? new Date(s.updatedAt).getTime() : Date.now();
+
+  const bust = (url?: string) => url ? `${url}${url.includes('?') ? '&' : '?'}v=${v}` : url;
 
   return {
     // ── Core ──────────────────────────────────────────────────────────────────
@@ -45,8 +48,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
     // ── Favicon / Icons ───────────────────────────────────────────────────────
     icons: {
-      icon: faviconUrl ?? "/favicon.ico",
-      ...(logoUrl && { apple: logoUrl }),
+      icon: bust(faviconUrl) ?? "/favicon.ico",
+      ...(logoUrl && { apple: bust(logoUrl) }),
     },
 
     // ── Canonical / base URL ──────────────────────────────────────────────────
@@ -62,7 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: browserTitle,
       description: desc,
       ...(siteUrl && { url: siteUrl }),
-      ...(logoUrl && { images: [{ url: logoUrl }] }),
+      ...(logoUrl && { images: [{ url: bust(logoUrl) }] }),
     },
 
     // ── Twitter / X cards ─────────────────────────────────────────────────────
@@ -70,7 +73,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: logoUrl ? "summary_large_image" : "summary",
       title: browserTitle,
       description: desc,
-      ...(logoUrl && { images: [logoUrl] }),
+      ...(logoUrl && { images: [bust(logoUrl)] }),
     },
 
     // ── Robots ────────────────────────────────────────────────────────────────

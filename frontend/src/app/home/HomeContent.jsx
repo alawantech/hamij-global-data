@@ -534,18 +534,18 @@ export default function LandingPage() {
           <div style={{ position: "relative", zIndex: 2, opacity: heroVisible ? 1 : 0, transform: heroVisible ? "translate3d(0,0,0)" : "translate3d(0,32px,0)", transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: ".6rem", padding: ".55rem 1rem", borderRadius: 999, background: "rgba(8,47,73,0.55)", border: "1px solid rgba(56,189,248,0.22)", color: "#7dd3fc", fontSize: ".78rem", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>
               <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 0 6px rgba(34,197,94,0.14)", animation: "lp-pulse 1.8s ease-in-out infinite" }} />
-              Built for serious VTU speed
+              Welcome to {siteName}
             </div>
 
             <h1 className={spaceGrotesk.className} style={{ fontSize: "clamp(2.8rem,6.5vw,4.5rem)", lineHeight: 1.02, letterSpacing: "-0.06em", margin: "1.4rem 0 1.25rem", color: "#f8fbff", maxWidth: 680 }}>
-              A VTU experience that{" "}
+              Your Trusted{" "}
               <span style={{ display: "block", background: "linear-gradient(135deg,#f8fafc 0%, #7dd3fc 34%, #facc15 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                feels premium, fast and dependable.
+                VTU Partner in Nigeria.
               </span>
             </h1>
 
             <p style={{ maxWidth: 620, fontSize: "1.06rem", lineHeight: 1.85, color: "rgba(226,232,240,0.72)" }}>
-              {siteName} helps you buy airtime, data, cable subscriptions, electricity tokens and exam pins with the kind of clarity and polish users expect from a modern fintech product.
+              Buy airtime, data, cable TV, electricity tokens and exam pins at the best rates. Fast, reliable and built for you.
             </p>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: ".9rem", marginTop: "2rem", alignItems: "center" }}>

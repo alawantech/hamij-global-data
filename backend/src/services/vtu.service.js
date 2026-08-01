@@ -653,7 +653,7 @@ async function purchaseDataDirectToken({
   ref,
 }) {
   const body = {
-    network: extNetworkId,
+    network: parseInt(extNetworkId) || extNetworkId,
     phone,
     bypass: false,
     "request-id": ref,
@@ -690,11 +690,11 @@ async function purchaseDataToken({
   ref,
 }) {
   const body = {
-    network: extNetworkId,
-    mobile_number: phone,
-    Ported_number: true,
+    network: parseInt(extNetworkId) || extNetworkId,
+    phone,
+    bypass: false,
     "request-id": ref,
-    plan: plan.planCode,
+    data_plan: plan.planCode,
   };
   try {
     console.log(
@@ -736,7 +736,7 @@ async function purchaseDataBasicAuth({
   ref,
 }) {
   const body = {
-    network: extNetworkId,
+    network: parseInt(extNetworkId) || extNetworkId,
     phone,
     bypass: true,
     "request-id": ref,
