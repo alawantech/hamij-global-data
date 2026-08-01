@@ -341,8 +341,6 @@ export default function ReceiptView({ tx, showPrint = true }) {
           highlight: true,
           color: isDebit ? "#dc2626" : "#059669",
         },
-        { label: "Previous Balance", value: fmtNaira(tx.oldbal) },
-        { label: "New Balance", value: fmtNaira(tx.newbal) },
         {
           label: "Date",
           value: new Date(tx.date || tx.createdAt).toLocaleString("en-NG", {
