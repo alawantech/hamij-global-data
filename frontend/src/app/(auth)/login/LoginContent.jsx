@@ -370,6 +370,7 @@ export default function LoginPage() {
         {step === 1 && (
           <form
             onSubmit={handleContinueToPassword}
+            noValidate
             style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}
           >
             <div>

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle, User, Mail, Phone, Gift, Lock, Eye, EyeOff } from "lucide-react";
@@ -30,6 +30,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const submittingRef = useRef(false);
 
   const handleUserDetailsChange = (e) => {
     const { name, value } = e.target;
@@ -37,7 +38,8 @@ export default function RegisterPage() {
   };
 
   const handleContinueToPassword = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (loading || submittingRef.current) return;
     if (!userDetails.fullname.trim()) {
       toast.error("Please enter your full name");
       return;
@@ -51,38 +53,41 @@ export default function RegisterPage() {
       return;
     }
 
-    // Validate email/phone doesn't already exist
+    submittingRef.current = true;
     setLoading(true);
     try {
       const response = await api.post("/auth/check-account", {
-        email: userDetails.email,
-        phone: userDetails.phone,
+        email: userDetails.email.trim().toLowerCase(),
+        phone: userDetails.phone.trim(),
       });
 
       if (response.data.data?.exists) {
         const field = response.data.data.field;
         if (field === "both") {
-          toast.error("📧 Email and 📱 phone number are already registered.\n\nPlease log in or use different credentials.");
+          toast.error("Email and phone number are already registered. Please log in or use different credentials.");
         } else if (field === "email") {
-          toast.error("📧 This email is already registered.\n\nPlease log in or use a different email.");
+          toast.error("This email is already registered. Please log in or use a different email.");
         } else if (field === "phone") {
-          toast.error("📱 This phone number is already registered.\n\nPlease log in or use a different phone number.");
+          toast.error("This phone number is already registered. Please log in or use a different phone number.");
         }
         setLoading(false);
+        submittingRef.current = false;
         return;
       }
 
-      // Account is available, proceed
       setLoading(false);
+      submittingRef.current = false;
       setStep(2);
     } catch (err) {
       toast.error("Error checking account. Please try again.");
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
   const handlePasswordSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (loading || submittingRef.current) return;
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters");
       return;
@@ -95,12 +100,14 @@ export default function RegisterPage() {
   };
 
   const doRegister = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
     try {
       await api.post("/auth/register", {
         fullname: userDetails.fullname.trim(),
-        email: userDetails.email,
-        phone: userDetails.phone,
+        email: userDetails.email.trim().toLowerCase(),
+        phone: userDetails.phone.trim(),
         password: password,
         referral: userDetails.referral.trim() || undefined,
       });
@@ -110,6 +117,7 @@ export default function RegisterPage() {
     } catch (err) {
       toast.error(err?.response?.data?.msg || "Registration failed");
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
@@ -276,6 +284,7 @@ export default function RegisterPage() {
         {step === 1 && (
           <form
             onSubmit={handleContinueToPassword}
+            noValidate
             style={{ display: "flex", flexDirection: "column", gap: ".875rem" }}
           >
             {/* Full Name Input */}
@@ -396,22 +405,24 @@ export default function RegisterPage() {
             <button
               type="submit"
               className="btn-primary"
+              disabled={loading || submittingRef.current}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: ".5rem",
+                opacity: loading || submittingRef.current ? 0.6 : 1,
               }}
             >
-              Continue
-              <ArrowRight size={18} />
+              {loading ? "Checking..." : "Continue"}
+              {!loading && <ArrowRight size={18} />}
             </button>
           </form>
         )}
 
         {/* Step 2: Password + Confirm Password */}
         {step === 2 && (
-          <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: ".875rem" }}>
+          <form onSubmit={handlePasswordSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: ".875rem" }}>
             <div>
               <label style={labelStyle}>Password</label>
               <div style={{ position: "relative" }}>
@@ -474,7 +485,7 @@ export default function RegisterPage() {
               {loading ? "Creating Account..." : "Create Account"}
             </button>
 
-            <button type="button" onClick={() => { setStep(1); setPassword(""); setConfirmPassword(""); }} style={{ background: "none", border: "none", color: "#64748b", fontSize: ".8rem", cursor: "pointer", display: "flex", alignItems: "center", gap: ".25rem", margin: "0 auto" }}>
+            <button type="button" onClick={() => { setStep(1); setPassword(""); setConfirmPassword(""); submittingRef.current = false; }} style={{ background: "none", border: "none", color: "#64748b", fontSize: ".8rem", cursor: "pointer", display: "flex", alignItems: "center", gap: ".25rem", margin: "0 auto" }}>
               <ArrowRight size={15} style={{ transform: "rotate(180deg)" }} /> Back to details
             </button>
           </form>
