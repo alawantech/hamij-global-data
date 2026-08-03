@@ -34,6 +34,7 @@ import {
   GraduationCap,
   MonitorSmartphone,
   FileText,
+  BarChart3,
 } from "lucide-react";
 
   const LINKS = [
@@ -41,6 +42,7 @@ import {
   { href: "/admin/users", label: "Users", icon: Users, perm: "users_view" },
   { href: "/admin/upgrade-requests", label: "Upgrade Requests", icon: TrendingUp, perm: "upgrade_requests_manage" },
   { href: "/admin/transactions", label: "Transactions", icon: ArrowLeftRight, perm: "transactions_view" },
+  { href: "/admin/profit", label: "Profit Report", icon: BarChart3, perm: "dashboard_view" },
   { href: "/admin/notifications", label: "Notifications", icon: Bell, perm: "notifications_manage" },
   { href: "/admin/issues", label: "Support Issues", icon: MessageSquare, perm: "issues_manage" },
   { href: "/admin/messages", label: "Contact Messages", icon: Mail, perm: "messages_manage" },

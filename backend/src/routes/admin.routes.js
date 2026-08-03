@@ -11,6 +11,8 @@ router.post("/logout", admin.logout);
 // ─── Protected admin routes ───────────────────────────────────────────────────
 router.get("/me", protectAdmin, admin.getMe);
 router.get("/stats", protectAdmin, admin.getStats);
+router.get("/profit/summary", protectAdmin, admin.getProfitSummary);
+router.get("/profit/report", protectAdmin, admin.getProfitReport);
 
 // Users
 router.get("/users", protectAdmin, admin.getUsers);

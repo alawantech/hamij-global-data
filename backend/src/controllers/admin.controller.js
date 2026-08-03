@@ -142,6 +142,162 @@ exports.getStats = async (req, res) => {
   }
 };
 
+// ─── PROFIT SUMMARY ──────────────────────────────────────────────────────────
+
+const SERVICE_LABELS = {
+  "data": "Data",
+  "airtime": "Airtime",
+  "Airtime to Cash": "Airtime to Cash",
+  "cable": "Cable TV",
+  "electricity": "Electricity",
+  "exam": "Exam Pins",
+  "sms": "Bulk SMS",
+  "data-card": "Data Card",
+  "recharge-card": "Recharge Card",
+  "wallet-credit": "Wallet Credit",
+  "wallet-debit": "Wallet Debit",
+};
+
+exports.getProfitSummary = async (req, res) => {
+  try {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(todayStart); todayEnd.setDate(todayEnd.getDate() + 1);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(monthStart); monthEnd.setMonth(monthEnd.getMonth() + 1);
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const yearEnd = new Date(now.getFullYear() + 1, 0, 1);
+
+    const [todayProfit, monthProfit, yearProfit, allTimeProfit] = await Promise.all([
+      prisma.transaction.aggregate({ where: { status: 1, date: { gte: todayStart, lt: todayEnd } }, _sum: { profit: true }, _count: true }),
+      prisma.transaction.aggregate({ where: { status: 1, date: { gte: monthStart, lt: monthEnd } }, _sum: { profit: true }, _count: true }),
+      prisma.transaction.aggregate({ where: { status: 1, date: { gte: yearStart, lt: yearEnd } }, _sum: { profit: true }, _count: true }),
+      prisma.transaction.aggregate({ where: { status: 1 }, _sum: { profit: true }, _count: true }),
+    ]);
+
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now); d.setDate(d.getDate() - i);
+      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const dayEnd = new Date(dayStart); dayEnd.setDate(dayEnd.getDate() + 1);
+      const dayData = await prisma.transaction.aggregate({
+        where: { status: 1, date: { gte: dayStart, lt: dayEnd } },
+        _sum: { profit: true },
+      });
+      last7Days.push({
+        date: dayStart.toISOString().split("T")[0],
+        day: dayStart.toLocaleDateString("en-US", { weekday: "short" }),
+        profit: dayData._sum.profit || 0,
+      });
+    }
+
+    return ok(res, {
+      today: { profit: todayProfit._sum.profit || 0, count: todayProfit._count || 0 },
+      thisMonth: { profit: monthProfit._sum.profit || 0, count: monthProfit._count || 0 },
+      thisYear: { profit: yearProfit._sum.profit || 0, count: yearProfit._count || 0 },
+      allTime: { profit: allTimeProfit._sum.profit || 0, count: allTimeProfit._count || 0 },
+      last7Days,
+    });
+  } catch (e) {
+    console.error("[getProfitSummary]", e);
+    return fail(res, "Failed to fetch profit summary.", 500);
+  }
+};
+
+// ─── PROFIT REPORT ───────────────────────────────────────────────────────────
+
+exports.getProfitReport = async (req, res) => {
+  try {
+    const { period = "daily", date, month, year } = req.query;
+    let start, end, groupLabel;
+
+    if (period === "daily" && date) {
+      start = new Date(date + "T00:00:00.000Z");
+      end = new Date(start); end.setDate(end.getDate() + 1);
+      groupLabel = "hour";
+    } else if (period === "monthly" && month) {
+      start = new Date(month + "-01T00:00:00.000Z");
+      end = new Date(start); end.setMonth(end.getMonth() + 1);
+      groupLabel = "day";
+    } else if (period === "yearly" && year) {
+      start = new Date(year + "-01-01T00:00:00.000Z");
+      end = new Date(start); end.setFullYear(end.getFullYear() + 1);
+      groupLabel = "month";
+    } else {
+      return fail(res, "Provide valid period and date params.");
+    }
+
+    const transactions = await prisma.transaction.findMany({
+      where: { status: 1, date: { gte: start, lt: end } },
+      select: { servicename: true, amount: true, profit: true, date: true },
+      orderBy: { date: "asc" },
+    });
+
+    const byService = {};
+    let totalCost = 0, totalRevenue = 0, totalProfit = 0;
+
+    for (const tx of transactions) {
+      const amount = parseFloat(tx.amount) || 0;
+      const profit = tx.profit || 0;
+      const cost = amount - profit;
+      const label = SERVICE_LABELS[tx.servicename] || tx.servicename;
+
+      if (!byService[label]) byService[label] = { profit: 0, cost: 0, revenue: 0, count: 0 };
+      byService[label].profit += profit;
+      byService[label].cost += cost;
+      byService[label].revenue += amount;
+      byService[label].count += 1;
+      totalCost += cost;
+      totalRevenue += amount;
+      totalProfit += profit;
+    }
+
+    const chartData = {};
+    for (const tx of transactions) {
+      let key;
+      if (groupLabel === "hour") {
+        key = tx.date.getUTCHours().toString().padStart(2, "0") + ":00";
+      } else if (groupLabel === "day") {
+        key = tx.date.toISOString().split("T")[0];
+      } else {
+        key = (tx.date.getUTCMonth() + 1).toString().padStart(2, "0");
+      }
+      if (!chartData[key]) chartData[key] = 0;
+      chartData[key] += tx.profit;
+    }
+
+    return ok(res, {
+      period,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      summary: {
+        totalCost: Math.round(totalCost * 100) / 100,
+        totalRevenue: Math.round(totalRevenue * 100) / 100,
+        totalProfit: Math.round(totalProfit * 100) / 100,
+        transactionCount: transactions.length,
+        avgProfitPerTx: transactions.length > 0 ? Math.round((totalProfit / transactions.length) * 100) / 100 : 0,
+        margin: totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 10000) / 100 : 0,
+      },
+      byService: Object.entries(byService)
+        .map(([service, d]) => ({
+          service,
+          profit: Math.round(d.profit * 100) / 100,
+          cost: Math.round(d.cost * 100) / 100,
+          revenue: Math.round(d.revenue * 100) / 100,
+          count: d.count,
+          margin: d.revenue > 0 ? Math.round((d.profit / d.revenue) * 10000) / 100 : 0,
+        }))
+        .sort((a, b) => b.profit - a.profit),
+      chart: Object.entries(chartData)
+        .map(([label, profit]) => ({ label, profit: Math.round(profit * 100) / 100 }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    });
+  } catch (e) {
+    console.error("[getProfitReport]", e);
+    return fail(res, "Failed to fetch profit report.", 500);
+  }
+};
+
 // ─── USERS ────────────────────────────────────────────────────────────────────
 
 exports.getUsers = async (req, res) => {
@@ -2759,6 +2915,7 @@ exports.verifyAtcTransaction = async (req, res) => {
     if (request.status !== "pending") return fail(res, "Transaction already processed.");
 
     if (status === "completed") {
+      const atcProfit = request.amount - request.receiveAmount;
       if (request.payoutMethod === "wallet") {
         const user = await prisma.user.findUnique({ where: { id: request.userId }, select: { wallet: true } });
         const newWallet = (user.wallet || 0) + request.receiveAmount;
@@ -2777,6 +2934,7 @@ exports.verifyAtcTransaction = async (req, res) => {
               status: 1,
               oldbal: (user.wallet || 0).toString(),
               newbal: newWallet.toString(),
+              profit: atcProfit,
             },
           }),
         ]);
@@ -2788,7 +2946,7 @@ exports.verifyAtcTransaction = async (req, res) => {
           }),
           prisma.transaction.updateMany({
             where: { transref: request.ref },
-            data: { status: 1 },
+            data: { status: 1, profit: atcProfit },
           }),
         ]);
       }

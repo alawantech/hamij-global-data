@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Users,
   ArrowLeftRight,
@@ -9,9 +10,15 @@ import {
   AlertCircle,
   RefreshCw,
   Shield,
+  BarChart3,
+  Calendar,
+  ArrowUpRight,
 } from "lucide-react";
 import adminApi from "@/lib/adminApi";
 import { useAdmin } from "@/context/AdminContext";
+
+const fmt = (n) =>
+  parseFloat(n || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function AdminDashboardPage() {
   const { admin, hasPermission } = useAdmin();
@@ -19,6 +26,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [providerBalances, setProviderBalances] = useState([]);
   const [provBalLoading, setProvBalLoading] = useState(true);
+  const [profitSummary, setProfitSummary] = useState(null);
 
   if (!hasPermission("dashboard_view")) {
     return (
@@ -47,6 +55,11 @@ export default function AdminDashboardPage() {
       .finally(() => setLoading(false));
 
     loadProviderBalances();
+
+    adminApi
+      .get("/admin/profit/summary")
+      .then((r) => setProfitSummary(r.data.data))
+      .catch(() => {});
   }, []);
 
   if (loading)
@@ -62,13 +75,26 @@ export default function AdminDashboardPage() {
       </div>
     );
 
-  const cards = [
+  const profitCards = profitSummary
+    ? [
+        { label: "Today's Profit", value: profitSummary.today?.profit || 0, count: profitSummary.today?.count || 0, color: "#059669" },
+        { label: "This Month", value: profitSummary.thisMonth?.profit || 0, count: profitSummary.thisMonth?.count || 0, color: "#2563eb" },
+        { label: "This Year", value: profitSummary.thisYear?.profit || 0, count: profitSummary.thisYear?.count || 0, color: "#7c3aed" },
+        { label: "All Time Profit", value: profitSummary.allTime?.profit || 0, count: profitSummary.allTime?.count || 0, color: "#0f172a" },
+      ]
+    : [];
+
+  const maxDayProfit = profitSummary
+    ? Math.max(...profitSummary.last7Days.map((d) => d.profit), 1)
+    : 1;
+
+  const overviewCards = [
     {
       label: "Total Users",
       value: stats.totalUsers?.toLocaleString() || 0,
       icon: Users,
       color: "#2563eb",
-      sub: `${stats.agentCount || 0} agents · ${stats.vendorCount || 0} vendors`,
+      sub: `${stats.vendorCount || 0} vendors`,
     },
     {
       label: "Total Transactions",
@@ -78,15 +104,8 @@ export default function AdminDashboardPage() {
       sub: `${stats.successCount || 0} success · ${stats.failedCount || 0} failed`,
     },
     {
-      label: "Total Revenue",
-      value: `₦${parseFloat(stats.totalRevenue || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`,
-      icon: TrendingUp,
-      color: "#059669",
-      sub: "All-time profit",
-    },
-    {
       label: "Wallet Balances",
-      value: `₦${parseFloat(stats.totalWalletBalance || 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`,
+      value: `₦${fmt(stats.totalWalletBalance)}`,
       icon: Wallet,
       color: "#d97706",
       sub: "Total user wallets",
@@ -110,31 +129,107 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <div style={{ marginBottom: "2rem" }}>
-        <h1
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: 900,
-            color: "#0f172a",
-            letterSpacing: "-.03em",
-          }}
-        >
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#0f172a", letterSpacing: "-.03em" }}>
           Dashboard Overview
         </h1>
-        <p
-          style={{ color: "#64748b", fontSize: ".875rem", marginTop: ".25rem" }}
-        >
-          Welcome back. Here's what's happening.
+        <p style={{ color: "#64748b", fontSize: ".875rem", marginTop: ".25rem" }}>
+          Welcome back. Here&apos;s what&apos;s happening.
         </p>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
-          gap: "1.25rem",
-        }}
-      >
-        {cards.map(({ label, value, icon: Icon, color, sub }) => (
+      {/* ── Profit Cards ── */}
+      {profitCards.length > 0 && (
+        <div style={{ marginBottom: "2rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
+              <TrendingUp size={18} color="#059669" />
+              <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>Profit Overview</h2>
+            </div>
+            <Link
+              href="/admin/profit"
+              style={{
+                fontSize: ".8rem",
+                fontWeight: 600,
+                color: "#2563eb",
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: ".25rem",
+              }}
+            >
+              Full Report <ArrowUpRight size={14} />
+            </Link>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: "1rem" }}>
+            {profitCards.map(({ label, value, count, color }) => (
+              <div
+                key={label}
+                style={{
+                  background: "white",
+                  borderRadius: "1rem",
+                  padding: "1.25rem 1.5rem",
+                  border: "1px solid #f1f5f9",
+                  boxShadow: "0 2px 8px rgba(0,0,0,.05)",
+                }}
+              >
+                <div style={{ fontSize: ".7rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".05em" }}>
+                  {label}
+                </div>
+                <div style={{ fontWeight: 900, fontSize: "1.6rem", color, letterSpacing: "-.02em", lineHeight: 1.2, margin: ".35rem 0" }}>
+                  ₦{fmt(value)}
+                </div>
+                <div style={{ fontSize: ".7rem", color: "#94a3b8" }}>
+                  {count.toLocaleString()} transactions
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Last 7 Days Chart ── */}
+          {profitSummary?.last7Days?.length > 0 && (
+            <div style={{
+              marginTop: "1.25rem",
+              background: "white",
+              borderRadius: "1rem",
+              padding: "1.5rem",
+              border: "1px solid #f1f5f9",
+              boxShadow: "0 2px 8px rgba(0,0,0,.05)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: ".5rem", marginBottom: "1rem" }}>
+                <BarChart3 size={16} color="#64748b" />
+                <span style={{ fontSize: ".85rem", fontWeight: 700, color: "#0f172a" }}>Last 7 Days Profit</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: ".5rem", height: 120 }}>
+                {profitSummary.last7Days.map((d) => (
+                  <div key={d.date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: ".25rem" }}>
+                    <span style={{ fontSize: ".6rem", color: "#64748b", fontWeight: 600 }}>
+                      {d.profit > 0 ? `₦${d.profit.toLocaleString()}` : "—"}
+                    </span>
+                    <div
+                      style={{
+                        width: "100%",
+                        maxWidth: 48,
+                        height: `${Math.max((d.profit / maxDayProfit) * 80, d.profit > 0 ? 4 : 1)}px`,
+                        background: d.profit > 0 ? "linear-gradient(to top, #059669, #34d399)" : "#e2e8f0",
+                        borderRadius: "6px 6px 2px 2px",
+                        transition: "height .3s",
+                      }}
+                    />
+                    <span style={{ fontSize: ".6rem", color: "#94a3b8", fontWeight: 500 }}>
+                      {d.day}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Overview Cards ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: "1.25rem" }}>
+        {overviewCards.map(({ label, value, icon: Icon, color, sub }) => (
           <div
             key={label}
             style={{
@@ -163,27 +258,10 @@ export default function AdminDashboardPage() {
               <Icon size={22} color={color} />
             </div>
             <div>
-              <div
-                style={{
-                  color: "#64748b",
-                  fontSize: ".75rem",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: ".05em",
-                }}
-              >
+              <div style={{ color: "#64748b", fontSize: ".75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".05em" }}>
                 {label}
               </div>
-              <div
-                style={{
-                  fontWeight: 900,
-                  fontSize: "1.5rem",
-                  color: "#0f172a",
-                  letterSpacing: "-.02em",
-                  lineHeight: 1.2,
-                  margin: ".25rem 0",
-                }}
-              >
+              <div style={{ fontWeight: 900, fontSize: "1.5rem", color: "#0f172a", letterSpacing: "-.02em", lineHeight: 1.2, margin: ".25rem 0" }}>
                 {value}
               </div>
               <div style={{ color: "#94a3b8", fontSize: ".75rem" }}>{sub}</div>
@@ -192,48 +270,21 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* Data Provider Wallet Balances */}
+      {/* ── Data Provider Wallet Balances ── */}
       {providerBalances.length > 0 && (
         <div style={{ marginTop: "1.5rem" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "1rem",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
             <div>
-              <h2
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 800,
-                  color: "#0f172a",
-                  margin: 0,
-                  letterSpacing: "-.02em",
-                }}
-              >
+              <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-.02em" }}>
                 Data Provider Wallets
               </h2>
-              <p
-                style={{
-                  fontSize: ".75rem",
-                  color: "#94a3b8",
-                  margin: ".2rem 0 0",
-                }}
-              >
+              <p style={{ fontSize: ".75rem", color: "#94a3b8", margin: ".2rem 0 0" }}>
                 Live balances from your configured data providers
               </p>
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
-              gap: "1rem",
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: "1rem" }}>
             {providerBalances.map((b) => (
               <div
                 key={b.id}
@@ -245,16 +296,7 @@ export default function AdminDashboardPage() {
                   boxShadow: "0 2px 8px rgba(0,0,0,.04)",
                 }}
               >
-                <div
-                  style={{
-                    fontSize: ".7rem",
-                    fontWeight: 700,
-                    color: "#94a3b8",
-                    textTransform: "uppercase",
-                    letterSpacing: ".05em",
-                    marginBottom: ".5rem",
-                  }}
-                >
+                <div style={{ fontSize: ".7rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: ".5rem" }}>
                   {b.name}
                   {b.username && (
                     <span style={{ color: "#cbd5e1", marginLeft: ".35rem", textTransform: "none" }}>
@@ -263,28 +305,12 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
                 {b.error ? (
-                  <div
-                    style={{
-                      color: "#ef4444",
-                      fontSize: ".8rem",
-                      fontWeight: 600,
-                    }}
-                  >
-                    ⚠ {b.error}
+                  <div style={{ color: "#ef4444", fontSize: ".8rem", fontWeight: 600 }}>
+                    {b.error}
                   </div>
                 ) : (
-                  <div
-                    style={{
-                      fontWeight: 900,
-                      fontSize: "1.5rem",
-                      color: "#0284c7",
-                      letterSpacing: "-.02em",
-                    }}
-                  >
-                    ₦
-                    {parseFloat(b.balance || 0).toLocaleString("en-NG", {
-                      minimumFractionDigits: 2,
-                    })}
+                  <div style={{ fontWeight: 900, fontSize: "1.5rem", color: "#0284c7", letterSpacing: "-.02em" }}>
+                    ₦{fmt(b.balance)}
                   </div>
                 )}
               </div>
