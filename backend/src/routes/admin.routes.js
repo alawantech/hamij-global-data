@@ -56,6 +56,7 @@ router.delete("/data-plans/:id", protectAdmin, admin.deleteDataPlan);
 
 // Data Providers
 router.get("/data-providers", protectAdmin, admin.getDataProviders);
+router.get("/data-providers/balances", protectAdmin, admin.getDataProviderBalances);
 router.get("/data-providers/:id/balance", protectAdmin, admin.getDataProviderBalance);
 router.post("/data-providers", protectAdmin, admin.createDataProvider);
 router.put("/data-providers/:id", protectAdmin, admin.updateDataProvider);

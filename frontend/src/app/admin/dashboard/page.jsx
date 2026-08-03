@@ -18,7 +18,9 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [balances, setBalances] = useState([]);
+  const [providerBalances, setProviderBalances] = useState([]);
   const [balLoading, setBalLoading] = useState(true);
+  const [provBalLoading, setProvBalLoading] = useState(true);
 
   if (!hasPermission("dashboard_view")) {
     return (
@@ -39,6 +41,15 @@ export default function AdminDashboardPage() {
       .finally(() => setBalLoading(false));
   };
 
+  const loadProviderBalances = () => {
+    setProvBalLoading(true);
+    adminApi
+      .get("/admin/data-providers/balances")
+      .then((r) => setProviderBalances(r.data.data?.balances || []))
+      .catch(() => {})
+      .finally(() => setProvBalLoading(false));
+  };
+
   useEffect(() => {
     adminApi
       .get("/admin/stats")
@@ -47,6 +58,7 @@ export default function AdminDashboardPage() {
       .finally(() => setLoading(false));
 
     loadBalances();
+    loadProviderBalances();
   }, []);
 
   if (loading)
@@ -225,8 +237,8 @@ export default function AdminDashboardPage() {
             </p>
           </div>
           <button
-            onClick={loadBalances}
-            disabled={balLoading}
+            onClick={() => { loadBalances(); loadProviderBalances(); }}
+            disabled={balLoading || provBalLoading}
             style={{
               display: "flex",
               alignItems: "center",
@@ -245,7 +257,7 @@ export default function AdminDashboardPage() {
             <RefreshCw
               size={13}
               style={{
-                animation: balLoading ? "spin 1s linear infinite" : "none",
+                animation: (balLoading || provBalLoading) ? "spin 1s linear infinite" : "none",
               }}
             />
             Refresh
@@ -352,6 +364,107 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Data Provider Wallet Balances */}
+      {providerBalances.length > 0 && (
+        <div style={{ marginTop: "1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "1rem",
+            }}
+          >
+            <div>
+              <h2
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 800,
+                  color: "#0f172a",
+                  margin: 0,
+                  letterSpacing: "-.02em",
+                }}
+              >
+                Data Provider Wallets
+              </h2>
+              <p
+                style={{
+                  fontSize: ".75rem",
+                  color: "#94a3b8",
+                  margin: ".2rem 0 0",
+                }}
+              >
+                Live balances from your configured data providers
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
+              gap: "1rem",
+            }}
+          >
+            {providerBalances.map((b) => (
+              <div
+                key={b.id}
+                style={{
+                  background: "white",
+                  borderRadius: "1.25rem",
+                  padding: "1.25rem 1.5rem",
+                  border: `1.5px solid ${b.error ? "#fecaca" : "#e0f2fe"}`,
+                  boxShadow: "0 2px 8px rgba(0,0,0,.04)",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: ".7rem",
+                    fontWeight: 700,
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: ".05em",
+                    marginBottom: ".5rem",
+                  }}
+                >
+                  {b.name}
+                  {b.username && (
+                    <span style={{ color: "#cbd5e1", marginLeft: ".35rem", textTransform: "none" }}>
+                      @{b.username}
+                    </span>
+                  )}
+                </div>
+                {b.error ? (
+                  <div
+                    style={{
+                      color: "#ef4444",
+                      fontSize: ".8rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    ⚠ {b.error}
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      fontWeight: 900,
+                      fontSize: "1.5rem",
+                      color: "#0284c7",
+                      letterSpacing: "-.02em",
+                    }}
+                  >
+                    ₦
+                    {parseFloat(b.balance || 0).toLocaleString("en-NG", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

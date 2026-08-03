@@ -775,6 +775,69 @@ exports.getDataProviderBalance = async (req, res) => {
   }
 };
 
+exports.getDataProviderBalances = async (req, res) => {
+  try {
+    const axios = require("axios");
+    const providers = await prisma.dataProvider.findMany({
+      where: { apiUrl: { not: "" }, apiKey: { not: "" } },
+      orderBy: { name: "asc" },
+    });
+
+    const results = await Promise.all(
+      providers.map(async (p) => {
+        let balance = null;
+        let username = null;
+        let error = null;
+
+        try {
+          const authType = p.authType || "basic";
+          let authHeader;
+          let method = "post";
+
+          if (authType === "basic" || authType === "subwallet") {
+            authHeader = `Basic ${p.apiKey}`;
+            method = "post";
+          } else if (authType === "direct_token") {
+            authHeader = `Token ${p.apiKey}`;
+            method = "post";
+          } else {
+            authHeader = `Token ${p.apiKey}`;
+            method = "get";
+          }
+
+          const userUrl = new URL(p.apiUrl);
+          userUrl.pathname = "/api/user";
+
+          const { data } = await axios({
+            method,
+            url: userUrl.toString(),
+            headers: { Authorization: authHeader },
+            timeout: 15000,
+          });
+
+          if (data?.balance != null) balance = data.balance;
+          else if (data?.user?.wallet_balance != null) balance = data.user.wallet_balance;
+          else if (data?.user?.wallet != null) balance = data.user.wallet;
+          else if (data?.wallet_balance != null) balance = data.wallet_balance;
+          else if (data?.data?.balance != null) balance = data.data.balance;
+          else if (data?.data?.wallet != null) balance = data.data.wallet;
+          else error = "Unrecognised response";
+
+          if (data?.username) username = data.username;
+        } catch (e) {
+          error = e.response?.data?.message || e.message || "Connection failed";
+        }
+
+        return { id: p.id, name: p.name, slug: p.slug, balance, username, error };
+      }),
+    );
+
+    return ok(res, { balances: results });
+  } catch (e) {
+    return fail(res, "Failed to fetch provider balances.", 500);
+  }
+};
+
 // ─── PROVIDER DATA PLANS ──────────────────────────────────────────────────────
 
 exports.getProviderDataPlans = async (req, res) => {
