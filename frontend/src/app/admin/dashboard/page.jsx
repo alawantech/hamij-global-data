@@ -17,9 +17,7 @@ export default function AdminDashboardPage() {
   const { admin, hasPermission } = useAdmin();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [balances, setBalances] = useState([]);
   const [providerBalances, setProviderBalances] = useState([]);
-  const [balLoading, setBalLoading] = useState(true);
   const [provBalLoading, setProvBalLoading] = useState(true);
 
   if (!hasPermission("dashboard_view")) {
@@ -31,15 +29,6 @@ export default function AdminDashboardPage() {
       </div>
     );
   }
-
-  const loadBalances = () => {
-    setBalLoading(true);
-    adminApi
-      .get("/admin/provider-balances")
-      .then((r) => setBalances(r.data.data?.balances || []))
-      .catch(() => {})
-      .finally(() => setBalLoading(false));
-  };
 
   const loadProviderBalances = () => {
     setProvBalLoading(true);
@@ -57,7 +46,6 @@ export default function AdminDashboardPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
 
-    loadBalances();
     loadProviderBalances();
   }, []);
 
@@ -202,167 +190,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Provider API Wallet Balances */}
-      <div style={{ marginTop: "2rem" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "1rem",
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                fontSize: "1rem",
-                fontWeight: 800,
-                color: "#0f172a",
-                margin: 0,
-                letterSpacing: "-.02em",
-              }}
-            >
-              Provider API Wallets
-            </h2>
-            <p
-              style={{
-                fontSize: ".75rem",
-                color: "#94a3b8",
-                margin: ".2rem 0 0",
-              }}
-            >
-              Live balances from your configured VTU API providers
-            </p>
-          </div>
-          <button
-            onClick={() => { loadBalances(); loadProviderBalances(); }}
-            disabled={balLoading || provBalLoading}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: ".4rem",
-              background: "white",
-              border: "1.5px solid #e2e8f0",
-              borderRadius: ".75rem",
-              padding: ".4rem .875rem",
-              cursor: balLoading ? "not-allowed" : "pointer",
-              fontSize: ".78rem",
-              fontWeight: 700,
-              color: "#475569",
-              fontFamily: "inherit",
-            }}
-          >
-            <RefreshCw
-              size={13}
-              style={{
-                animation: (balLoading || provBalLoading) ? "spin 1s linear infinite" : "none",
-              }}
-            />
-            Refresh
-          </button>
-        </div>
-
-        {balLoading ? (
-          <div
-            style={{
-              background: "white",
-              borderRadius: "1rem",
-              padding: "2rem",
-              textAlign: "center",
-              color: "#94a3b8",
-              border: "1px solid #f1f5f9",
-              fontSize: ".875rem",
-            }}
-          >
-            Fetching provider balances…
-          </div>
-        ) : balances.length === 0 ? (
-          <div
-            style={{
-              background: "white",
-              borderRadius: "1rem",
-              padding: "2rem",
-              textAlign: "center",
-              color: "#94a3b8",
-              border: "1px solid #f1f5f9",
-              fontSize: ".875rem",
-            }}
-          >
-            No provider wallets configured. Go to{" "}
-            <a
-              href="/admin/api-configs"
-              style={{
-                color: "#2563eb",
-                textDecoration: "none",
-                fontWeight: 700,
-              }}
-            >
-              API Config → Provider Wallets
-            </a>{" "}
-            to set them up.
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
-              gap: "1rem",
-            }}
-          >
-            {balances.map((b) => (
-              <div
-                key={b.slot}
-                style={{
-                  background: "white",
-                  borderRadius: "1.25rem",
-                  padding: "1.25rem 1.5rem",
-                  border: `1.5px solid ${b.error ? "#fecaca" : "#e0f2fe"}`,
-                  boxShadow: "0 2px 8px rgba(0,0,0,.04)",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: ".7rem",
-                    fontWeight: 700,
-                    color: "#94a3b8",
-                    textTransform: "uppercase",
-                    letterSpacing: ".05em",
-                    marginBottom: ".5rem",
-                  }}
-                >
-                  {b.label}
-                </div>
-                {b.error ? (
-                  <div
-                    style={{
-                      color: "#ef4444",
-                      fontSize: ".8rem",
-                      fontWeight: 600,
-                    }}
-                  >
-                    ⚠ {b.error}
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      fontWeight: 900,
-                      fontSize: "1.5rem",
-                      color: "#0284c7",
-                      letterSpacing: "-.02em",
-                    }}
-                  >
-                    ₦
-                    {parseFloat(b.balance || 0).toLocaleString("en-NG", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Data Provider Wallet Balances */}
