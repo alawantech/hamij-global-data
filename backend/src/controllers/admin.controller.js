@@ -707,6 +707,74 @@ exports.deleteDataProvider = async (req, res) => {
   }
 };
 
+// ─── DATA PROVIDER BALANCE ─────────────────────────────────────────────────────
+
+exports.getDataProviderBalance = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const provider = await prisma.dataProvider.findUnique({ where: { id } });
+    if (!provider) return fail(res, "Provider not found.", 404);
+    if (!provider.apiUrl || !provider.apiKey)
+      return fail(res, "Provider has no API credentials configured.", 400);
+
+    let balance = null;
+    let username = null;
+    let error = null;
+
+    try {
+      const authType = provider.authType || "basic";
+      let authHeader;
+      let method = "post";
+
+      if (authType === "basic") {
+        authHeader = `Basic ${provider.apiKey}`;
+        method = "post";
+      } else if (authType === "subwallet") {
+        authHeader = `Basic ${provider.apiKey}`;
+        method = "post";
+      } else if (authType === "direct_token") {
+        authHeader = `Token ${provider.apiKey}`;
+        method = "post";
+      } else {
+        authHeader = `Token ${provider.apiKey}`;
+        method = "get";
+      }
+
+      const userUrl = new URL(provider.apiUrl);
+      userUrl.pathname = "/api/user";
+
+      const axios = require("axios");
+      const { data } = await axios({
+        method,
+        url: userUrl.toString(),
+        headers: { Authorization: authHeader },
+        timeout: 15000,
+      });
+
+      if (data?.balance != null) balance = data.balance;
+      else if (data?.user?.wallet_balance != null) balance = data.user.wallet_balance;
+      else if (data?.user?.wallet != null) balance = data.user.wallet;
+      else if (data?.wallet_balance != null) balance = data.wallet_balance;
+      else if (data?.data?.balance != null) balance = data.data.balance;
+      else if (data?.data?.wallet != null) balance = data.data.wallet;
+      else error = "Unrecognised response";
+
+      if (data?.username) username = data.username;
+    } catch (e) {
+      error = e.response?.data?.message || e.message || "Connection failed";
+    }
+
+    return ok(res, {
+      provider: provider.name,
+      balance,
+      username,
+      error,
+    });
+  } catch (e) {
+    return fail(res, "Failed to check balance.", 500);
+  }
+};
+
 // ─── PROVIDER DATA PLANS ──────────────────────────────────────────────────────
 
 exports.getProviderDataPlans = async (req, res) => {

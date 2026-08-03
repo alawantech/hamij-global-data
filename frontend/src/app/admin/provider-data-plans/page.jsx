@@ -1,6 +1,6 @@
 ﻿"use client";
 import { useEffect, useState, useCallback } from "react";
-import { Plus, Edit2, Trash2, X, ChevronDown, ChevronRight, Link2, Save } from "lucide-react";
+import { Plus, Edit2, Trash2, X, ChevronDown, ChevronRight, Link2, Save, Wallet } from "lucide-react";
 import adminApi from "@/lib/adminApi";
 import toast from "react-hot-toast";
 import RequirePermission from "@/components/RequirePermission";
@@ -47,6 +47,8 @@ export default function DataPlansPage() {
   const [providerModal, setProviderModal] = useState(false);
   const [providerForm, setProviderForm] = useState({ name: "", slug: "", apiUrl: "", apiKey: "", authType: "basic" });
   const [savingProvider, setSavingProvider] = useState(false);
+  const [balanceInfo, setBalanceInfo] = useState(null);
+  const [checkingBalance, setCheckingBalance] = useState(false);
 
   const loadProviders = useCallback(() => {
     adminApi.get("/admin/data-providers")
@@ -127,6 +129,20 @@ export default function DataPlansPage() {
       toast.error("Failed to save credentials");
     } finally {
       setSavingProvider(false);
+    }
+  };
+
+  const checkBalance = async () => {
+    if (!activeProvider) return;
+    setCheckingBalance(true);
+    setBalanceInfo(null);
+    try {
+      const res = await adminApi.get(`/admin/data-providers/${activeProvider.id}/balance`);
+      setBalanceInfo(res.data.data);
+    } catch (err) {
+      setBalanceInfo({ error: err?.response?.data?.msg || "Failed to check balance" });
+    } finally {
+      setCheckingBalance(false);
     }
   };
 
@@ -294,7 +310,15 @@ export default function DataPlansPage() {
                       </select>
                     </div>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: ".75rem" }}>
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: ".5rem", marginTop: ".75rem" }}>
+                    <button
+                      onClick={checkBalance}
+                      disabled={checkingBalance || !activeProvider.apiUrl || !activeProvider.apiKey}
+                      style={{ ...btnBase, background: checkingBalance ? "#94a3b8" : "#7c3aed", color: "white", padding: ".4rem 1rem" }}
+                    >
+                      <Wallet size={13} />
+                      {checkingBalance ? "Checking…" : "Check Balance"}
+                    </button>
                     <button
                       onClick={saveProviderCredentials}
                       disabled={savingProvider}
@@ -304,6 +328,27 @@ export default function DataPlansPage() {
                       {savingProvider ? "Saving…" : "Save Credentials"}
                     </button>
                   </div>
+                  {balanceInfo && (
+                    <div style={{
+                      marginTop: ".75rem",
+                      padding: ".75rem 1rem",
+                      borderRadius: ".75rem",
+                      background: balanceInfo.error ? "#fef2f2" : "#f0fdf4",
+                      border: `1px solid ${balanceInfo.error ? "#fecaca" : "#bbf7d0"}`,
+                    }}>
+                      {balanceInfo.error ? (
+                        <span style={{ color: "#dc2626", fontSize: ".82rem" }}>❌ {balanceInfo.error}</span>
+                      ) : (
+                        <div style={{ fontSize: ".82rem", color: "#166534" }}>
+                          <strong>{balanceInfo.provider}</strong>
+                          {balanceInfo.username && <span style={{ color: "#64748b", marginLeft: ".5rem" }}>@{balanceInfo.username}</span>}
+                          <span style={{ display: "inline-block", marginLeft: ".75rem", fontWeight: 800, fontSize: "1rem", color: "#15803d" }}>
+                            ₦{Number(balanceInfo.balance || 0).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
