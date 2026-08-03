@@ -189,6 +189,7 @@ async function getVirtualAccounts(req, res) {
     if (!user) return sendError(res, "User not found.", 404);
 
     // Lazy generation: if Paystack accounts are missing, create them now (fire-and-forget)
+    let pendingAccounts = false;
     if (!user.paystackCustomerCode || !user.paystackWemaAccount || !user.paystackTitanAccount) {
       const paystackService = require("../services/paystack.service");
       paystackService.ensureAllAccounts({
@@ -198,6 +199,7 @@ async function getVirtualAccounts(req, res) {
         phone: user.phone || "",
         email: user.email,
       });
+      pendingAccounts = true;
     }
 
     const localAccounts = [];
@@ -207,7 +209,7 @@ async function getVirtualAccounts(req, res) {
         bankName: "Wema Bank",
         bankCode: "035",
         accountNumber: user.paystackWemaAccount,
-        accountName: `GUCHORMONIE/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
+        accountName: `GUCHOR DATA/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
         status: "active",
       });
     }
@@ -217,12 +219,12 @@ async function getVirtualAccounts(req, res) {
         bankName: "Paystack Titan",
         bankCode: "titan-paystack",
         accountNumber: user.paystackTitanAccount,
-        accountName: `GUCHORMONIE/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
+        accountName: `GUCHOR DATA/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
         status: "active",
       });
     }
 
-    return sendSuccess(res, { accounts: localAccounts, pending: false });
+    return sendSuccess(res, { accounts: localAccounts, pending: pendingAccounts });
   } catch (e) {
     console.error("[getVirtualAccounts]", e);
     return sendError(res, "Failed to fetch virtual accounts.", 500);

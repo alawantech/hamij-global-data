@@ -38,6 +38,21 @@ export default function FundWalletPage() {
   }, [fetchVirtualAccounts]);
 
   useEffect(() => {
+    if (!vasPending || vasLoading) return;
+    let attempts = 0;
+    const maxAttempts = 10;
+    const interval = setInterval(() => {
+      attempts++;
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        return;
+      }
+      fetchVirtualAccounts();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [vasPending, vasLoading, fetchVirtualAccounts]);
+
+  useEffect(() => {
     if (activeTab !== "manual") return;
     const fetchManual = async () => {
       setManualLoading(true);
