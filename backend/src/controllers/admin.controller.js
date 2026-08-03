@@ -751,12 +751,12 @@ exports.getDataProviderBalance = async (req, res) => {
         timeout: 15000,
       });
 
-      if (data?.balance != null) balance = data.balance;
-      else if (data?.user?.wallet_balance != null) balance = data.user.wallet_balance;
-      else if (data?.user?.wallet != null) balance = data.user.wallet;
-      else if (data?.wallet_balance != null) balance = data.wallet_balance;
-      else if (data?.data?.balance != null) balance = data.data.balance;
-      else if (data?.data?.wallet != null) balance = data.data.wallet;
+      if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
+      else if (data?.user?.wallet_balance != null) balance = String(data.user.wallet_balance).replace(/,/g, "");
+      else if (data?.user?.wallet != null) balance = String(data.user.wallet).replace(/,/g, "");
+      else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
+      else if (data?.data?.balance != null) balance = String(data.data.balance).replace(/,/g, "");
+      else if (data?.data?.wallet != null) balance = String(data.data.wallet).replace(/,/g, "");
       else error = "Unrecognised response";
 
       if (data?.username) username = data.username;
@@ -815,12 +815,12 @@ exports.getDataProviderBalances = async (req, res) => {
             timeout: 15000,
           });
 
-          if (data?.balance != null) balance = data.balance;
-          else if (data?.user?.wallet_balance != null) balance = data.user.wallet_balance;
-          else if (data?.user?.wallet != null) balance = data.user.wallet;
-          else if (data?.wallet_balance != null) balance = data.wallet_balance;
-          else if (data?.data?.balance != null) balance = data.data.balance;
-          else if (data?.data?.wallet != null) balance = data.data.wallet;
+          if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
+          else if (data?.user?.wallet_balance != null) balance = String(data.user.wallet_balance).replace(/,/g, "");
+          else if (data?.user?.wallet != null) balance = String(data.user.wallet).replace(/,/g, "");
+          else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
+          else if (data?.data?.balance != null) balance = String(data.data.balance).replace(/,/g, "");
+          else if (data?.data?.wallet != null) balance = String(data.data.wallet).replace(/,/g, "");
           else error = "Unrecognised response";
 
           if (data?.username) username = data.username;
