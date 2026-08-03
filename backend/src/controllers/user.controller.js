@@ -118,6 +118,18 @@ async function createSupportIssue(req, res) {
   }
 }
 
+async function getManualFundRequests(req, res) {
+  try {
+    const requests = await prisma.manualFund.findMany({
+      where: { userId: req.user.id.toString(), method: "manual-fund" },
+      orderBy: { createdAt: "desc" },
+    });
+    return sendSuccess(res, { requests });
+  } catch (e) {
+    return sendError(res, "Failed to fetch manual requests.", 500);
+  }
+}
+
 async function getAirtimeToCashRequests(req, res) {
   try {
     const requests = await prisma.manualFund.findMany({
@@ -308,6 +320,7 @@ module.exports = {
   getSupportIssues,
   createSupportIssue,
   getAirtimeToCashRequests,
+  getManualFundRequests,
   submitAirtimeToCash,
   getVirtualAccounts,
   requestVendorUpgrade,

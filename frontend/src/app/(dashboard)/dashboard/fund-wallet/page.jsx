@@ -16,6 +16,8 @@ export default function FundWalletPage() {
   const [vasPending, setVasPending] = useState(false);
   const [vasLoading, setVasLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("auto");
+  const [manualLoading, setManualLoading] = useState(false);
+  const [manualRequests, setManualRequests] = useState([]);
 
   const fetchVirtualAccounts = useCallback(async () => {
     setVasLoading(true);
@@ -34,6 +36,22 @@ export default function FundWalletPage() {
   useEffect(() => {
     fetchVirtualAccounts();
   }, [fetchVirtualAccounts]);
+
+  useEffect(() => {
+    if (activeTab !== "manual") return;
+    const fetchManual = async () => {
+      setManualLoading(true);
+      try {
+        const res = await api.get("/user/manual-funds");
+        setManualRequests(res.data.data.requests || []);
+      } catch {
+        setManualRequests([]);
+      } finally {
+        setManualLoading(false);
+      }
+    };
+    fetchManual();
+  }, [activeTab]);
 
   const copy = (text) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -93,6 +111,7 @@ export default function FundWalletPage() {
         <div style={{ display: "flex", gap: ".5rem" }}>
           {[
             { key: "auto", label: "Automatic" },
+            { key: "manual", label: "Manual" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -453,10 +472,10 @@ export default function FundWalletPage() {
                     >
                       <div>
                         <div style={{ fontWeight: 700, color: "#0f172a" }}>
-                          ₦{Number(r.amount || 0).toLocaleString()} • {r.bankName}
+                          ₦{Number(r.amount || 0).toLocaleString()}
                         </div>
                         <div style={{ fontSize: ".75rem", color: "#94a3b8" }}>
-                          {new Date(r.createdAt).toLocaleDateString()} • {r.senderName}
+                          {r.account} • {new Date(r.createdAt).toLocaleDateString()}
                         </div>
                       </div>
                       <span

@@ -17,6 +17,7 @@ router.get("/support", user.getSupportIssues);
 router.post("/support", user.createSupportIssue);
 router.get("/airtime-to-cash", user.getAirtimeToCashRequests);
 router.post("/airtime-to-cash", user.submitAirtimeToCash);
+router.get("/manual-funds", user.getManualFundRequests);
 router.get("/virtual-accounts", user.getVirtualAccounts);
 router.post("/kyc", user.updateKyc);
 router.get("/upgrade-status", user.getUpgradeStatus);
