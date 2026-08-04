@@ -278,7 +278,9 @@ async function getMe(req, res) {
   if (!user) return sendError(res, "User not found.", 404);
 
   // Lazy generation: if Paystack accounts are missing, create them now (fire-and-forget)
+  let pendingAccounts = false;
   if (!user.paystackCustomerCode || !user.paystackWemaAccount || !user.paystackTitanAccount) {
+    pendingAccounts = true;
     paystackService
       .ensureAllAccounts({
         userId: user.id,
@@ -326,6 +328,7 @@ async function getMe(req, res) {
       memberSince: user.regDate,
       accountReference: user.accountReference,
       virtualAccounts,
+      pendingAccounts,
       referralCount,
     },
   });

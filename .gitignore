@@ -31,3 +31,4 @@ backend/node_modules/.prisma/
 
 # Migration backups (contain secrets, DB dumps, SSL certs — NEVER commit)
 migration/
+backend/fix-paystack-keys.js
