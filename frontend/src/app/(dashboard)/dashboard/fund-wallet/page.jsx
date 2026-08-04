@@ -18,6 +18,7 @@ export default function FundWalletPage() {
   const [activeTab, setActiveTab] = useState("auto");
   const [manualLoading, setManualLoading] = useState(false);
   const [manualRequests, setManualRequests] = useState([]);
+  const [dvaFailed, setDvaFailed] = useState(false);
 
   const fetchVirtualAccounts = useCallback(async () => {
     setVasLoading(true);
@@ -25,9 +26,11 @@ export default function FundWalletPage() {
       const res = await api.get("/user/virtual-accounts");
       setVirtualAccounts(res.data.data.accounts || []);
       setVasPending(res.data.data.pending || false);
+      setDvaFailed(res.data.data.dvaFailed || false);
     } catch {
       setVirtualAccounts([]);
       setVasPending(false);
+      setDvaFailed(false);
     } finally {
       setVasLoading(false);
     }

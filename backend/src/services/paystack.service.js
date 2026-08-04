@@ -71,6 +71,11 @@ async function ensureAllAccounts({ userId, firstname, lastname, phone, email }) 
     if (!user) return;
     if (user.paystackCustomerCode && user.paystackWemaAccount && user.paystackTitanAccount) return;
 
+    // If customer already exists but DVA creation failed previously, don't retry endlessly
+    if (user.paystackCustomerCode && !user.paystackWemaAccount && !user.paystackTitanAccount) {
+      return;
+    }
+
     let customerCode = user.paystackCustomerCode;
     let paystackCustomerId = null;
 
