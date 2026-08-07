@@ -41,7 +41,7 @@ async function getDataPlan(planId, source) {
   if (source === "provider") {
     return prisma.providerDataPlan.findUnique({
       where: { id: parseInt(planId) },
-      include: { network: true, provider: true },
+      include: { network: true },
     });
   }
   return prisma.dataPlan.findUnique({
@@ -597,6 +597,8 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
       msg: "Data service not configured. Please contact admin.",
     };
   }
+
+  console.log("[VTU] purchaseData →", { host, authType, extNetworkId, planCode, phone });
 
   const planObj = { ...plan, planCode }; // use resolved planCode
 
