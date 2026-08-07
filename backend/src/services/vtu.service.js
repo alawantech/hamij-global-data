@@ -41,7 +41,7 @@ async function getDataPlan(planId, source) {
   if (source === "provider") {
     return prisma.providerDataPlan.findUnique({
       where: { id: parseInt(planId) },
-      include: { network: true },
+      include: { network: true, provider: true },
     });
   }
   return prisma.dataPlan.findUnique({
