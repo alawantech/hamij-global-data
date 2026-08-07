@@ -90,27 +90,11 @@ function extractApiError(errDetail) {
 // ---------------------------------------------------------
 function detectAuthType(host) {
   if (!host) return "token";
-  // Providers that use 2-step Basic auth → dynamic Token exchange
-  const basicHosts = [
-    "n3tdata247.com",
-    "n3tdata.com",
-    "bilalsadasub.com",
-    "rabdata360.com",
-    "nabatulu",
-  ];
-  // mySubwallet — 2-step Basic auth but with integer network ID + international phone format
-  const subwalletHosts = ["mysubwallet.ng"];
-  // Providers that use a direct static Token with phone/data_plan/bypass body format
-  const directTokenHosts = [
-    "dorosub.com",
-    "legitdataway.com",
-    "gwarzodata.com",
-  ];
-  if (basicHosts.some((h) => host.includes(h))) return "basic";
-  if (directTokenHosts.some((h) => host.includes(h))) return "direct_token";
-  if (subwalletHosts.some((h) => host.includes(h))) return "subwallet";
+  // ALL VTU providers use 2-step Basic auth: POST /api/user with Basic → get AccessToken, then POST /api/data with Token
+  // This applies to: dorosub.com, first-sub.com, mbcdata.com, mysubwallet.ng, legitdataway.com, etc.
+  if (host.includes("mysubwallet.ng")) return "subwallet";
   if (host.includes("vtpass")) return "vtpass";
-  return "token";
+  return "basic";
 }
 
 // ---------------------------------------------------------
@@ -600,25 +584,19 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
 
   console.log("[VTU] purchaseData →", { host, authType, extNetworkId, planCode, phone });
 
+  // Convert network name to integer if needed — ALL providers expect integer IDs
+  const NETWORK_NAME_MAP = { mtn: 1, airtel: 2, glo: 3, "9mobile": 4, etisalat: 4 };
+  const resolvedNetwork = NETWORK_NAME_MAP[String(extNetworkId).toLowerCase()] || parseInt(extNetworkId) || extNetworkId;
+
   const planObj = { ...plan, planCode }; // use resolved planCode
 
-  if (authType === "direct_token") {
-    return purchaseDataDirectToken({
-      host,
-      apiKey,
-      extNetworkId,
-      plan: planObj,
-      phone,
-      ref,
-    });
-  }
-  if (authType === "basic") {
+  if (authType === "basic" || authType === "direct_token") {
     const userUrl = host.replace(/\/api\/data\/?$/, "/api/user/");
     return purchaseDataBasicAuth({
       host,
       userUrl,
       apiKey,
-      extNetworkId,
+      extNetworkId: resolvedNetwork,
       plan: planObj,
       phone,
       ref,
@@ -630,7 +608,7 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
       host,
       userUrl,
       apiKey,
-      extNetworkId,
+      extNetworkId: resolvedNetwork,
       plan: planObj,
       phone,
       ref,
@@ -639,7 +617,7 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
   return purchaseDataToken({
     host,
     apiKey,
-    extNetworkId,
+    extNetworkId: resolvedNetwork,
     plan: planObj,
     phone,
     ref,
