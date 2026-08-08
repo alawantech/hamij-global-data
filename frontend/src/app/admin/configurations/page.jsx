@@ -54,7 +54,7 @@ const CARDS = [
     icon: Wifi,
     color: "#16a34a",
     title: "Data API",
-    desc: "Set API key + select provider for MTN/GLO/Airtel/9Mobile – SME, SME2, Gifting, Corporate, Coupon",
+    desc: "Set API key + select provider for MTN/GLO/Airtel/9Mobile – SME, Gifting, Cooperate Gifting",
     href: "/admin/api-configs?tab=Data",
     badge: "Step 2",
     badgeColor: "#16a34a",

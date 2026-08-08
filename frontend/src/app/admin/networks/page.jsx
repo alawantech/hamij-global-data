@@ -18,10 +18,8 @@ const STATUS_FIELDS = [
   { key: "vtuStatus", label: "Airtime (VTU)" },
   { key: "sharesellStatus", label: "Airtime (Share & Sell)" },
   { key: "smeStatus", label: "SME Data" },
-  { key: "sme2Status", label: "SME2 Data" },
   { key: "giftingStatus", label: "Gifting Data" },
-  { key: "corporateStatus", label: "Corporate Data" },
-  { key: "couponStatus", label: "Coupon Data" },
+  { key: "corporateStatus", label: "Cooperate Gifting Data" },
   { key: "airtimepinStatus", label: "Recharge Card (Airtime PIN)" },
   { key: "datapinStatus", label: "Data PIN" },
 ];

@@ -56,10 +56,8 @@ export default function DataPage() {
 
   const typeColor = {
     SME: { icon: "🔵", accent: "#2563eb" },
-    SME2: { icon: "🟢", accent: "#16a34a" },
-    Corporate: { icon: "🟣", accent: "#7c3aed" },
     Gifting: { icon: "🟠", accent: "#ea580c" },
-    Coupon: { icon: "🩷", accent: "#a21caf" },
+    "Cooperate Gifting": { icon: "🟣", accent: "#7c3aed" },
     Other: { icon: "⚪", accent: "#64748b" },
   };
 

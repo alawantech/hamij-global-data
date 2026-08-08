@@ -5,7 +5,7 @@ import adminApi from "@/lib/adminApi";
 import toast from "react-hot-toast";
 import RequirePermission from "@/components/RequirePermission";
 
-const PLAN_TYPES = ["SME", "SME2", "Gifting", "Corporate", "Coupon", "Awoof"];
+const PLAN_TYPES = ["SME", "Gifting", "Cooperate Gifting"];
 const AUTH_TYPES = [
   { value: "basic", label: "Basic Auth (2-step)" },
   { value: "direct_token", label: "Direct Token" },

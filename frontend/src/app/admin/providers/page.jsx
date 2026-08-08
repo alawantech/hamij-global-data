@@ -28,11 +28,8 @@ const NETWORKS = [
 
 const DATA_TYPES = [
   { key: "sme", label: "SME Data" },
-  { key: "sme2", label: "SME2 Data" },
   { key: "gifting", label: "Gifting Data" },
-  { key: "corporate", label: "Corporate Data" },
-  { key: "coupon", label: "Coupon Data" },
-  { key: "awoof", label: "Awoof Data" },
+  { key: "corporate", label: "Cooperate Gifting Data" },
 ];
 
 const AIRTIME_TYPES = [
