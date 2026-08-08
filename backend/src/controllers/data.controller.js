@@ -38,11 +38,8 @@ async function getPlans(req, res) {
 
   const typeKeyMap = {
     SME: "sme",
-    SME2: "sme2",
     Gifting: "gifting",
-    Corporate: "corporate",
-    Coupon: "coupon",
-    Awoof: "awoof",
+    "Cooperate Gifting": "cooperateGifting",
   };
   const typesToCheck = type ? [type] : Object.keys(typeKeyMap);
 
@@ -60,22 +57,19 @@ async function getPlans(req, res) {
   // Priority: per-network+type (e.g. mtnSmeEnabledProviders) → global (smeDataProvider)
   const providerTypes = typesToCheck.filter((t) => {
     const key = typeKeyMap[t] || t.toLowerCase();
-    const typeUpper = t.charAt(0).toUpperCase() + t.slice(1);
-    // Check per-network+type first
-    const perNetKey = `${netName}${typeUpper}EnabledProviders`;
+    const configKey = key.charAt(0).toUpperCase() + key.slice(1);
+    const perNetKey = `${netName}${configKey}EnabledProviders`;
     if (configMap[perNetKey] && configMap[perNetKey].trim().length > 0) return true;
-    // Fallback to global slug
     const globalKey = `${key}DataProvider`;
     return !!configMap[globalKey] && configMap[globalKey].trim().length > 0;
   });
 
   if (providerTypes.length > 0) {
-    // Collect ALL slugs: per-network+type first, then global fallback
     const allSlugs = new Set();
     for (const t of providerTypes) {
       const key = typeKeyMap[t] || t.toLowerCase();
-      const typeUpper = t.charAt(0).toUpperCase() + t.slice(1);
-      const perNetKey = `${netName}${typeUpper}EnabledProviders`;
+      const configKey = key.charAt(0).toUpperCase() + key.slice(1);
+      const perNetKey = `${netName}${configKey}EnabledProviders`;
       const perNetVal = configMap[perNetKey] || "";
       const globalVal = configMap[`${key}DataProvider`] || "";
       // Prefer per-network if set, else use global
@@ -166,10 +160,8 @@ async function getPlans(req, res) {
     const netObj = allPlans[0]?.network;
     const statusMap = {
       SME: "smeStatus",
-      SME2: "sme2Status",
       Gifting: "giftingStatus",
-      Corporate: "corporateStatus",
-      Coupon: "couponStatus",
+      "Cooperate Gifting": "corporateStatus",
     };
     const filteredPlans = allPlans.filter((p) => {
       const field = statusMap[p.type];
@@ -205,10 +197,8 @@ async function getPlans(req, res) {
     const netObj3 = autoProviderPlans[0]?.network;
     const statusMap3 = {
       SME: "smeStatus",
-      SME2: "sme2Status",
       Gifting: "giftingStatus",
-      Corporate: "corporateStatus",
-      Coupon: "couponStatus",
+      "Cooperate Gifting": "corporateStatus",
     };
     const filteredAuto = autoProviderPlans.filter((p) => {
       const field = statusMap3[p.type];
@@ -241,10 +231,8 @@ async function getPlans(req, res) {
   const netObj4 = plans[0]?.network;
   const statusMap4 = {
     SME: "smeStatus",
-    SME2: "sme2Status",
     Gifting: "giftingStatus",
-    Corporate: "corporateStatus",
-    Coupon: "couponStatus",
+    "Cooperate Gifting": "corporateStatus",
   };
   const filteredClassic = plans.filter((p) => {
     const field = statusMap4[p.type];
@@ -293,11 +281,8 @@ async function purchase(req, res) {
   const planType = (plan.type || "SME").toUpperCase();
   const statusMap = {
     SME: "smeStatus",
-    SME2: "sme2Status",
     GIFTING: "giftingStatus",
-    CORPORATE: "corporateStatus",
-    COUPON: "couponStatus",
-    AWOOF: "awoofStatus",
+    "COOPERATE GIFTING": "corporateStatus",
   };
   const statusField = statusMap[planType];
   const networkFieldVal = statusField ? plan.network[statusField] : undefined;

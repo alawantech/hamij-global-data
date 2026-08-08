@@ -17,9 +17,8 @@ const NETWORKS = [
 
 const DATA_TYPES = [
   { id: "Sme", label: "SME Data" },
-  { id: "Sme2", label: "SME2 Data" },
   { id: "Gifting", label: "Gifting Data" },
-  { id: "Cooperate Gifting", label: "Cooperate Gifting Data" },
+  { id: "CooperateGifting", label: "Cooperate Gifting Data" },
 ];
 
 const PAYMENT_SECTIONS = [

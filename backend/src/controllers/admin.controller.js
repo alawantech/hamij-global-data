@@ -2364,11 +2364,8 @@ exports.getProviderPlanCodes = async (req, res) => {
       ) {
         const typeMap = {
           sme: "SME",
-          sme2: "SME2",
           gifting: "Gifting",
-          corporate: "Corporate",
-          coupon: "Coupon",
-          awoof: "Awoof",
+          cooperategifting: "Cooperate Gifting",
         };
         const network = await prisma.network.findFirst({
           where: { name: { equals: parts[0], mode: "insensitive" } },
