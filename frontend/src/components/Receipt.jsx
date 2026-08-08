@@ -295,7 +295,7 @@ function parseServicedesc(desc, servicename, apiResponseLog) {
 export default function ReceiptView({ tx, showPrint = true }) {
   const [downloading, setDownloading] = useState(false);
   const settings = useSiteSettings();
-  const siteName = settings.sitename || "Gwarzo Data Sub";
+  const siteName = settings.sitename || "Guchor Data";
 
   const category = tx.category || "other";
   const { color, bg, Icon, label } = getSvcMeta(category, tx.servicename);

@@ -160,7 +160,7 @@ export default function TermsPage() {
             G
           </div>
           <span style={{ fontWeight: 800, color: "white", fontSize: "1.1rem" }}>
-            GUCHOR<span style={{ color: "#38bdf8" }}>MONIE</span>
+            GUCHOR<span style={{ color: "#38bdf8" }}>DATA</span>
           </span>
         </Link>
         <Link

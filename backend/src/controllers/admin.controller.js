@@ -847,15 +847,7 @@ exports.updateDataProvider = async (req, res) => {
 exports.deleteDataProvider = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const count = await prisma.providerDataPlan.count({
-      where: { providerId: id },
-    });
-    if (count > 0)
-      return fail(
-        res,
-        "Cannot delete provider with existing plans. Delete plans first.",
-        400,
-      );
+    await prisma.providerDataPlan.deleteMany({ where: { providerId: id } });
     await prisma.dataProvider.delete({ where: { id } });
     return ok(res, { msg: "Provider deleted." });
   } catch (e) {

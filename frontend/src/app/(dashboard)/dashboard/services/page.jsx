@@ -61,7 +61,7 @@ const SERVICES = [
     href: "/dashboard/data-card",
     color: "#7c3aed",
     bg: "#f5f3ff",
-    desc: "GUCHORMONIE scratch card pins",
+    desc: "Scratch card pins",
   },
   {
     label: "Recharge Card",
@@ -69,7 +69,7 @@ const SERVICES = [
     href: "/dashboard/recharge-card",
     color: "#16a34a",
     bg: "#f0fdf4",
-    desc: "GUCHORMONIE airtime scratch cards",
+    desc: "Airtime scratch cards",
   },
   {
     label: "Bulk SMS",

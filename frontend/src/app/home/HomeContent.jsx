@@ -105,8 +105,8 @@ const SERVICES = [
   { icon: Tv, title: "Cable Renewals", description: "DStv, GOtv and Startimes subscriptions handled with real-time confirmation.", accent: "#7c3aed", tint: "rgba(124,58,237,0.12)", link: "/dashboard/cable" },
   { icon: Zap, title: "Electricity Tokens", description: "Prepaid meter tokens delivered fast across all major DISCOs in Nigeria.", accent: "#d97706", tint: "rgba(217,119,6,0.12)", link: "/dashboard/electricity" },
   { icon: GraduationCap, title: "Exam Pins", description: "WAEC, NECO and JAMB checker pins available the moment you need them.", accent: "#059669", tint: "rgba(5,150,105,0.12)", link: "/dashboard/exam" },
-  { icon: CreditCard, title: "Data Card Pins", description: "GUCHORMONIE scratch card pins for bulk data resale and distribution.", accent: "#7c3aed", tint: "rgba(124,58,237,0.12)", link: "/dashboard/data-card" },
-  { icon: PhoneCall, title: "Recharge Card Pins", description: "GUCHORMONIE airtime scratch cards for agents and resellers.", accent: "#16a34a", tint: "rgba(22,163,74,0.12)", link: "/dashboard/recharge-card" },
+  { icon: CreditCard, title: "Data Card Pins", description: "Scratch card pins for bulk data resale and distribution.", accent: "#7c3aed", tint: "rgba(124,58,237,0.12)", link: "/dashboard/data-card" },
+  { icon: PhoneCall, title: "Recharge Card Pins", description: "Airtime scratch cards for agents and resellers.", accent: "#16a34a", tint: "rgba(22,163,74,0.12)", link: "/dashboard/recharge-card" },
   { icon: MessageSquare, title: "Bulk SMS", description: "Send SMS to any number nationwide with reliable delivery tracking.", accent: "#0891b2", tint: "rgba(8,145,178,0.12)", link: "/dashboard/sms" },
 ];
 
