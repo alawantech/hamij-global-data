@@ -1,17 +1,11 @@
 ﻿"use client";
 import { useEffect, useState, useCallback } from "react";
-import { Plus, Edit2, Trash2, X, ChevronDown, ChevronRight, Link2, Save, Wallet } from "lucide-react";
+import { Plus, Edit2, Trash2, X, ChevronDown, ChevronRight, Link2 } from "lucide-react";
 import adminApi from "@/lib/adminApi";
 import toast from "react-hot-toast";
 import RequirePermission from "@/components/RequirePermission";
 
 const PLAN_TYPES = ["SME", "Gifting", "Cooperate Gifting"];
-const AUTH_TYPES = [
-  { value: "basic", label: "Basic Auth (2-step)" },
-  { value: "direct_token", label: "Direct Token" },
-  { value: "subwallet", label: "SubWallet" },
-  { value: "token", label: "Token" },
-];
 
 const EMPTY_PLAN = {
   providerId: "",
@@ -45,10 +39,7 @@ export default function DataPlansPage() {
   const [planForm, setPlanForm] = useState(EMPTY_PLAN);
   const [loading, setLoading] = useState(false);
   const [providerModal, setProviderModal] = useState(false);
-  const [providerForm, setProviderForm] = useState({ name: "", slug: "", apiUrl: "", apiKey: "", authType: "basic" });
-  const [savingProvider, setSavingProvider] = useState(false);
-  const [balanceInfo, setBalanceInfo] = useState(null);
-  const [checkingBalance, setCheckingBalance] = useState(false);
+  const [providerForm, setProviderForm] = useState({ name: "", slug: "" });
 
   const loadProviders = useCallback(() => {
     adminApi.get("/admin/data-providers")
@@ -114,40 +105,8 @@ export default function DataPlansPage() {
     catch { toast.error("Failed"); }
   };
 
-  const saveProviderCredentials = async () => {
-    if (!activeProvider) return;
-    setSavingProvider(true);
-    try {
-      await adminApi.put(`/admin/data-providers/${activeProvider.id}`, {
-        apiUrl: activeProvider.apiUrl || "",
-        apiKey: activeProvider.apiKey || "",
-        authType: activeProvider.authType || "basic",
-      });
-      toast.success("Provider credentials saved");
-      loadProviders();
-    } catch {
-      toast.error("Failed to save credentials");
-    } finally {
-      setSavingProvider(false);
-    }
-  };
-
-  const checkBalance = async () => {
-    if (!activeProvider) return;
-    setCheckingBalance(true);
-    setBalanceInfo(null);
-    try {
-      const res = await adminApi.get(`/admin/data-providers/${activeProvider.id}/balance`);
-      setBalanceInfo(res.data.data);
-    } catch (err) {
-      setBalanceInfo({ error: err?.response?.data?.msg || "Failed to check balance" });
-    } finally {
-      setCheckingBalance(false);
-    }
-  };
-
   const openAddProvider = () => {
-    setProviderForm({ name: "", slug: "", apiUrl: "", apiKey: "", authType: "basic" });
+    setProviderForm({ name: "", slug: "" });
     setProviderModal(true);
   };
 
@@ -189,7 +148,7 @@ export default function DataPlansPage() {
     <div style={{ minHeight: "100vh" }}>
       <div style={{ marginBottom: "1.5rem" }}>
         <h1 style={{ fontSize: "1.5rem", fontWeight: 900, color: "#0f172a", letterSpacing: "-.03em", margin: 0 }}>Data Providers & Plans</h1>
-        <p style={{ color: "#64748b", fontSize: ".875rem", marginTop: ".25rem" }}>Manage data providers and their plans. Configure API credentials for each provider.</p>
+        <p style={{ color: "#64748b", fontSize: ".875rem", marginTop: ".25rem" }}>Manage data providers and their plans. API credentials are configured in the Provider Library.</p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: "1.5rem", alignItems: "start" }}>
@@ -214,7 +173,6 @@ export default function DataPlansPage() {
           ) : (
             dataProviders.map((p) => {
               const isActive = activeProvider?.id === p.id;
-              const hasCreds = p.apiUrl && p.apiKey;
               return (
                 <div key={p.id} style={{ display: "flex", alignItems: "center", borderBottom: "1px solid #f8fafc" }}>
                   <div
@@ -229,13 +187,6 @@ export default function DataPlansPage() {
                     <div style={{ fontWeight: 700, fontSize: ".875rem", color: isActive ? "#1d4ed8" : "#1e293b" }}>
                       {p.name}
                       <span style={{ fontSize: ".65rem", fontWeight: 600, marginLeft: ".4rem", padding: "1px 6px", borderRadius: "999px", background: p.status === "On" ? "#dcfce7" : "#fee2e2", color: p.status === "On" ? "#166534" : "#991b1b" }}>{p.status}</span>
-                    </div>
-                    <div style={{ fontSize: ".72rem", color: "#94a3b8", marginTop: ".15rem" }}>
-                      {hasCreds ? (
-                        <span style={{ color: "#16a34a" }}>✓ API configured</span>
-                      ) : (
-                        <span style={{ color: "#f59e0b" }}>⚠ No API credentials</span>
-                      )}
                     </div>
                   </div>
                   <button
@@ -271,84 +222,6 @@ export default function DataPlansPage() {
                   <button onClick={() => openAddPlan(null, null)} style={{ ...btnBase, background: "#2563eb", color: "white" }}>
                     <Plus size={15} /> Add Plan
                   </button>
-                </div>
-
-                {/* API Credentials Section */}
-                <div style={{ background: "#f8fafc", borderRadius: ".875rem", padding: "1rem", border: "1px solid #e2e8f0" }}>
-                  <div style={{ fontWeight: 700, fontSize: ".8rem", color: "#475569", marginBottom: ".75rem", textTransform: "uppercase", letterSpacing: ".04em" }}>
-                    API Credentials
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".75rem" }}>
-                    <div style={{ gridColumn: "span 2" }}>
-                      <label style={labelStyle}>API URL</label>
-                      <input
-                        value={activeProvider.apiUrl || ""}
-                        onChange={(e) => setActiveProvider({ ...activeProvider, apiUrl: e.target.value })}
-                        placeholder="https://api.provider.com/data"
-                        style={inputStyle}
-                      />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>API Key</label>
-                      <input
-                        value={activeProvider.apiKey || ""}
-                        onChange={(e) => setActiveProvider({ ...activeProvider, apiKey: e.target.value })}
-                        placeholder="Your API key"
-                        style={inputStyle}
-                      />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Auth Type</label>
-                      <select
-                        value={activeProvider.authType || "basic"}
-                        onChange={(e) => setActiveProvider({ ...activeProvider, authType: e.target.value })}
-                        style={inputStyle}
-                      >
-                        {AUTH_TYPES.map((a) => (
-                          <option key={a.value} value={a.value}>{a.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end", gap: ".5rem", marginTop: ".75rem" }}>
-                    <button
-                      onClick={checkBalance}
-                      disabled={checkingBalance || !activeProvider.apiUrl || !activeProvider.apiKey}
-                      style={{ ...btnBase, background: checkingBalance ? "#94a3b8" : "#7c3aed", color: "white", padding: ".4rem 1rem" }}
-                    >
-                      <Wallet size={13} />
-                      {checkingBalance ? "Checking…" : "Check Balance"}
-                    </button>
-                    <button
-                      onClick={saveProviderCredentials}
-                      disabled={savingProvider}
-                      style={{ ...btnBase, background: savingProvider ? "#94a3b8" : "#2563eb", color: "white", padding: ".4rem 1rem" }}
-                    >
-                      <Save size={13} />
-                      {savingProvider ? "Saving…" : "Save Credentials"}
-                    </button>
-                  </div>
-                  {balanceInfo && (
-                    <div style={{
-                      marginTop: ".75rem",
-                      padding: ".75rem 1rem",
-                      borderRadius: ".75rem",
-                      background: balanceInfo.error ? "#fef2f2" : "#f0fdf4",
-                      border: `1px solid ${balanceInfo.error ? "#fecaca" : "#bbf7d0"}`,
-                    }}>
-                      {balanceInfo.error ? (
-                        <span style={{ color: "#dc2626", fontSize: ".82rem" }}>❌ {balanceInfo.error}</span>
-                      ) : (
-                        <div style={{ fontSize: ".82rem", color: "#166534" }}>
-                          <strong>{balanceInfo.provider}</strong>
-                          {balanceInfo.username && <span style={{ color: "#64748b", marginLeft: ".5rem" }}>@{balanceInfo.username}</span>}
-                          <span style={{ display: "inline-block", marginLeft: ".75rem", fontWeight: 800, fontSize: "1rem", color: "#15803d" }}>
-                            ₦{Number(balanceInfo.balance || 0).toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -514,36 +387,6 @@ export default function DataPlansPage() {
                   placeholder="e.g. dorosub"
                   style={{ ...inputStyle, fontFamily: "monospace" }}
                 />
-              </div>
-              <div>
-                <label style={labelStyle}>API URL</label>
-                <input
-                  value={providerForm.apiUrl}
-                  onChange={(e) => setProviderForm((f) => ({ ...f, apiUrl: e.target.value }))}
-                  placeholder="https://api.provider.com/data"
-                  style={inputStyle}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>API Key</label>
-                <input
-                  value={providerForm.apiKey}
-                  onChange={(e) => setProviderForm((f) => ({ ...f, apiKey: e.target.value }))}
-                  placeholder="Your API key"
-                  style={inputStyle}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>Auth Type</label>
-                <select
-                  value={providerForm.authType}
-                  onChange={(e) => setProviderForm((f) => ({ ...f, authType: e.target.value }))}
-                  style={inputStyle}
-                >
-                  {AUTH_TYPES.map((a) => (
-                    <option key={a.value} value={a.value}>{a.label}</option>
-                  ))}
-                </select>
               </div>
             </div>
             <div style={{ display: "flex", gap: ".75rem", justifyContent: "flex-end", marginTop: "1.5rem" }}>

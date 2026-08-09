@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import api from "@/lib/api";
 import { fetchWithCache, TTL } from "@/lib/cache";
 import { useAuth } from "@/context/AuthContext";
+import { detectNetwork } from "@/lib/detectNetwork";
 import ForgotPinOverlay from "@/components/ForgotPinOverlay";
 
 export default function DataPage() {
@@ -260,6 +261,15 @@ export default function DataPage() {
                 <Phone size={17} style={{ position: "absolute", left: ".875rem", color: "#a1a1aa", pointerEvents: "none" }} />
                 <input className="form-input" type="tel" placeholder="08012345678" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 11))} style={{ paddingLeft: "2.75rem" }} />
               </div>
+              {phone.length >= 4 && (
+                <div style={{ marginTop: ".5rem", fontSize: ".82rem", fontWeight: 600, color: detectNetwork(phone) ? "#16a34a" : "#dc2626" }}>
+                  {detectNetwork(phone) ? (
+                    <>Network detected: <span style={{ fontWeight: 800 }}>{detectNetwork(phone)}</span> <span style={{ fontSize: ".75rem", color: "#16a34a" }}>&#10003;</span></>
+                  ) : (
+                    <span>Network not recognized — ported number?</span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Continue Button */}
