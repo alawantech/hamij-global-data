@@ -16,6 +16,15 @@ import {
   Download,
   ShieldCheck,
   Loader2,
+  Hash,
+  Calendar,
+  FileText,
+  ArrowDownLeft,
+  ArrowUpRight,
+  MapPin,
+  User,
+  Package,
+  Info,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
@@ -32,6 +41,42 @@ const SVC_MAP = {
   card: { color: "#16a34a", bg: "#f0fdf4", Icon: CreditCard, label: "Card" },
   pin: { color: "#db2777", bg: "#fdf2f8", Icon: CreditCard, label: "Pin" },
   other: { color: "#0891b2", bg: "#ecfeff", Icon: RefreshCcw, label: "Transaction" },
+};
+
+const ROW_ICON_MAP = {
+  "Reference": Hash,
+  "Transaction ID": Hash,
+  "Service": Package,
+  "Description": FileText,
+  "Amount": Wallet,
+  "Old Balance": ArrowDownLeft,
+  "New Balance": ArrowUpRight,
+  "Date": Calendar,
+  "Token": Zap,
+  "Meter": Hash,
+  "Meter Type": Info,
+  "Customer Name": User,
+  "Customer Address": MapPin,
+  "Product": Package,
+  "Status": CheckCircle2,
+};
+
+const ROW_ICON_COLOR = {
+  "Reference": "#6366f1",
+  "Transaction ID": "#6366f1",
+  "Service": "#8b5cf6",
+  "Description": "#a78bfa",
+  "Amount": "#4f46e5",
+  "Old Balance": "#f97316",
+  "New Balance": "#10b981",
+  "Date": "#64748b",
+  "Token": "#d97706",
+  "Meter": "#0891b2",
+  "Meter Type": "#0891b2",
+  "Customer Name": "#7c3aed",
+  "Customer Address": "#6366f1",
+  "Product": "#8b5cf6",
+  "Status": "#10b981",
 };
 
 export function getSvcMeta(category, servicename = "") {
@@ -63,12 +108,22 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
   ctx.lineTo(x + r, y + h);
   ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
+  ctx.lineTo(x + r, y + r);
   ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
 
-function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
+function loadImage(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+function drawReceiptCanvas(tx, siteName, label, st, isDebit, details, logoImg) {
   const dpr = 2;
   const W = 440;
   const PADDING = 32;
@@ -82,17 +137,14 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
 
   let y = 0;
 
-  // Background
   ctx.fillStyle = "#f5f5f7";
   ctx.fillRect(0, 0, W, 900);
 
-  // ── Card background ──
   const cardX = 16;
   const cardW = W - 32;
   const cardStartY = 16;
   y = cardStartY;
 
-  // ── Gradient header ──
   const headerH = 260;
   roundRect(ctx, cardX, y, cardW, headerH, 20);
   const grad = ctx.createLinearGradient(cardX, y, cardX + cardW, y + headerH);
@@ -101,7 +153,6 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // Decorative circles
   ctx.save();
   ctx.beginPath();
   ctx.arc(cardX + cardW - 30, y - 30, 60, 0, Math.PI * 2);
@@ -113,26 +164,34 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
   ctx.fill();
   ctx.restore();
 
-  // Logo initial
   const logoSize = 48;
   const logoX = W / 2 - logoSize / 2;
   const logoY = y + 24;
-  roundRect(ctx, logoX, logoY, logoSize, logoSize, 12);
-  ctx.fillStyle = "rgba(255,255,255,0.2)";
-  ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(siteName.charAt(0), W / 2, logoY + logoSize / 2);
 
-  // Site name
+  if (logoImg) {
+    ctx.save();
+    roundRect(ctx, logoX, logoY, logoSize, logoSize, 12);
+    ctx.clip();
+    ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+    ctx.restore();
+  } else {
+    roundRect(ctx, logoX, logoY, logoSize, logoSize, 12);
+    ctx.fillStyle = "rgba(255,255,255,0.2)";
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(siteName.charAt(0), W / 2, logoY + logoSize / 2);
+  }
+
   y = logoY + logoSize + 10;
   ctx.fillStyle = "rgba(255,255,255,0.9)";
   ctx.font = "800 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText(siteName, W / 2, y);
 
-  // Checkmark circle
   y += 22;
   const checkR = 26;
   ctx.beginPath();
@@ -143,20 +202,17 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
   ctx.font = "bold 26px -apple-system, sans-serif";
   ctx.fillText("\u2713", W / 2, y + checkR + 2);
 
-  // Label
   y += checkR * 2 + 14;
   ctx.fillStyle = "rgba(255,255,255,0.75)";
   ctx.font = "600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   ctx.fillText(label + " Receipt", W / 2, y);
 
-  // Amount
   y += 24;
   ctx.fillStyle = "#fff";
   ctx.font = "900 30px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   const amtText = (isDebit ? "-" : "+") + fmtNaira(tx.amount);
   ctx.fillText(amtText, W / 2, y);
 
-  // Badge
   y += 20;
   const badgeText = st.label;
   ctx.font = "700 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
@@ -169,10 +225,10 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
   ctx.textBaseline = "middle";
   ctx.fillText(badgeText, W / 2, y + badgeH / 2);
 
-  // ── Details rows ──
   y = cardStartY + headerH + 12;
   const rowPad = 14;
   const rowH = 44;
+  const iconCircleSize = 28;
 
   roundRect(ctx, cardX, y, cardW, rowH * details.length, 16);
   ctx.fillStyle = "#fff";
@@ -182,13 +238,27 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
     const ry = y + i * rowH;
     ctx.textBaseline = "middle";
 
-    // Label
+    const iconColor = ROW_ICON_COLOR[d.label] || "#6366f1";
+    const iconBg = iconColor + "12";
+    const iconCx = cardX + rowPad + iconCircleSize / 2;
+    const iconCy = ry + rowH / 2;
+
+    ctx.beginPath();
+    ctx.arc(iconCx, iconCy, iconCircleSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = iconBg;
+    ctx.fill();
+
+    ctx.fillStyle = iconColor;
+    ctx.font = "600 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    const iconChar = d.label.charAt(0);
+    ctx.fillText(iconChar, iconCx, iconCy + 1);
+
+    ctx.textAlign = "left";
     ctx.fillStyle = "#71717a";
     ctx.font = "500 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(d.label, cardX + rowPad, ry + rowH / 2);
+    ctx.fillText(d.label, cardX + rowPad + iconCircleSize + 10, ry + rowH / 2);
 
-    // Value
     ctx.textAlign = "right";
     if (d.highlight) {
       ctx.fillStyle = d.color || "#09090b";
@@ -199,9 +269,8 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
     }
     if (d.mono) ctx.font = "600 12px 'Courier New', monospace";
 
-    // Truncate if too long
     let val = d.value;
-    let maxW = CONTENT_W - rowPad * 2 - 100;
+    let maxW = CONTENT_W - rowPad * 2 - 100 - iconCircleSize - 10;
     if (ctx.measureText(val).width > maxW) {
       while (ctx.measureText(val + "\u2026").width > maxW && val.length > 5) {
         val = val.slice(0, -1);
@@ -210,12 +279,11 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
     }
     ctx.fillText(val, cardX + cardW - rowPad, ry + rowH / 2);
 
-    // Separator line
     if (i < details.length - 1) {
       ctx.strokeStyle = "#f4f4f5";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(cardX + rowPad, ry + rowH);
+      ctx.moveTo(cardX + rowPad + iconCircleSize + 10, ry + rowH);
       ctx.lineTo(cardX + cardW - rowPad, ry + rowH);
       ctx.stroke();
     }
@@ -223,14 +291,12 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
 
   y += rowH * details.length + 14;
 
-  // ── Secured badge ──
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#a1a1aa";
   ctx.font = "600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   ctx.fillText("\u{1F6E1}\uFE0F Secured & verified by " + siteName, W / 2, y);
 
-  // Trim canvas height
   y += 24;
   const finalH = Math.max(y + 16, 400);
   const trimmedCanvas = document.createElement("canvas");
@@ -245,7 +311,6 @@ function drawReceiptCanvas(tx, siteName, label, st, isDebit, details) {
 function parseServicedesc(desc, servicename, apiResponseLog) {
   if (!desc || desc === "\u2014") return { description: desc || "\u2014" };
 
-  // Extract token from apiResponseLog for electricity
   let token = undefined;
   if (apiResponseLog && servicename === "Electricity") {
     try {
@@ -260,7 +325,6 @@ function parseServicedesc(desc, servicename, apiResponseLog) {
   const first = parts[0] || desc;
   const rest = parts.length > 1 ? parts.slice(1) : [];
 
-  // Extract meter type
   const meterTypes = ["Prepaid", "Postpaid"];
   let meterType = "";
   let providerName = first;
@@ -272,13 +336,10 @@ function parseServicedesc(desc, servicename, apiResponseLog) {
     }
   }
 
-  // Extract meter number (10+ digits)
   const meterMatch = first.match(/(\d{10,})/);
   const meterNumber = meterMatch ? meterMatch[1] : undefined;
 
-  // Clean provider name
   if (!providerName || providerName === first) {
-    // Remove meter number from provider name if present
     providerName = first.replace(/\d{10,}/, "").replace(/\s*-\s*$/, "").trim();
   }
 
@@ -369,7 +430,11 @@ export default function ReceiptView({ tx, showPrint = true }) {
     setDownloading(true);
     try {
       const canvasDetails = details.filter((d) => d.label !== "Old Balance" && d.label !== "New Balance");
-      const canvas = drawReceiptCanvas(tx, siteName, label, st, isDebit, canvasDetails);
+      let logoImg = null;
+      if (settings.logoUrl) {
+        logoImg = await loadImage(settings.logoUrl);
+      }
+      const canvas = drawReceiptCanvas(tx, siteName, label, st, isDebit, canvasDetails, logoImg);
       const blob = await new Promise((resolve) =>
         canvas.toBlob(resolve, "image/png")
       );
@@ -392,7 +457,6 @@ export default function ReceiptView({ tx, showPrint = true }) {
 
   return (
     <div className="receipt-sheet">
-      {/* Hero */}
       <div
         style={{
           background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
@@ -430,23 +494,29 @@ export default function ReceiptView({ tx, showPrint = true }) {
         </span>
       </div>
 
-      {/* Details */}
       <div style={{ background: "#fff", borderRadius: "1.25rem", overflow: "hidden", border: "1px solid #f1f5f9", boxShadow: "0 2px 12px rgba(0,0,0,.03)" }}>
-        {details.map((d, i) => (
-          <div key={d.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: ".85rem 1.1rem", borderBottom: i < details.length - 1 ? "1px solid #f4f4f5" : "none" }}>
-            <span style={{ fontSize: ".8rem", color: "#71717a", flexShrink: 0 }}>{d.label}</span>
-            <span style={{ fontSize: ".85rem", fontWeight: d.highlight ? 900 : 600, color: d.color || "#09090b", textAlign: "right", maxWidth: "62%", wordBreak: "break-all", fontFamily: d.mono ? "monospace" : "inherit" }}>{d.value}</span>
-          </div>
-        ))}
+        {details.map((d, i) => {
+          const RowIcon = ROW_ICON_MAP[d.label] || Hash;
+          const iconColor = ROW_ICON_COLOR[d.label] || "#6366f1";
+          return (
+            <div key={d.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: ".85rem 1.1rem", borderBottom: i < details.length - 1 ? "1px solid #f4f4f5" : "none", gap: ".5rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: ".5rem", flexShrink: 0 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: iconColor + "12", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <RowIcon size={14} color={iconColor} strokeWidth={2.2} />
+                </div>
+                <span style={{ fontSize: ".8rem", color: "#71717a" }}>{d.label}</span>
+              </div>
+              <span style={{ fontSize: ".85rem", fontWeight: d.highlight ? 900 : 600, color: d.color || "#09090b", textAlign: "right", maxWidth: "55%", wordBreak: "break-all", fontFamily: d.mono ? "monospace" : "inherit" }}>{d.value}</span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Secured badge */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: ".85rem", color: "#a1a1aa", fontSize: ".7rem", fontWeight: 600 }}>
         <ShieldCheck size={13} />
         Secured &amp; verified by {siteName}
       </div>
 
-      {/* Actions */}
       <div style={{ display: "flex", gap: ".625rem", marginTop: ".75rem" }}>
         <button onClick={() => copy(tx.transref || tx.ref || "")} style={{ flex: 1, background: "#fff", border: "1.5px solid #e4e4e7", borderRadius: "1rem", padding: ".85rem", display: "flex", alignItems: "center", justifyContent: "center", gap: ".4rem", fontWeight: 700, fontSize: ".82rem", color: "#4f46e5", cursor: "pointer" }}>
           <Copy size={16} /> Copy Ref
