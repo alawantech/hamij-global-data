@@ -295,7 +295,7 @@ function parseServicedesc(desc, servicename, apiResponseLog) {
 export default function ReceiptView({ tx, showPrint = true }) {
   const [downloading, setDownloading] = useState(false);
   const settings = useSiteSettings();
-  const siteName = settings.sitename || "Guchor Data";
+  const siteName = settings.sitename || "Gwarzo Data Sub";
 
   const category = tx.category || "other";
   const { color, bg, Icon, label } = getSvcMeta(category, tx.servicename);
@@ -341,6 +341,14 @@ export default function ReceiptView({ tx, showPrint = true }) {
           highlight: true,
           color: isDebit ? "#dc2626" : "#059669",
         },
+        showPrint && tx.oldbal != null && {
+          label: "Old Balance",
+          value: fmtNaira(tx.oldbal),
+        },
+        showPrint && tx.newbal != null && {
+          label: "New Balance",
+          value: fmtNaira(tx.newbal),
+        },
         {
           label: "Date",
           value: new Date(tx.date || tx.createdAt).toLocaleString("en-NG", {
@@ -360,7 +368,8 @@ export default function ReceiptView({ tx, showPrint = true }) {
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const canvas = drawReceiptCanvas(tx, siteName, label, st, isDebit, details);
+      const canvasDetails = details.filter((d) => d.label !== "Old Balance" && d.label !== "New Balance");
+      const canvas = drawReceiptCanvas(tx, siteName, label, st, isDebit, canvasDetails);
       const blob = await new Promise((resolve) =>
         canvas.toBlob(resolve, "image/png")
       );
