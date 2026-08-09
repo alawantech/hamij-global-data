@@ -44,15 +44,16 @@ async function login(req, res) {
       data: { otpCode: otp, otpExpiresAt: expiresAt, otpAttempts: 0 },
     });
 
-    await sendOtpEmail({ to: admin.email, otpCode: otp, expiresInMinutes: OTP_EXPIRY_MINUTES, purpose: "login" });
+    const emailSent = await sendOtpEmail({ to: admin.email, otpCode: otp, expiresInMinutes: OTP_EXPIRY_MINUTES, purpose: "login" });
 
     await logAdminAction({ adminId: admin.id, action: "login_requested", ip: req.ip, userAgent: req.headers["user-agent"] });
 
     return res.json({
       ok: true,
-      msg: "OTP sent to your email.",
+      msg: emailSent ? "OTP sent to your email." : "OTP generated but email could not be sent. Contact support.",
       data: { adminId: admin.id, email: admin.email },
       requiresOtp: true,
+      emailFailed: !emailSent,
     });
   } catch (err) {
     console.error("Admin login error:", err);
@@ -370,13 +371,23 @@ async function updateAdmin(req, res) {
     const admin = await prisma.admin.findUnique({ where: { id: parseInt(id) } });
     if (!admin) return res.status(404).json({ ok: false, msg: "Admin not found." });
 
+    if (admin.role === "super_admin" && parseInt(id) !== req.admin.id) {
+      return res.status(403).json({ ok: false, msg: "Cannot modify another super admin." });
+    }
+
     const updateData = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email.toLowerCase().trim();
     if (phone !== undefined) updateData.phone = phone;
-    if (role) updateData.role = role;
+    if (role) {
+      if (admin.role === "super_admin") return res.status(403).json({ ok: false, msg: "Cannot change super admin role." });
+      updateData.role = role;
+    }
     if (permissions) updateData.permissions = JSON.stringify(permissions);
-    if (status !== undefined) updateData.status = status;
+    if (status !== undefined) {
+      if (admin.role === "super_admin" && status !== 1) return res.status(403).json({ ok: false, msg: "Cannot deactivate super admin." });
+      updateData.status = status;
+    }
     if (password && password.length >= 8) updateData.password = await bcrypt.hash(password, 12);
 
     const updated = await prisma.admin.update({
@@ -417,6 +428,9 @@ async function deleteAdmin(req, res) {
 
     const admin = await prisma.admin.findUnique({ where: { id: parseInt(id) } });
     if (!admin) return res.status(404).json({ ok: false, msg: "Admin not found." });
+
+    if (admin.role === "super_admin")
+      return res.status(403).json({ ok: false, msg: "Cannot delete super admin." });
 
     await prisma.admin.delete({ where: { id: parseInt(id) } });
 
@@ -483,7 +497,7 @@ async function sendLoginNotification({ admin, ip, userAgent }) {
   try {
     const axios = require("axios");
     const MAILERSEND_API_KEY = process.env.MAILERSEND_API_KEY;
-    const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@guchordata.com";
+    const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@gwarzodatasub.com";
     const MAILERSEND_FROM_NAME = process.env.MAILERSEND_FROM_NAME || "GUCHOR DATA";
 
     const html = `

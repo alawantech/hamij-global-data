@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const MAILERSEND_API_KEY = process.env.MAILERSEND_API_KEY;
-const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@guchordata.com";
+const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@gwarzodatasub.com";
 const MAILERSEND_FROM_NAME = process.env.MAILERSEND_FROM_NAME || "GUCHOR DATA";
 
 const PURPOSE_CONFIG = {
@@ -108,7 +108,7 @@ async function sendOtpEmail({ to, otpCode, expiresInMinutes = 20, purpose = "log
     return response.status === 202;
   } catch (err) {
     console.error("[MailerSend] Failed to send OTP email:", err.response?.data || err.message);
-    throw new Error("Failed to send verification email");
+    return false;
   }
 }
 
