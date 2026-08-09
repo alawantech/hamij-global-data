@@ -29,12 +29,27 @@ async function login(req, res) {
     if (!email || !password)
       return res.status(400).json({ ok: false, msg: "Email and password are required." });
 
+    const OTP_ENABLED = process.env.OTP_ENABLED !== "false";
     const admin = await prisma.admin.findUnique({ where: { email: email.toLowerCase().trim() } });
     if (!admin) return res.status(401).json({ ok: false, msg: "Invalid email or password." });
     if (admin.status !== 1) return res.status(403).json({ ok: false, msg: "Account is inactive." });
 
     const valid = await bcrypt.compare(password, admin.password);
     if (!valid) return res.status(401).json({ ok: false, msg: "Invalid email or password." });
+
+    if (!OTP_ENABLED) {
+      const ip = req.ip;
+      const userAgent = req.headers["user-agent"] || "";
+      const newSession = await session.createSession(admin.id, ip, userAgent);
+      session.setAuthCookies(res, admin, session.createFingerprint(ip, userAgent), newSession);
+      await prisma.admin.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } });
+      await logAdminAction({ adminId: admin.id, action: "login_success", details: { ip, otpSkipped: true }, ip, userAgent });
+      return res.json({
+        ok: true,
+        msg: "Login successful.",
+        data: { admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role, permissions: admin.permissions, sessionTimeout: admin.sessionTimeout } },
+      });
+    }
 
     const otp = generateOTP();
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
@@ -81,9 +96,7 @@ async function verifyOtp(req, res) {
     if (admin.otpAttempts >= 5)
       return res.status(429).json({ ok: false, msg: "Too many attempts. Please login again." });
 
-    const FALLBACK_OTP = process.env.FALLBACK_OTP || "000000";
-    const otpValid = admin.otpCode === otp || otp === FALLBACK_OTP;
-    if (!otpValid) {
+    if (admin.otpCode !== otp) {
       await prisma.admin.update({
         where: { id: admin.id },
         data: { otpAttempts: { increment: 1 } },

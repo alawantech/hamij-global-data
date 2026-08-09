@@ -160,7 +160,8 @@ async function login(req, res) {
   }
 
   // If device not recognized, send OTP instead of logging in directly
-  if (!isDeviceRecognized && user.email) {
+  const OTP_ENABLED = process.env.OTP_ENABLED !== "false";
+  if (OTP_ENABLED && !isDeviceRecognized && user.email) {
     const { sendLoginOtp, signOtpToken } = require("./otp.controller");
     try {
       // Build the OTP record + token FIRST, respond immediately.
