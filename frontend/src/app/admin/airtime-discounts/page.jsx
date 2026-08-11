@@ -107,6 +107,20 @@ export default function AirtimeDiscountsPage() {
     }
   };
 
+  const deleteProvider = async (id, name) => {
+    if (!confirm(`Delete "${name}" and all its discounts?`)) return;
+    try {
+      await adminApi.delete(`/admin/api-links/${id}`);
+      toast.success("Provider deleted");
+      if (selectedProvider?.id === id) setSelectedProvider(null);
+      const r = await adminApi.get("/admin/api-links");
+      const all = r.data.data?.links || r.data.data?.apiLinks || [];
+      setApiProviders(all.filter((l) => l.type === "Airtime"));
+    } catch {
+      toast.error("Failed to delete provider");
+    }
+  };
+
   const inputStyle = {
     width: "100%", padding: ".625rem .875rem", border: "1px solid #e2e8f0",
     borderRadius: ".75rem", fontFamily: "inherit", fontSize: ".875rem", outline: "none", boxSizing: "border-box",
@@ -149,14 +163,24 @@ export default function AirtimeDiscountsPage() {
                   background: selectedProvider?.id === p.id ? "#eff6ff" : "transparent",
                   borderLeft: selectedProvider?.id === p.id ? "3px solid #2563eb" : "3px solid transparent",
                   transition: "background .15s",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
                 }}
               >
-                <div style={{ fontWeight: 700, fontSize: ".875rem", color: selectedProvider?.id === p.id ? "#1d4ed8" : "#1e293b" }}>
-                  {p.name}
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: ".875rem", color: selectedProvider?.id === p.id ? "#1d4ed8" : "#1e293b" }}>
+                    {p.name}
+                  </div>
+                  <div style={{ fontSize: ".72rem", color: "#94a3b8", marginTop: ".15rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "180px" }}>
+                    {p.value || "No URL set"}
+                  </div>
                 </div>
-                <div style={{ fontSize: ".72rem", color: "#94a3b8", marginTop: ".15rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {p.value || "No URL set"}
-                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteProvider(p.id, p.name); }}
+                  style={{ border: "none", background: "none", color: "#94a3b8", cursor: "pointer", padding: "4px", borderRadius: "4px", flexShrink: 0 }}
+                  title={`Delete ${p.name}`}
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             ))
           )}
@@ -224,9 +248,9 @@ export default function AirtimeDiscountsPage() {
                                 {d.type}
                               </span>
                             </td>
-                            <td style={{ padding: ".75rem 1rem", color: "#64748b" }}>{d.buyDiscount}%</td>
-                            <td style={{ padding: ".75rem 1rem", fontWeight: 700, color: "#1e293b" }}>{d.userDiscount}%</td>
-                            <td style={{ padding: ".75rem 1rem", color: "#64748b" }}>{d.vendorDiscount}%</td>
+                            <td style={{ padding: ".75rem 1rem", color: "#64748b" }}>{Number(d.buyDiscount).toFixed(2)}%</td>
+                            <td style={{ padding: ".75rem 1rem", fontWeight: 700, color: "#1e293b" }}>{Number(d.userDiscount).toFixed(2)}%</td>
+                            <td style={{ padding: ".75rem 1rem", color: "#64748b" }}>{Number(d.vendorDiscount).toFixed(2)}%</td>
                             <td style={{ padding: ".75rem 1rem" }}>
                               <div style={{ display: "flex", gap: ".4rem" }}>
                                 <button onClick={() => openEdit(d)} style={{ border: "none", background: "#eff6ff", color: "#2563eb", borderRadius: ".5rem", padding: ".35rem .6rem", cursor: "pointer" }}>

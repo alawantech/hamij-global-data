@@ -61,6 +61,9 @@ export default function AdminLoginPage() {
         setOtp("");
         startCooldown(RESEND_SECONDS);
         toast.success("OTP sent to your email!");
+      } else {
+        toast.success("Welcome back!");
+        router.replace("/admin/dashboard");
       }
     } catch (err) {
       toast.error(err?.response?.data?.msg || "Invalid credentials");

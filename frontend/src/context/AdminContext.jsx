@@ -51,6 +51,10 @@ export function AdminProvider({ children }) {
 
   const adminLogin = async (email, password) => {
     const res = await adminApi.post("/admin/auth/login", { email, password });
+    if (res.data.ok && !res.data.requiresOtp && res.data.data?.admin) {
+      setAdmin(res.data.data.admin);
+      scheduleRefresh();
+    }
     return res.data;
   };
 
