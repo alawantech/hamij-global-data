@@ -90,10 +90,9 @@ function extractApiError(errDetail) {
 // ---------------------------------------------------------
 function detectAuthType(host) {
   if (!host) return "token";
-  // ALL VTU providers use 2-step Basic auth: POST /api/user with Basic → get AccessToken, then POST /api/data with Token
-  // This applies to: dorosub.com, first-sub.com, mbcdata.com, mysubwallet.ng, legitdataway.com, etc.
   if (host.includes("mysubwallet.ng")) return "subwallet";
   if (host.includes("vtpass")) return "vtpass";
+  if (host.includes("mbcdata.com")) return "token";
   return "basic";
 }
 
@@ -277,12 +276,12 @@ async function purchaseAirtimeToken({
   airtimeType,
 }) {
   const body = {
-    network: networkId,
-    amount,
-    mobile_number: phone,
-    Ported_number: true,
+    network: parseInt(networkId),
+    phone,
+    plan_type: airtimeType || "VTU",
+    amount: parseFloat(amount),
+    bypass: false,
     "request-id": ref,
-    airtime_type: airtimeType,
   };
   try {
     const { data } = await axios.post(host, body, {
