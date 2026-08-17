@@ -16,7 +16,8 @@ jobs:
           key: ${{ secrets.GUCHOR_SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/guchor-monie
-            git pull origin main
+            git config --global --add safe.directory /var/www/guchor-monie
+            GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no' git pull origin main
             cd backend
             npx prisma db push --skip-generate && npx prisma generate
             cd ../frontend
