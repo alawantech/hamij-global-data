@@ -977,44 +977,60 @@ exports.getDataProviderBalances = async (req, res) => {
         let error = null;
 
         try {
-          const authType = p.authType;
-          let authHeader;
-          let method = "get";
+          const isDorosub = (p.apiUrl || "").includes("dorosub.com");
+          const isBasic = p.authType === "basic" || p.authType === "subwallet";
 
-          if (authType === "basic" || authType === "subwallet") {
-            authHeader = `Basic ${p.apiKey}`;
-            method = "post";
+          if (isDorosub) {
+            // Dorosub: POST /api/user with Basic auth → returns AccessToken + balance
+            const { data } = await axios.post(
+              "https://dorosub.com/api/user",
+              null,
+              { headers: { Authorization: `Basic ${p.apiKey}` }, timeout: 15000 }
+            );
+            if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
+            else if (data?.oldbal != null) balance = String(data.oldbal).replace(/,/g, "");
+            else if (data?.user?.wallet_balance != null) balance = String(data.user.wallet_balance).replace(/,/g, "");
+            else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
+            else error = data?.message || data?.msg || "No balance in response";
+            if (data?.username) username = data.username;
           } else {
-            authHeader = `Token ${p.apiKey}`;
-            method = "get";
+            // Other providers
+            let authHeader;
+            let method = "get";
+
+            if (isBasic) {
+              authHeader = `Basic ${p.apiKey}`;
+              method = "post";
+            } else {
+              authHeader = `Token ${p.apiKey}`;
+              method = "get";
+            }
+
+            let balanceUrl;
+            try {
+              const u = new URL(p.apiUrl);
+              u.pathname = "/api/user";
+              balanceUrl = u.toString();
+            } catch {
+              balanceUrl = p.apiUrl.replace(/\/api\/(topup|airtime|data)\/?$/, "/api/user");
+            }
+
+            const { data } = await axios({
+              method,
+              url: balanceUrl,
+              headers: { Authorization: authHeader },
+              timeout: 15000,
+            });
+
+            if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
+            else if (data?.user?.wallet_balance != null) balance = String(data.user.wallet_balance).replace(/,/g, "");
+            else if (data?.user?.wallet != null) balance = String(data.user.wallet).replace(/,/g, "");
+            else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
+            else if (data?.data?.balance != null) balance = String(data.data.balance).replace(/,/g, "");
+            else if (data?.data?.wallet != null) balance = String(data.data.wallet).replace(/,/g, "");
+            else error = "Unrecognised response";
+            if (data?.username) username = data.username;
           }
-
-          let balanceUrl;
-          try {
-            const u = new URL(p.apiUrl);
-            u.pathname = "/api/user";
-            balanceUrl = u.toString();
-          } catch {
-            balanceUrl = p.apiUrl.replace(/\/api\/(topup|airtime|data)\/?$/, "/api/user");
-          }
-
-          const { data } = await axios({
-            method,
-            url: balanceUrl,
-            headers: { Authorization: authHeader },
-            timeout: 15000,
-          });
-
-          if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
-          else if (data?.user?.wallet_balance != null) balance = String(data.user.wallet_balance).replace(/,/g, "");
-          else if (data?.user?.wallet != null) balance = String(data.user.wallet).replace(/,/g, "");
-          else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
-          else if (data?.data?.balance != null) balance = String(data.data.balance).replace(/,/g, "");
-          else if (data?.data?.wallet != null) balance = String(data.data.wallet).replace(/,/g, "");
-          else if (data?.oldbal != null) balance = String(data.oldbal).replace(/,/g, "");
-          else error = "Unrecognised response";
-
-          if (data?.username) username = data.username;
         } catch (e) {
           error = e.response?.data?.message || e.response?.data?.msg || e.message || "Connection failed";
         }
