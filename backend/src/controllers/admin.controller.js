@@ -981,9 +981,12 @@ exports.getDataProviderBalances = async (req, res) => {
           const isBasic = p.authType === "basic" || p.authType === "subwallet";
 
           if (isDorosub) {
-            // Dorosub: GET /api/user with Token auth (AccessToken) → returns balance
-            const { data } = await axios.get("https://dorosub.com/api/user", {
-              headers: { Authorization: `Token ${p.apiKey}` },
+            // Dorosub: POST /api/user with Basic base64(username:password) → returns balance + AccessToken
+            // Use same credentials as MBC Data (user confirmed same username/password)
+            const mbcDataProvider = dataProviders.find((d) => (d.apiUrl || "").includes("mbcdata.com"));
+            const basicCredentials = mbcDataProvider ? mbcDataProvider.apiKey : p.apiKey;
+            const { data } = await axios.post("https://dorosub.com/api/user", null, {
+              headers: { Authorization: `Basic ${basicCredentials}` },
               timeout: 15000,
             });
             if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
