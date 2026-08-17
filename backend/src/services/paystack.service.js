@@ -122,6 +122,22 @@ async function ensureAllAccounts({ userId, firstname, lastname, phone, email }) 
   }
 }
 
+async function initializeTransaction({ email, amount, reference, metadata, callbackUrl }) {
+  const res = await paystackRequest("POST", "/transaction/initialize", {
+    email,
+    amount: Math.round(amount * 100), // Paystack expects kobo
+    reference,
+    metadata: metadata || {},
+    callback_url: callbackUrl,
+  });
+  return res.data;
+}
+
+async function verifyTransaction(reference) {
+  const res = await paystackRequest("GET", `/transaction/verify/${reference}`);
+  return res.data;
+}
+
 module.exports = {
   getPaystackSecretKey,
   getPaystackPublicKey,
@@ -131,4 +147,6 @@ module.exports = {
   getCustomerDvas,
   getCustomerByEmail,
   ensureAllAccounts,
+  initializeTransaction,
+  verifyTransaction,
 };

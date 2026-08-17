@@ -48,7 +48,7 @@ module.exports = async function paystackWebhook(req, res) {
     }
 
     if (!user && reference) {
-      const match = reference.match(/ZDR-(\d+)-/);
+      const match = reference.match(/(?:ZDR|GCH)-(\d+)-/);
       if (match) {
         user = await prisma.user.findUnique({ where: { id: Number(match[1]) } });
       }

@@ -19,6 +19,7 @@ router.get("/airtime-to-cash", user.getAirtimeToCashRequests);
 router.post("/airtime-to-cash", user.submitAirtimeToCash);
 router.get("/manual-funds", user.getManualFundRequests);
 router.get("/virtual-accounts", user.getVirtualAccounts);
+router.post("/fund-wallet/initialize", user.initializePaystackPayment);
 router.post("/kyc", user.updateKyc);
 router.get("/upgrade-status", user.getUpgradeStatus);
 router.post("/upgrade-request", user.requestVendorUpgrade);

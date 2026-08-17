@@ -315,6 +315,46 @@ async function transferReferralToWallet(req, res) {
   }
 }
 
+async function initializePaystackPayment(req, res) {
+  try {
+    const { amount } = req.body;
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) < 100)
+      return sendError(res, "Minimum funding amount is ₦100.");
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, email: true, firstname: true, lastname: true },
+    });
+    if (!user) return sendError(res, "User not found.", 404);
+
+    const paystackService = require("../services/paystack.service");
+    const reference = `GCH-${user.id}-${Date.now()}`;
+
+    const result = await paystackService.initializeTransaction({
+      email: user.email,
+      amount: parseFloat(amount),
+      reference,
+      metadata: {
+        userId: user.id,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        purpose: "wallet_funding",
+      },
+      callbackUrl: `${process.env.FRONTEND_URL || "https://guchordata.com"}/dashboard/fund-wallet?ref=${reference}`,
+    });
+
+    return sendSuccess(res, {
+      authorization_url: result.authorization_url,
+      access_code: result.access_code,
+      reference: result.reference,
+    });
+  } catch (err) {
+    console.error("[Paystack] Initialize error:", err.message);
+    return sendError(res, "Failed to initialize payment. Please try again.", 500);
+  }
+}
+
 module.exports = {
   getProfile,
   getWallet,
@@ -337,6 +377,7 @@ module.exports = {
   updateKyc,
   getReferralStats,
   transferReferralToWallet,
+  initializePaystackPayment,
 };
 
 async function verifyTransactionPin(req, res) {

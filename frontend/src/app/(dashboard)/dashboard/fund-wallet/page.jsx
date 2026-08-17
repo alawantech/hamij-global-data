@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Copy, RefreshCw } from "lucide-react";
+import { ChevronLeft, Copy, CreditCard, Wallet } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
@@ -12,48 +12,11 @@ export default function FundWalletPage() {
   const { user } = useAuth();
   const settings = useSiteSettings();
   const [copied, setCopied] = useState(false);
-  const [virtualAccounts, setVirtualAccounts] = useState(null);
-  const [vasPending, setVasPending] = useState(false);
-  const [vasLoading, setVasLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("auto");
   const [manualLoading, setManualLoading] = useState(false);
   const [manualRequests, setManualRequests] = useState([]);
-  const [dvaFailed, setDvaFailed] = useState(false);
-
-  const fetchVirtualAccounts = useCallback(async () => {
-    setVasLoading(true);
-    try {
-      const res = await api.get("/user/virtual-accounts");
-      setVirtualAccounts(res.data.data.accounts || []);
-      setVasPending(res.data.data.pending || false);
-      setDvaFailed(res.data.data.dvaFailed || false);
-    } catch {
-      setVirtualAccounts([]);
-      setVasPending(false);
-      setDvaFailed(false);
-    } finally {
-      setVasLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchVirtualAccounts();
-  }, [fetchVirtualAccounts]);
-
-  useEffect(() => {
-    if (!vasPending || vasLoading) return;
-    let attempts = 0;
-    const maxAttempts = 10;
-    const interval = setInterval(() => {
-      attempts++;
-      if (attempts >= maxAttempts) {
-        clearInterval(interval);
-        return;
-      }
-      fetchVirtualAccounts();
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [vasPending, vasLoading, fetchVirtualAccounts]);
+  const [paystackAmount, setPaystackAmount] = useState("");
+  const [paystackLoading, setPaystackLoading] = useState(false);
 
   useEffect(() => {
     if (activeTab !== "manual") return;
@@ -88,6 +51,27 @@ export default function FundWalletPage() {
     const msg =
       "I made a manual transfer. Please confirm my wallet funding. I can share the receipt here.";
     window.open(`https://wa.me/${number}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  const handlePaystackPay = async () => {
+    const amt = parseFloat(paystackAmount);
+    if (!amt || amt < 100) return toast.error("Minimum amount is ₦100");
+    if (paystackLoading) return;
+
+    setPaystackLoading(true);
+    try {
+      const res = await api.post("/user/fund-wallet/initialize", { amount: amt });
+      const { authorization_url } = res.data.data;
+      if (authorization_url) {
+        window.location.href = authorization_url;
+      } else {
+        toast.error("Failed to initialize payment.");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to initialize payment.");
+    } finally {
+      setPaystackLoading(false);
+    }
   };
 
   return (
@@ -128,7 +112,7 @@ export default function FundWalletPage() {
       >
         <div style={{ display: "flex", gap: ".5rem" }}>
           {[
-            { key: "auto", label: "Automatic" },
+            { key: "auto", label: "Pay Online" },
             { key: "manual", label: "Manual" },
           ].map((tab) => (
             <button
@@ -156,213 +140,162 @@ export default function FundWalletPage() {
 
         {activeTab === "auto" ? (
           <>
-            {virtualAccounts === null || vasLoading ? (
-              <div
+            <div
+              style={{
+                background: "linear-gradient(135deg,#312e81 0%,#4f46e5 100%)",
+                borderRadius: "1.5rem",
+                padding: "1.5rem",
+                color: "white",
+                boxShadow: "0 4px 20px rgba(79,70,229,.35)",
+              }}
+            >
+              <p
                 style={{
-                  background: "linear-gradient(135deg,#312e81 0%,#4f46e5 100%)",
-                  borderRadius: "1.5rem",
-                  padding: "1.5rem",
-                  color: "white",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: ".75rem",
-                  boxShadow: "0 4px 20px rgba(79,70,229,.35)",
+                  fontSize: ".72rem",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: ".06em",
+                  opacity: 0.75,
+                  marginBottom: ".5rem",
                 }}
               >
-                <RefreshCw
-                  size={18}
-                  style={{ opacity: 0.7, animation: "spin 1s linear infinite" }}
-                />
-                <p style={{ fontSize: ".85rem", opacity: 0.85 }}>
-                  Loading your dedicated account…
-                </p>
-              </div>
-            ) : vasPending ? (
-              <div
-                style={{
-                  background: "linear-gradient(135deg,#312e81 0%,#4f46e5 100%)",
-                  borderRadius: "1.5rem",
-                  padding: "1.5rem",
-                  color: "white",
-                  boxShadow: "0 4px 20px rgba(79,70,229,.35)",
-                }}
-              >
-                <p
+                Fund Wallet Online
+              </p>
+              <p style={{ fontSize: ".85rem", opacity: 0.85, marginBottom: "1rem" }}>
+                Pay with your card, bank transfer, or USSD — instant credit.
+              </p>
+
+              {parseFloat(settings?.walletFundingFeePercent || "0") > 0 && (
+                <div
                   style={{
-                    fontSize: ".72rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: ".06em",
-                    opacity: 0.75,
-                    marginBottom: ".5rem",
-                  }}
-                >
-                  Your Dedicated Account
-                </p>
-                <p
-                  style={{
-                    fontSize: ".85rem",
-                    opacity: 0.85,
+                    background: "rgba(255,255,255,.1)",
+                    borderRadius: ".75rem",
+                    padding: ".625rem .875rem",
                     marginBottom: "1rem",
+                    fontSize: ".78rem",
+                    opacity: 0.9,
                   }}
                 >
-                  Your virtual account is being created — this usually takes a few
-                  seconds.
-                </p>
+                  Wallet funding fee: {settings.walletFundingFeePercent}%
+                  {parseFloat(settings?.walletFundingFeeCap || "50") > 0 &&
+                    ` (max ₦${settings.walletFundingFeeCap})`}
+                </div>
+              )}
+
+              <div style={{ display: "flex", flexDirection: "column", gap: ".75rem" }}>
+                <div>
+                  <label style={{ fontSize: ".78rem", opacity: 0.8, fontWeight: 600, marginBottom: ".35rem", display: "block" }}>
+                    Amount (₦)
+                  </label>
+                  <input
+                    type="number"
+                    min="100"
+                    step="50"
+                    placeholder="Enter amount"
+                    value={paystackAmount}
+                    onChange={(e) => setPaystackAmount(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: ".85rem 1rem",
+                      borderRadius: ".75rem",
+                      border: "2px solid rgba(255,255,255,.2)",
+                      background: "rgba(255,255,255,.12)",
+                      color: "white",
+                      fontSize: "1.1rem",
+                      fontWeight: 700,
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
                 <button
-                  onClick={fetchVirtualAccounts}
-                  disabled={vasLoading}
+                  onClick={handlePaystackPay}
+                  disabled={paystackLoading || !paystackAmount || parseFloat(paystackAmount) < 100}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: ".4rem",
-                    background: "rgba(255,255,255,.18)",
+                    justifyContent: "center",
+                    gap: ".5rem",
+                    background: paystackLoading ? "rgba(255,255,255,.15)" : "white",
                     border: "none",
                     borderRadius: ".75rem",
-                    padding: ".55rem 1rem",
-                    cursor: "pointer",
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: ".78rem",
+                    padding: ".85rem",
+                    cursor: paystackLoading ? "wait" : "pointer",
+                    color: "#4f46e5",
+                    fontWeight: 800,
+                    fontSize: ".9rem",
+                    opacity: !paystackAmount || parseFloat(paystackAmount) < 100 ? 0.5 : 1,
                   }}
                 >
-                  <RefreshCw size={14} /> Check Again
+                  <CreditCard size={18} />
+                  {paystackLoading ? "Initializing..." : "Pay Now"}
                 </button>
               </div>
-            ) : virtualAccounts.length > 0 ? (
-              <div
-                style={{
-                  background: "linear-gradient(135deg,#312e81 0%,#4f46e5 100%)",
-                  borderRadius: "1.5rem",
-                  padding: "1.25rem",
-                  color: "white",
-                  boxShadow: "0 4px 20px rgba(79,70,229,.35)",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: ".72rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: ".06em",
-                    opacity: 0.75,
-                    marginBottom: ".875rem",
-                  }}
-                >
-                  Your Dedicated Accounts
-                </p>
-                <p
-                  style={{
-                    fontSize: ".78rem",
-                    opacity: 0.8,
-                    marginBottom: "1rem",
-                  }}
-                >
-                  Transfer directly to any of these accounts to fund your wallet
-                  instantly — no reference needed.
-                </p>
 
-                {parseFloat(settings?.walletFundingFeePercent || "0") > 0 && (
-                  <div
+              <div style={{ marginTop: "1rem", display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
+                {[100, 200, 500, 1000, 2000, 5000].map((amt) => (
+                  <button
+                    key={amt}
+                    onClick={() => setPaystackAmount(String(amt))}
                     style={{
-                      background: "rgba(255,255,255,.1)",
-                      borderRadius: ".75rem",
-                      padding: ".625rem .875rem",
-                      marginBottom: "1rem",
-                      fontSize: ".78rem",
-                      opacity: 0.9,
+                      padding: ".35rem .7rem",
+                      borderRadius: ".5rem",
+                      background: paystackAmount === String(amt) ? "white" : "rgba(255,255,255,.15)",
+                      color: paystackAmount === String(amt) ? "#4f46e5" : "white",
+                      border: "none",
+                      fontWeight: 700,
+                      fontSize: ".72rem",
+                      cursor: "pointer",
                     }}
                   >
-                    Wallet funding fee: {settings.walletFundingFeePercent}%
-                    {parseFloat(settings?.walletFundingFeeCap || "50") > 0 &&
-                      ` (max ₦${settings.walletFundingFeeCap})`}
-                  </div>
-                )}
+                    ₦{amt.toLocaleString()}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: ".625rem",
-                  }}
-                >
-                  {virtualAccounts.map((acct, i) => (
+            <div
+              style={{
+                background: "white",
+                borderRadius: "1.5rem",
+                padding: "1.25rem",
+                boxShadow: "0 4px 20px rgba(0,0,0,.08)",
+              }}
+            >
+              <h4 style={{ fontWeight: 800, marginBottom: ".5rem", fontSize: ".9rem" }}>
+                How it works
+              </h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: ".6rem" }}>
+                {[
+                  { step: "1", text: "Enter the amount you want to fund" },
+                  { step: "2", text: "Click Pay Now and choose your payment method" },
+                  { step: "3", text: "Complete payment — wallet is credited instantly" },
+                ].map((item) => (
+                  <div key={item.step} style={{ display: "flex", gap: ".6rem", alignItems: "flex-start" }}>
                     <div
-                      key={i}
                       style={{
-                        background: "rgba(255,255,255,.12)",
-                        borderRadius: "1rem",
-                        padding: ".875rem 1rem",
+                        width: "22px",
+                        height: "22px",
+                        borderRadius: "50%",
+                        background: "#4f46e5",
+                        color: "white",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: ".7rem",
+                        fontWeight: 800,
+                        flexShrink: 0,
                       }}
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          marginBottom: ".35rem",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: ".72rem",
-                            opacity: 0.75,
-                            fontWeight: 600,
-                          }}
-                        >
-                          {acct.bankName}
-                        </span>
-                        <button
-                          onClick={() => copy(acct.accountNumber)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: ".3rem",
-                            background: "rgba(255,255,255,.18)",
-                            border: "none",
-                            borderRadius: "6px",
-                            padding: ".3rem .65rem",
-                            cursor: "pointer",
-                            color: "white",
-                            fontWeight: 700,
-                            fontSize: ".7rem",
-                          }}
-                        >
-                          <Copy size={12} /> Copy
-                        </button>
-                      </div>
-                      <p
-                        style={{
-                          fontSize: "1.35rem",
-                          fontWeight: 800,
-                          letterSpacing: ".05em",
-                          marginBottom: ".25rem",
-                        }}
-                      >
-                        {acct.accountNumber}
-                      </p>
-                      <p style={{ fontSize: ".78rem", opacity: 0.85 }}>
-                        {acct.accountName || `${user?.firstname} ${user?.lastname}`}
-                      </p>
+                      {item.step}
                     </div>
-                  ))}
-                </div>
+                    <p style={{ fontSize: ".82rem", color: "#64748b", margin: 0, lineHeight: 1.4 }}>
+                      {item.text}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <div
-                style={{
-                  background: "white",
-                  borderRadius: "1.5rem",
-                  padding: "1.5rem",
-                  boxShadow: "0 4px 20px rgba(0,0,0,.08)",
-                  textAlign: "center",
-                }}
-              >
-                <p style={{ color: "#94a3b8" }}>
-                  No accounts available yet. Please contact support.
-                </p>
-              </div>
-            )}
+            </div>
           </>
         ) : (
           <>
