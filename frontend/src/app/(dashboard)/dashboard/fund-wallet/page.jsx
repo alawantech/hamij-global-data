@@ -473,7 +473,7 @@ export default function FundWalletPage() {
               )}
             </div>
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );
