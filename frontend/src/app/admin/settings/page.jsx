@@ -370,38 +370,6 @@ export default function AdminSettingsPage() {
       ],
     },
     {
-      title: "Fund Wallet Tabs",
-      fields: [
-        {
-          label: "Default Tab",
-          key: "fundWalletDefaultTab",
-          type: "select",
-          options: [
-            { value: "paystack", label: "Pay Online (Paystack)" },
-            { value: "manual", label: "Manual Transfer" },
-          ],
-        },
-        {
-          label: "Show Pay Online (Paystack)",
-          key: "fundWalletPaystack",
-          type: "select",
-          options: [
-            { value: "yes", label: "Yes" },
-            { value: "no", label: "No" },
-          ],
-        },
-        {
-          label: "Show Manual Transfer",
-          key: "fundWalletManual",
-          type: "select",
-          options: [
-            { value: "yes", label: "Yes" },
-            { value: "no", label: "No" },
-          ],
-        },
-      ],
-    },
-    {
       title: "Manual Funding Account",
       fields: [
         { label: "Account Name", key: "accountName", type: "text" },

@@ -12,23 +12,20 @@ export default function FundWalletPage() {
   const { user } = useAuth();
   const settings = useSiteSettings();
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState(settings?.fundWalletDefaultTab || "manual");
+  const [activeTab, setActiveTab] = useState("auto");
   const [manualLoading, setManualLoading] = useState(false);
   const [manualRequests, setManualRequests] = useState([]);
   const [paystackAmount, setPaystackAmount] = useState("");
   const [paystackLoading, setPaystackLoading] = useState(false);
 
-  const showPaystack = settings?.fundWalletPaystack !== "no";
-  const showManual = settings?.fundWalletManual !== "no";
-
   useEffect(() => {
-    if (!settings) return;
-    const def = settings.fundWalletDefaultTab || "manual";
-    if (def === "auto" && showPaystack) setActiveTab("auto");
-    else if (def === "manual" && showManual) setActiveTab("manual");
-    else if (showPaystack) setActiveTab("auto");
-    else if (showManual) setActiveTab("manual");
-  }, [settings, showPaystack, showManual]);
+    if (document.getElementById("paystack-script")) return;
+    const script = document.createElement("script");
+    script.id = "paystack-script";
+    script.src = "https://js.paystack.co/v1/inline.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   useEffect(() => {
     if (activeTab !== "manual") return;
@@ -72,16 +69,42 @@ export default function FundWalletPage() {
 
     setPaystackLoading(true);
     try {
-      const res = await api.post("/user/fund-wallet/initialize", { amount: amt });
-      const { authorization_url } = res.data.data;
-      if (authorization_url) {
-        window.location.href = authorization_url;
-      } else {
-        toast.error("Failed to initialize payment.");
+      const keyRes = await api.get("/public/paystack-key");
+      const publicKey = keyRes.data.data.publicKey;
+
+      if (!publicKey) {
+        toast.error("Payment not configured.");
+        setPaystackLoading(false);
+        return;
       }
+
+      const reference = `GCH-${user.id}-${Date.now()}`;
+
+      const handler = window.PaystackPop.setup({
+        key: publicKey,
+        email: user.email,
+        amount: Math.round(amt * 100),
+        ref: reference,
+        metadata: {
+          userId: user.id,
+          email: user.email,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          purpose: "wallet_funding",
+        },
+        channels: ["transfer"],
+        onSuccess: (transaction) => {
+          toast.success("Payment successful! Your wallet will be credited shortly.");
+          setPaystackLoading(false);
+          router.push("/dashboard/fund-wallet");
+        },
+        onClose: () => {
+          setPaystackLoading(false);
+        },
+      });
+      handler.openIframe();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to initialize payment.");
-    } finally {
       setPaystackLoading(false);
     }
   };
@@ -124,9 +147,9 @@ export default function FundWalletPage() {
       >
         <div style={{ display: "flex", gap: ".5rem" }}>
           {[
-            showPaystack && { key: "auto", label: "Pay Online" },
-            showManual && { key: "manual", label: "Manual" },
-          ].filter(Boolean).map((tab) => (
+            { key: "auto", label: "Pay Online" },
+            { key: "manual", label: "Manual" },
+          ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
@@ -150,7 +173,7 @@ export default function FundWalletPage() {
           ))}
         </div>
 
-        {activeTab === "auto" && showPaystack ? (
+        {activeTab === "auto" ? (
           <>
             <div
               style={{
@@ -309,7 +332,7 @@ export default function FundWalletPage() {
               </div>
             </div>
           </>
-        ) : showManual ? (
+        ) : (
           <>
             <div
               style={{
@@ -473,7 +496,7 @@ export default function FundWalletPage() {
               )}
             </div>
           </>
-        ) : null}
+        )}
       </div>
     </div>
   );
