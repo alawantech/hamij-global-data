@@ -981,31 +981,17 @@ exports.getDataProviderBalances = async (req, res) => {
           const isBasic = p.authType === "basic" || p.authType === "subwallet";
 
           if (isDorosub) {
-            // Dorosub: GET /api/user with Token auth → returns balance
-            try {
-              const { data } = await axios.get("https://dorosub.com/api/user", {
-                headers: { Authorization: `Token ${p.apiKey}` },
-                timeout: 15000,
-              });
-              if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
-              else if (data?.oldbal != null) balance = String(data.oldbal).replace(/,/g, "");
-              else if (data?.user?.wallet_balance != null) balance = String(data.user.wallet_balance).replace(/,/g, "");
-              else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
-              else error = data?.message || data?.msg || "No balance in response";
-              if (data?.username) username = data.username;
-            } catch (innerErr) {
-              // Fallback: POST /api/user with Basic auth (token exchange, may return balance)
-              const { data } = await axios.post("https://dorosub.com/api/user", null, {
-                headers: { Authorization: `Basic ${p.apiKey}` },
-                timeout: 15000,
-              });
-              if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
-              else if (data?.oldbal != null) balance = String(data.oldbal).replace(/,/g, "");
-              else if (data?.user?.wallet_balance != null) balance = String(data.user.wallet_balance).replace(/,/g, "");
-              else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
-              else error = data?.message || data?.msg || "No balance in response";
-              if (data?.username) username = data.username;
-            }
+            // Dorosub: GET /api/user with Token auth (AccessToken) → returns balance
+            const { data } = await axios.get("https://dorosub.com/api/user", {
+              headers: { Authorization: `Token ${p.apiKey}` },
+              timeout: 15000,
+            });
+            if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
+            else if (data?.oldbal != null) balance = String(data.oldbal).replace(/,/g, "");
+            else if (data?.user?.wallet_balance != null) balance = String(data.user.wallet_balance).replace(/,/g, "");
+            else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
+            else error = data?.message || data?.msg || "No balance in response";
+            if (data?.username) username = data.username;
           } else {
             // Other providers
             let authHeader;
