@@ -12,11 +12,23 @@ export default function FundWalletPage() {
   const { user } = useAuth();
   const settings = useSiteSettings();
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState("auto");
+  const [activeTab, setActiveTab] = useState(settings?.fundWalletDefaultTab || "manual");
   const [manualLoading, setManualLoading] = useState(false);
   const [manualRequests, setManualRequests] = useState([]);
   const [paystackAmount, setPaystackAmount] = useState("");
   const [paystackLoading, setPaystackLoading] = useState(false);
+
+  const showPaystack = settings?.fundWalletPaystack !== "no";
+  const showManual = settings?.fundWalletManual !== "no";
+
+  useEffect(() => {
+    if (!settings) return;
+    const def = settings.fundWalletDefaultTab || "manual";
+    if (def === "auto" && showPaystack) setActiveTab("auto");
+    else if (def === "manual" && showManual) setActiveTab("manual");
+    else if (showPaystack) setActiveTab("auto");
+    else if (showManual) setActiveTab("manual");
+  }, [settings, showPaystack, showManual]);
 
   useEffect(() => {
     if (activeTab !== "manual") return;
@@ -112,9 +124,9 @@ export default function FundWalletPage() {
       >
         <div style={{ display: "flex", gap: ".5rem" }}>
           {[
-            { key: "auto", label: "Pay Online" },
-            { key: "manual", label: "Manual" },
-          ].map((tab) => (
+            showPaystack && { key: "auto", label: "Pay Online" },
+            showManual && { key: "manual", label: "Manual" },
+          ].filter(Boolean).map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
@@ -138,7 +150,7 @@ export default function FundWalletPage() {
           ))}
         </div>
 
-        {activeTab === "auto" ? (
+        {activeTab === "auto" && showPaystack ? (
           <>
             <div
               style={{
@@ -297,7 +309,7 @@ export default function FundWalletPage() {
               </div>
             </div>
           </>
-        ) : (
+        ) : showManual ? (
           <>
             <div
               style={{

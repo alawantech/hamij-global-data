@@ -454,8 +454,11 @@ model SiteSetting {
   atcAirtelNumber      String @default("")
   atcMinAmount         String @default("100")
    atcMaxAmount         String @default("50000")
-   walletFundingFeePercent String @default("0")
-   walletFundingFeeCap     String @default("50")
+    walletFundingFeePercent String @default("0")
+    walletFundingFeeCap     String @default("50")
+    fundWalletDefaultTab    String @default("manual")
+    fundWalletPaystack      String @default("yes")
+    fundWalletManual        String @default("yes")
 
   @@map("site_settings")
 }
