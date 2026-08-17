@@ -926,10 +926,49 @@ exports.getDataProviderBalance = async (req, res) => {
 exports.getDataProviderBalances = async (req, res) => {
   try {
     const axios = require("axios");
-    const providers = await prisma.dataProvider.findMany({
+
+    // ── 1. Collect providers from DataProvider table ────
+    const dataProviders = await prisma.dataProvider.findMany({
       where: { apiUrl: { not: "" }, apiKey: { not: "" } },
       orderBy: { name: "asc" },
     });
+    const providers = dataProviders.map((p) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      apiUrl: p.apiUrl,
+      apiKey: p.apiKey,
+      authType: p.authType || "basic",
+      source: "dataProvider",
+    }));
+
+    // ── 2. Also collect unique airtime providers from ApiConfig table ────
+    try {
+      const configs = await prisma.apiConfig.findMany();
+      const cfg = {};
+      for (const c of configs) {
+        try { cfg[c.name] = decrypt(c.value); } catch { cfg[c.name] = ""; }
+      }
+
+      const networks = ["mtn", "glo", "airtel", "9mobile"];
+      const seen = new Set();
+      for (const net of networks) {
+        const host = cfg[`${net}VtuProvider`];
+        const key = cfg[`${net}VtuKey`];
+        if (!host || !key) continue;
+        if (seen.has(host)) continue;
+        seen.add(host);
+        providers.push({
+          id: `api-${net}`,
+          name: `${net.toUpperCase()} VTU (Dorosub)`,
+          slug: `${net}-vtu`,
+          apiUrl: host,
+          apiKey: key,
+          authType: host.includes("dorosub.com") ? "token" : "basic",
+          source: "apiConfig",
+        });
+      }
+    } catch {}
 
     const results = await Promise.all(
       providers.map(async (p) => {
@@ -938,27 +977,30 @@ exports.getDataProviderBalances = async (req, res) => {
         let error = null;
 
         try {
-          const authType = p.authType || "basic";
+          const authType = p.authType;
           let authHeader;
-          let method = "post";
+          let method = "get";
 
           if (authType === "basic" || authType === "subwallet") {
             authHeader = `Basic ${p.apiKey}`;
-            method = "post";
-          } else if (authType === "direct_token") {
-            authHeader = `Token ${p.apiKey}`;
             method = "post";
           } else {
             authHeader = `Token ${p.apiKey}`;
             method = "get";
           }
 
-          const userUrl = new URL(p.apiUrl);
-          userUrl.pathname = "/api/user";
+          let balanceUrl;
+          try {
+            const u = new URL(p.apiUrl);
+            u.pathname = "/api/user";
+            balanceUrl = u.toString();
+          } catch {
+            balanceUrl = p.apiUrl.replace(/\/api\/(topup|airtime|data)\/?$/, "/api/user");
+          }
 
           const { data } = await axios({
             method,
-            url: userUrl.toString(),
+            url: balanceUrl,
             headers: { Authorization: authHeader },
             timeout: 15000,
           });
@@ -969,11 +1011,12 @@ exports.getDataProviderBalances = async (req, res) => {
           else if (data?.wallet_balance != null) balance = String(data.wallet_balance).replace(/,/g, "");
           else if (data?.data?.balance != null) balance = String(data.data.balance).replace(/,/g, "");
           else if (data?.data?.wallet != null) balance = String(data.data.wallet).replace(/,/g, "");
+          else if (data?.oldbal != null) balance = String(data.oldbal).replace(/,/g, "");
           else error = "Unrecognised response";
 
           if (data?.username) username = data.username;
         } catch (e) {
-          error = e.response?.data?.message || e.message || "Connection failed";
+          error = e.response?.data?.message || e.response?.data?.msg || e.message || "Connection failed";
         }
 
         return { id: p.id, name: p.name, slug: p.slug, balance, username, error };
