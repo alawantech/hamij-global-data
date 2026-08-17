@@ -92,7 +92,6 @@ export default function FundWalletPage() {
           lastname: user.lastname,
           purpose: "wallet_funding",
         },
-        channels: ["transfer"],
         onSuccess: (transaction) => {
           toast.success("Payment successful! Your wallet will be credited shortly.");
           setPaystackLoading(false);
