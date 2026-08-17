@@ -179,6 +179,7 @@ async function purchaseAirtime({
   }
   if (authType === "basic") {
     const userUrl = host
+      .replace(/\/api\/topup\/?$/, "/api/user/")
       .replace(/\/api\/airtime\/?$/, "/api/user/")
       .replace(/\/airtime\/?$/, "/user/");
     return purchaseAirtimeBasicAuth({
@@ -237,7 +238,7 @@ async function purchaseAirtimeDirectToken({
   airtimeType,
 }) {
   const body = {
-    network: networkId,
+    network: parseInt(networkId) || networkId,
     amount,
     phone,
     bypass: false,
@@ -324,7 +325,7 @@ async function purchaseAirtimeBasicAuth({
     const { data } = await axios.post(
       host,
       {
-        network: networkId,
+        network: parseInt(networkId) || networkId,
         amount,
         phone,
         bypass: true,
