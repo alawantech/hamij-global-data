@@ -813,7 +813,7 @@ exports.createDataProvider = async (req, res) => {
         slug: slugNorm,
         status: status || "On",
         apiUrl: apiUrl || "",
-        apiKey: apiKey || "",
+        apiKey: apiKey ? encrypt(apiKey) : "",
         authType: authType || "basic",
       },
     });
@@ -832,7 +832,7 @@ exports.updateDataProvider = async (req, res) => {
     if (name !== undefined) data.name = name;
     if (status !== undefined) data.status = status;
     if (apiUrl !== undefined) data.apiUrl = apiUrl;
-    if (apiKey !== undefined) data.apiKey = apiKey;
+    if (apiKey !== undefined) data.apiKey = apiKey ? encrypt(apiKey) : apiKey;
     if (authType !== undefined) data.authType = authType;
     const provider = await prisma.dataProvider.update({
       where: { id: parseInt(req.params.id) },
@@ -980,13 +980,14 @@ exports.getDataProviderBalances = async (req, res) => {
           const isDorosub = (p.apiUrl || "").includes("dorosub.com");
           const isBasic = p.authType === "basic" || p.authType === "subwallet";
 
+          const apiKey = isEncrypted(p.apiKey) ? decrypt(p.apiKey) : p.apiKey;
+
           if (isDorosub) {
             // Dorosub: POST /api/user with Basic base64(username:password) → returns balance + AccessToken
-            // Use same credentials as MBC Data (user confirmed same username/password)
             const mbcDataProvider = dataProviders.find((d) => (d.apiUrl || "").includes("mbcdata.com"));
-            const basicCredentials = mbcDataProvider ? mbcDataProvider.apiKey : p.apiKey;
+            const mbcApiKey = mbcDataProvider ? (isEncrypted(mbcDataProvider.apiKey) ? decrypt(mbcDataProvider.apiKey) : mbcDataProvider.apiKey) : apiKey;
             const { data } = await axios.post("https://dorosub.com/api/user", null, {
-              headers: { Authorization: `Basic ${basicCredentials}` },
+              headers: { Authorization: `Basic ${mbcApiKey}` },
               timeout: 15000,
             });
             if (data?.balance != null) balance = String(data.balance).replace(/,/g, "");
@@ -1001,10 +1002,10 @@ exports.getDataProviderBalances = async (req, res) => {
             let method = "get";
 
             if (isBasic) {
-              authHeader = `Basic ${p.apiKey}`;
+              authHeader = `Basic ${apiKey}`;
               method = "post";
             } else {
-              authHeader = `Token ${p.apiKey}`;
+              authHeader = `Token ${apiKey}`;
               method = "get";
             }
 
