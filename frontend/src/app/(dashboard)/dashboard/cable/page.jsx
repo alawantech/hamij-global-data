@@ -612,8 +612,8 @@ parseFloat(selectedPlan.buyingPrice || 0) + cableFee
                           }}
                         >
                           ₦
-                          {parseFloat(
-                            plan.buyingPrice || 0,
+                          {(
+                            parseFloat(plan.buyingPrice || 0) + cableFee
                           ).toLocaleString()}
                         </span>
                       </div>
