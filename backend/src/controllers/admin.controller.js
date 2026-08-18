@@ -874,7 +874,11 @@ exports.getDataProviderBalance = async (req, res) => {
       let authHeader;
       let method = "post";
 
-      if (authType === "basic") {
+      const isMbcData = (provider.apiUrl || "").includes("mbcdata.com");
+      if (isMbcData) {
+        authHeader = `Basic ${provider.apiKey}`;
+        method = "post";
+      } else if (authType === "basic") {
         authHeader = `Basic ${provider.apiKey}`;
         method = "post";
       } else if (authType === "subwallet") {
@@ -1000,8 +1004,9 @@ exports.getDataProviderBalances = async (req, res) => {
             // Other providers
             let authHeader;
             let method = "get";
+            const isMbcData = (p.apiUrl || "").includes("mbcdata.com");
 
-            if (isBasic) {
+            if (isMbcData || isBasic) {
               authHeader = `Basic ${apiKey}`;
               method = "post";
             } else {
