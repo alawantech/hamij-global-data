@@ -842,6 +842,15 @@ const CABLE_MAP = {
 };
 
 // ---------------------------------------------------------
+// Exam code → Dorosub integer ID mapping
+// ---------------------------------------------------------
+const EXAM_MAP = {
+  "waec": 1,
+  "neco": 2,
+  "nabteb": 3,
+};
+
+// ---------------------------------------------------------
 // Verify Cable IUC / Smart Card
 // GET https://api.mysubwallet.ng/api/cable/cable-validation?iuc=...&cable=1
 // ---------------------------------------------------------
@@ -932,9 +941,10 @@ async function purchaseCable({
     const { data } = await axios.post(
       host,
       {
-        cablename: provider,
-        cableplan: planCode,
-        smart_card_number: iuc,
+        cable: CABLE_MAP[provider] || CABLE_MAP[provider.toUpperCase()] || provider,
+        cable_plan: planCode,
+        iuc: iuc,
+        bypass: false,
         "request-id": ref,
       },
       {
@@ -1132,7 +1142,7 @@ async function purchaseExamPin({ provider, quantity, ref, apiConfigs }) {
     const { data } = await axios.post(
       host,
       {
-        exam: provider,
+        exam: EXAM_MAP[provider] || EXAM_MAP[String(provider).toLowerCase()] || provider,
         quantity,
         "request-id": ref,
       },
