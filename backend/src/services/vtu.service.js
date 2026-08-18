@@ -988,10 +988,6 @@ const DISCO_MAP = {
   "ibadan-electric": 6,
   "kaduna-electric": 7,
   "abuja-electric": 8,
-  "benin-electric": 9,
-  "enugu-electric": 10,
-  "aba-electric": 11,
-  "yola-electric": 12,
 };
 
 // ---------------------------------------------------------
