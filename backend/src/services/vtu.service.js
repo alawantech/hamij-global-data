@@ -1,6 +1,6 @@
 const axios = require("axios");
 const prisma = require("../config/prisma");
-const { decrypt } = require("../utils/crypto");
+const { decrypt, isEncrypted } = require("../utils/crypto");
 
 // ---------------------------------------------------------
 // Get all API configs from DB as a key-value map (decrypted)
@@ -151,7 +151,7 @@ async function purchaseAirtime({
     const activeProvider = await getActiveProviderForService(serviceKey);
     if (activeProvider) {
       host = activeProvider.service.serviceUrl || activeProvider.provider.baseUrl;
-      apiKey = activeProvider.provider.apiKey;
+      apiKey = isEncrypted(activeProvider.provider.apiKey) ? decrypt(activeProvider.provider.apiKey) : activeProvider.provider.apiKey;
       apiSecret = activeProvider.provider.apiSecret;
       authType = activeProvider.provider.authType;
       networkId =
@@ -505,7 +505,7 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
   if (plan.provider && plan.provider.apiUrl && plan.provider.apiKey) {
     const prov = plan.provider;
     host = prov.apiUrl;
-    apiKey = prov.apiKey;
+    apiKey = isEncrypted(prov.apiKey) ? decrypt(prov.apiKey) : prov.apiKey;
     apiSecret = prov.apiSecret || "";
     authType = prov.authType || detectAuthType(host);
     const slug = prov.slug || "";
@@ -562,7 +562,7 @@ async function purchaseData({ plan, phone, ref, apiConfigs }) {
       const activeProvider = await getActiveProviderForService(serviceKey);
       if (activeProvider) {
         host = activeProvider.service.serviceUrl || activeProvider.provider.baseUrl;
-        apiKey = activeProvider.provider.apiKey;
+        apiKey = isEncrypted(activeProvider.provider.apiKey) ? decrypt(activeProvider.provider.apiKey) : activeProvider.provider.apiKey;
         apiSecret = activeProvider.provider.apiSecret;
         authType = activeProvider.provider.authType;
         extNetworkId =
