@@ -267,7 +267,7 @@ export default function TermsPage() {
           </div>
         </div>
         <p style={{ color: "rgba(255,255,255,.3)", fontSize: ".7rem", marginTop: "1rem" }}>
-          For support or legal inquiries: support@guchordata.com
+          Developed by <a href="https://zedrotech.com" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,.5)", textDecoration: "underline" }}>ZEDROTECH</a> | For support or legal inquiries: support@guchordata.com
         </p>
       </footer>
     </div>

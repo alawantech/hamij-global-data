@@ -233,6 +233,12 @@ export default function DashboardLayout({ children }) {
           borderTop: "1px solid rgba(255,255,255,.08)",
         }}
       >
+        <div style={{ padding: "0 .875rem .625rem", fontSize: ".72rem", color: "rgba(255,255,255,.25)", lineHeight: 1.5 }}>
+          Developed by{" "}
+          <a href="https://zedrotech.com" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(165,180,252,.5)", textDecoration: "none", fontWeight: 600 }}>
+            ZEDROTECH
+          </a>
+        </div>
         <button
           onClick={() => {
             logout?.();

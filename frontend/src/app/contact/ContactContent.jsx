@@ -578,7 +578,7 @@ export default function ContactPage() {
           fontSize: ".8rem",
         }}
       >
-        © {new Date().getFullYear()} {siteName}. All rights reserved.
+        © {new Date().getFullYear()} {siteName}. All rights reserved. | Developed by <a href="https://zedrotech.com" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,.6)", textDecoration: "underline" }}>ZEDROTECH</a>
       </footer>
     </div>
   );

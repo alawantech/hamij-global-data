@@ -251,6 +251,12 @@ function AdminLayoutInner({ children }) {
               {admin?.role === "super_admin" ? "Super Admin" : "Admin"}
             </div>
           </div>
+          <div style={{ padding: "0 1rem .625rem", fontSize: ".7rem", color: "rgba(255,255,255,.22)", lineHeight: 1.5 }}>
+            Developed by{" "}
+            <a href="https://zedrotech.com" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(96,165,250,.45)", textDecoration: "none", fontWeight: 600 }}>
+              ZEDROTECH
+            </a>
+          </div>
           <button
             onClick={handleLogout}
             style={{

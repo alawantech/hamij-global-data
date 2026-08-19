@@ -979,7 +979,7 @@ export default function LandingPage() {
           {/* Bottom bar */}
           <div style={{ padding: "1.2rem 2.5rem", borderTop: "1px solid rgba(148,163,184,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
             <span style={{ color: "rgba(226,232,240,0.4)", fontSize: ".85rem" }}>{"\u00A9"} {new Date().getFullYear()} {siteName}. All rights reserved.</span>
-            <span style={{ color: "rgba(226,232,240,0.35)", fontSize: ".85rem" }}>Built for buyers, resellers and everyday bill payments.</span>
+            <span style={{ color: "rgba(226,232,240,0.35)", fontSize: ".85rem" }}>Developed by <a href="https://zedrotech.com" target="_blank" rel="noopener noreferrer" style={{ color: "#7dd3fc", textDecoration: "none", fontWeight: 600 }}>ZEDROTECH</a></span>
           </div>
         </div>
       </footer>
