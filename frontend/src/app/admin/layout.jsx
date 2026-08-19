@@ -325,7 +325,7 @@ function AdminLayoutInner({ children }) {
         </main>
       </div>
 
-      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @media(min-width:1024px){aside{transform:translateX(0)!important} main{margin-left:260px}}`}</style>
+      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @media(min-width:1024px){aside{transform:translateX(0)!important} header{display:none!important} main{margin-left:260px}}`}</style>
     </div>
   );
 }
