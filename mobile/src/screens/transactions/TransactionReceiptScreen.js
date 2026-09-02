@@ -12,7 +12,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Clipboard from "expo-clipboard";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 import Toast from "react-native-toast-message";
 import client from "../../api/client";
 import { COLORS, RADIUS, SHADOW } from "../../constants/theme";
@@ -161,6 +162,7 @@ export default function TransactionReceiptScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState(null);
   const [siteName, setSiteName] = useState("Guchor Data");
+  const [downloading, setDownloading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -187,60 +189,113 @@ export default function TransactionReceiptScreen({ navigation, route }) {
       .catch(() => {});
   }, [load]);
 
-  const copyRef = async () => {
-    await Clipboard.setStringAsync(tx?.transref || tx?.ref || "");
-    Toast.show({ type: "success", text1: "Reference copied!" });
-  };
-
-  const buildReceiptText = () => {
+  const buildReceiptHTML = () => {
     if (!tx) return "";
     const isDebit = Number(tx.oldbal || 0) > Number(tx.newbal || 0);
     const st = statusMeta(tx.status);
     const cat = tx.category || "other";
     const svc = getSvc(cat, tx.servicename);
     const pd = parseServicedesc(tx.servicedesc || "", tx.servicename, tx.apiResponseLog);
+    const statusColor = st.color === COLORS.success ? "#10b981" : st.color === COLORS.danger ? "#ef4444" : "#f59e0b";
 
-    const line = "\u2500".repeat(32);
-    let text =
-      `\n${siteName}\n` +
-      `${line}\n` +
-      `${svc.label} Receipt\n` +
-      `${line}\n\n` +
-      `Reference:    ${tx.transref || tx.ref}\n` +
-      `Service:      ${tx.servicename || svc.label}\n`;
-    if (pd.token) text += `Token:        ${pd.token}\n`;
-    if (pd.description) text += `Provider:     ${pd.description}\n`;
-    if (pd.meterNumber) text += `Meter Number: ${pd.meterNumber}\n`;
-    if (pd.meterType) text += `Meter Type:   ${pd.meterType}\n`;
-    if (pd.customerName) text += `Customer:     ${pd.customerName}\n`;
-    if (pd.address) text += `Address:      ${pd.address}\n`;
-    text +=
-      `Amount:       ${isDebit ? "-" : "+"}${fmt(tx.amount)}\n` +
-      `Status:       ${st.label}\n` +
-      `Prev Balance: ${fmt(tx.oldbal)}\n` +
-      `New Balance:  ${fmt(tx.newbal)}\n` +
-      `Date:         ${fmtDate(tx.date || tx.createdAt)}\n\n` +
-      `${line}\n` +
-      `Secured & verified by ${siteName}\n` +
-      `Generated ${new Date().toLocaleString("en-NG")}\n`;
-    return text;
+    let detailsHTML = "";
+    if (isElectricity) {
+      if (pd.token) detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Token</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;font-family:monospace;">${pd.token}</td></tr>`;
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Transaction ID</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;font-family:monospace;">${tx.transref || tx.ref}</td></tr>`;
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Status</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;color:${statusColor};">${st.label}</td></tr>`;
+      if (pd.description) detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Product</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;">${pd.description}</td></tr>`;
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Amount</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:15px;font-weight:900;text-align:right;">${fmt(tx.amount)}</td></tr>`;
+      if (pd.meterNumber) detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Meter</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;font-family:monospace;">${pd.meterNumber}</td></tr>`;
+      if (pd.meterType) detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Meter Type</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;">${pd.meterType}</td></tr>`;
+      if (pd.customerName) detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Customer Name</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;">${pd.customerName}</td></tr>`;
+      if (pd.address) detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Customer Address</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;">${pd.address}</td></tr>`;
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Date</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;">${fmtDate(tx.date || tx.createdAt)}</td></tr>`;
+    } else {
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Reference</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;font-family:monospace;">${tx.transref || tx.ref}</td></tr>`;
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Service</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;">${tx.servicename || svc.label}</td></tr>`;
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Description</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;">${tx.servicedesc || "\u2014"}</td></tr>`;
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Amount</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:15px;font-weight:900;text-align:right;color:${isDebit ? "#ef4444" : "#10b981"};">${isDebit ? "-" : "+"}${fmt(tx.amount)}</td></tr>`;
+      detailsHTML += `<tr><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#64748b;font-size:13px;">Date</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;text-align:right;">${fmtDate(tx.date || tx.createdAt)}</td></tr>`;
+    }
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"><style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;margin:0;padding:20px;background:#f5f5f7;}</style></head>
+      <body>
+        <div style="max-width:400px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+          <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:30px 20px;text-align:center;">
+            ${logoUrl ? `<img src="${logoUrl}" style="width:60px;height:60px;border-radius:12px;margin-bottom:10px;" />` : `<div style="width:60px;height:60px;border-radius:12px;background:rgba(255,255,255,0.18);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:28px;font-weight:900;">${siteName.charAt(0)}</span></div>`}
+            <div style="color:rgba(255,255,255,0.85);font-size:14px;font-weight:800;letter-spacing:0.3px;margin-bottom:16px;">${siteName}</div>
+            <div style="width:50px;height:50px;border-radius:25px;background:rgba(255,255,255,0.18);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
+              <span style="color:#fff;font-size:24px;">&#10003;</span>
+            </div>
+            <div style="color:rgba(255,255,255,0.75);font-size:13px;font-weight:600;margin-bottom:4px;">${svc.label} Receipt</div>
+            <div style="color:#fff;font-size:32px;font-weight:900;letter-spacing:-1px;margin-top:4px;">${isDebit ? "-" : "+"}${fmt(tx.amount)}</div>
+            <div style="display:inline-block;background:rgba(255,255,255,0.18);padding:5px 18px;border-radius:99px;margin-top:12px;"><span style="color:#fff;font-size:12px;font-weight:700;">${st.label}</span></div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">${detailsHTML}</table>
+          <div style="text-align:center;padding:16px;color:#a1a1aa;font-size:12px;font-weight:600;">Secured & verified by ${siteName}</div>
+          <div style="text-align:center;padding:4px 16px 20px;color:#d4d4d8;font-size:11px;">Generated ${new Date().toLocaleString("en-NG")}</div>
+        </div>
+      </body>
+      </html>`;
+  };
+
+  const downloadReceipt = async () => {
+    if (!tx) return;
+    try {
+      setDownloading(true);
+      const html = buildReceiptHTML();
+      const { uri } = await Print.printToFileAsync({ html, base64: false });
+      await Sharing.shareAsync(uri, {
+        mimeType: "application/pdf",
+        dialogTitle: "Save Receipt PDF",
+        UTI: "com.adobe.pdf",
+      });
+    } catch (err) {
+      Toast.show({ type: "error", text1: "Download failed", text2: "Please try again" });
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const shareReceipt = async () => {
     if (!tx) return;
     try {
-      await Share.share({
-        message: buildReceiptText(),
-        title: `${siteName} Receipt`,
-      });
+      const isDebit = Number(tx.oldbal || 0) > Number(tx.newbal || 0);
+      const st = statusMeta(tx.status);
+      const cat = tx.category || "other";
+      const svc = getSvc(cat, tx.servicename);
+      const pd = parseServicedesc(tx.servicedesc || "", tx.servicename, tx.apiResponseLog);
+
+      const line = "\u2500".repeat(32);
+      let text =
+        `\n${siteName}\n` +
+        `${line}\n` +
+        `${svc.label} Receipt\n` +
+        `${line}\n\n` +
+        `Reference:    ${tx.transref || tx.ref}\n` +
+        `Service:      ${tx.servicename || svc.label}\n`;
+      if (pd.token) text += `Token:        ${pd.token}\n`;
+      if (pd.description) text += `Provider:     ${pd.description}\n`;
+      if (pd.meterNumber) text += `Meter Number: ${pd.meterNumber}\n`;
+      if (pd.meterType) text += `Meter Type:   ${pd.meterType}\n`;
+      if (pd.customerName) text += `Customer:     ${pd.customerName}\n`;
+      if (pd.address) text += `Address:      ${pd.address}\n`;
+      text +=
+        `Amount:       ${isDebit ? "-" : "+"}${fmt(tx.amount)}\n` +
+        `Status:       ${st.label}\n` +
+        `Prev Balance: ${fmt(tx.oldbal)}\n` +
+        `New Balance:  ${fmt(tx.newbal)}\n` +
+        `Date:         ${fmtDate(tx.date || tx.createdAt)}\n\n` +
+        `${line}\n` +
+        `Secured & verified by ${siteName}\n` +
+        `Generated ${new Date().toLocaleString("en-NG")}\n`;
+      await Share.share({ message: text, title: `${siteName} Receipt` });
     } catch {
       // user cancelled
     }
-  };
-
-  const copyFullReceipt = async () => {
-    await Clipboard.setStringAsync(buildReceiptText());
-    Toast.show({ type: "success", text1: "Full receipt copied!" });
   };
 
   if (loading) {
@@ -395,19 +450,24 @@ export default function TransactionReceiptScreen({ navigation, route }) {
           </Text>
         </View>
 
-        <TouchableOpacity style={[styles.actionBtn, styles.actionOutline]} onPress={copyRef}>
-          <Ionicons name="copy-outline" size={18} color={COLORS.primary} />
-          <Text style={[styles.actionText, { color: COLORS.primary }]}>Copy Reference</Text>
+        <TouchableOpacity
+          style={[styles.actionBtn, styles.actionPrimary]}
+          onPress={downloadReceipt}
+          disabled={downloading}
+        >
+          {downloading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Ionicons name="download-outline" size={18} color="#fff" />
+          )}
+          <Text style={[styles.actionText, { color: "#fff" }]}>
+            {downloading ? "Generating PDF..." : "Download Receipt"}
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.actionBtn, styles.actionOutline]} onPress={copyFullReceipt}>
-          <Ionicons name="document-text-outline" size={18} color={COLORS.primary} />
-          <Text style={[styles.actionText, { color: COLORS.primary }]}>Copy Full Receipt</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.actionBtn, styles.actionPrimary]} onPress={shareReceipt}>
-          <Ionicons name="share-social-outline" size={18} color="#fff" />
-          <Text style={[styles.actionText, { color: "#fff" }]}>Share Receipt</Text>
+        <TouchableOpacity style={[styles.actionBtn, styles.actionOutline]} onPress={shareReceipt}>
+          <Ionicons name="share-social-outline" size={18} color={COLORS.primary} />
+          <Text style={[styles.actionText, { color: COLORS.primary }]}>Share Receipt</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
