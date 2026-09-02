@@ -461,13 +461,8 @@ export default function TransactionReceiptScreen({ navigation, route }) {
             <Ionicons name="download-outline" size={18} color="#fff" />
           )}
           <Text style={[styles.actionText, { color: "#fff" }]}>
-            {downloading ? "Generating PDF..." : "Download Receipt"}
+            {downloading ? "Generating PDF..." : "Save / Share Receipt"}
           </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.actionBtn, styles.actionOutline]} onPress={shareReceipt}>
-          <Ionicons name="share-social-outline" size={18} color={COLORS.primary} />
-          <Text style={[styles.actionText, { color: COLORS.primary }]}>Share Receipt</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
