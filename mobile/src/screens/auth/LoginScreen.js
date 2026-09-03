@@ -467,7 +467,7 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.wbAvatarText}>{(firstName || "U").charAt(0).toUpperCase()}</Text>
             </View>
             <Text style={styles.wbTitle}>Welcome Back</Text>
-            <Text style={styles.wbAppName}>GUCHOR</Text>
+            <Text style={styles.wbAppName}>HAMIJ</Text>
           </Animated.View>
 
           {/* Floating card at bottom */}
@@ -565,7 +565,7 @@ export default function LoginScreen({ navigation }) {
               <Animated.View style={{ alignItems: "center", opacity: fadeAnim, transform: [{ scale: logoScale }] }}>
                 <Logo size={100} style={{ marginBottom: 10 }} />
                 <Text style={styles.wbGreeting}>Sign in to</Text>
-                <Text style={styles.wbName}>Guchor Data</Text>
+                <Text style={styles.wbName}>Hamij Global Data</Text>
               </Animated.View>
             ) : (
               <Animated.View style={{ alignItems: "center", opacity: fadeAnim, transform: [{ scale: logoScale }] }}>

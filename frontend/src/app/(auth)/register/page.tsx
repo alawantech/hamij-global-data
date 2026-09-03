@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import RegisterContent from "./RegisterContent";
 
 export const metadata: Metadata = {
-  title: "Register - Guchor Data | Create Free Account",
+  title: "Register - Hamij Global Data | Create Free Account",
   description:
-    "Create a free Guchor Data account. Buy airtime, data, pay bills, and earn commissions. Fast registration.",
+    "Create a free Hamij Global Data account. Buy airtime, data, pay bills, and earn commissions. Fast registration.",
   keywords: [
-    "register Guchor Data",
+    "register Hamij Global Data",
     "create account",
     "free VTU account Nigeria",
     "sign up airtime data",

@@ -641,7 +641,7 @@ export default function ProfilePage() {
             paddingBottom: ".5rem",
           }}
         >
-          GUCHOR DATA v2.0
+          HAMIJ GLOBAL DATA v2.0
         </p>
       </div>
     </div>

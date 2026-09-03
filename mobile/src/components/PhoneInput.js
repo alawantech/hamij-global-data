@@ -53,7 +53,7 @@ export function PhoneInput({
           {
             title: "Contacts Access",
             message:
-              "Guchor Data needs access to your contacts so you can pick a phone number directly. This is optional — you can type the number manually instead.",
+              "Hamij Global Data needs access to your contacts so you can pick a phone number directly. This is optional — you can type the number manually instead.",
             buttonPositive: "Allow",
             buttonNegative: "Deny",
           },

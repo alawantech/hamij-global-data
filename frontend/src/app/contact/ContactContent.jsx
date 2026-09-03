@@ -16,7 +16,7 @@ import AppLogo from "@/components/AppLogo";
 
 export default function ContactPage() {
   const settings = useSiteSettings();
-  const siteName = settings.sitename || "GUCHOR DATA";
+  const siteName = settings.sitename || "HAMIJ GLOBAL DATA";
   const siteInitial = siteName.charAt(0).toUpperCase();
   const logoUrl = settings.logoUrl || "";
   const [form, setForm] = useState({
@@ -232,7 +232,7 @@ export default function ContactPage() {
 
             {/* Email */}
             {(() => {
-              const emailVal = settings.email || "support@guchordata.com";
+              const emailVal = settings.email || "support@hamijglobaldata.com";
               return (
                 <a
                   href={`mailto:${emailVal}`}

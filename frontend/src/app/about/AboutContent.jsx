@@ -6,7 +6,7 @@ import AppLogo from "@/components/AppLogo";
 
 export default function AboutPage() {
   const settings = useSiteSettings();
-  const siteName = settings.sitename || "GUCHOR DATA";
+  const siteName = settings.sitename || "HAMIJ GLOBAL DATA";
   const siteInitial = siteName.charAt(0).toUpperCase();
   const logoUrl = settings.logoUrl || "";
   const team = [

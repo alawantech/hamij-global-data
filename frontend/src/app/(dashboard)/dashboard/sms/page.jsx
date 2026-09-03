@@ -368,7 +368,7 @@ export default function SmsPage() {
             </label>
             <input
               type="text"
-              placeholder="e.g. GuchorData"
+              placeholder="e.g. HamijGlobalData"
               value={senderName}
               onChange={(e) => setSenderName(e.target.value)}
               maxLength={11}

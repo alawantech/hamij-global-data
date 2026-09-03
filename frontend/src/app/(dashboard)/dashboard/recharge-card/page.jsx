@@ -368,7 +368,7 @@ export default function RechargeCardPage() {
               Recharge Card
             </h1>
             <p style={{ color: "rgba(255,255,255,.6)", fontSize: ".75rem" }}>
-              GuchorData · Scratch card airtime pins
+              HamijGlobalData · Scratch card airtime pins
             </p>
           </div>
         </div>

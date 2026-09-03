@@ -568,7 +568,7 @@ export default function LoginPage() {
             marginTop: "2rem",
           }}
         >
-          © {new Date().getFullYear()} Guchor Data — Secure & Encrypted
+          © {new Date().getFullYear()} Hamij Global Data — Secure & Encrypted
         </p>
       </div>
 

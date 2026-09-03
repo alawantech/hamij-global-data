@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 const DEFAULT = {
-  sitename: "GUCHOR DATA",
+  sitename: "HAMIJ GLOBAL DATA",
   sitetitle: "",
   sitedesc:
     "Nigeria's most reliable VTU platform. Buy airtime, data, pay bills and more.",

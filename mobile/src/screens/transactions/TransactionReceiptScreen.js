@@ -161,7 +161,7 @@ export default function TransactionReceiptScreen({ navigation, route }) {
   const [tx, setTx] = useState(null);
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState(null);
-  const [siteName, setSiteName] = useState("Guchor Data");
+  const [siteName, setSiteName] = useState("Hamij Global Data");
   const [downloading, setDownloading] = useState(false);
 
   const load = useCallback(async () => {

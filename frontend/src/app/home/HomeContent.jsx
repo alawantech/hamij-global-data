@@ -353,7 +353,7 @@ export default function LandingPage() {
   var router = useRouter();
   var settings = useSiteSettings();
 
-  var siteName = (settings && settings.sitename) || "GUCHOR DATA";
+  var siteName = (settings && settings.sitename) || "HAMIJ GLOBAL DATA";
   var siteDescription = (settings && settings.sitedesc) || "A premium VTU and bill payment experience built for speed, trust and repeat use.";
   var logoUrl = (settings && settings.logoUrl) || "";
   var apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v2";

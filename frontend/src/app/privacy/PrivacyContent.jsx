@@ -6,12 +6,12 @@ const sections = [
   {
     title: "1. Information We Collect",
     content:
-      "GUCHOR DATA collects information you provide directly and information generated through your use of our services. We collect: your full name, email address, phone number, and password (hashed) when you register; your BVN or NIN and date of birth when you complete optional KYC verification; transaction data including purchases, wallet funding, and airtime-to-cash requests; device information including device fingerprint (derived from your device's operating system and app version), operating system version, and app version; and account activity such as login timestamps and session duration.",
+      "HAMIJ GLOBAL DATA collects information you provide directly and information generated through your use of our services. We collect: your full name, email address, phone number, and password (hashed) when you register; your BVN or NIN and date of birth when you complete optional KYC verification; transaction data including purchases, wallet funding, and airtime-to-cash requests; device information including device fingerprint (derived from your device's operating system and app version), operating system version, and app version; and account activity such as login timestamps and session duration.",
   },
   {
     title: "2. Personal Information at Registration",
     content:
-      "When you create a GUCHOR DATA account, we collect: full name, email address, phone number, and a password (stored as a bcrypt hash — we never store plain text passwords). You may optionally provide a referral code. BVN, NIN, and date of birth are only collected if you choose to complete KYC verification, which is a separate optional step.",
+      "When you create a HAMIJ GLOBAL DATA account, we collect: full name, email address, phone number, and a password (stored as a bcrypt hash — we never store plain text passwords). You may optionally provide a referral code. BVN, NIN, and date of birth are only collected if you choose to complete KYC verification, which is a separate optional step.",
   },
   {
     title: "3. Transaction Information",
@@ -61,12 +61,12 @@ const sections = [
   {
     title: "12. Your Privacy Rights",
     content:
-      "Under the Nigeria Data Protection Act (NDPA 2023), you have the right to: access your personal data; correct or update inaccurate information; request deletion of your data (subject to legal retention obligations); data portability (receive your data in a machine-readable format); withdraw consent for data processing; and lodge complaints with the Nigeria Data Protection Commission (NDPC). To exercise these rights, contact us at support@guchordata.com or through in-app support.",
+      "Under the Nigeria Data Protection Act (NDPA 2023), you have the right to: access your personal data; correct or update inaccurate information; request deletion of your data (subject to legal retention obligations); data portability (receive your data in a machine-readable format); withdraw consent for data processing; and lodge complaints with the Nigeria Data Protection Commission (NDPC). To exercise these rights, contact us at support@hamijglobaldata.com or through in-app support.",
   },
   {
     title: "13. Children's Privacy",
     content:
-      "GUCHOR DATA services are not directed to children under 18. We do not knowingly collect personal information from minors. If you believe we have collected information from a child under 18, please contact us immediately at support@guchordata.com. We will take appropriate action to remove such information.",
+      "HAMIJ GLOBAL DATA services are not directed to children under 18. We do not knowingly collect personal information from minors. If you believe we have collected information from a child under 18, please contact us immediately at support@hamijglobaldata.com. We will take appropriate action to remove such information.",
   },
   {
     title: "14. Data Transfer and Storage",
@@ -76,7 +76,7 @@ const sections = [
   {
     title: "15. Changes to This Privacy Policy",
     content:
-      "We may update this Privacy Policy periodically to reflect changes in our practices or applicable laws. Material changes will be communicated via email, in-app notification, or prominent notice on our website. Continued use of GUCHOR DATA after updates constitutes acceptance of the modified policy.",
+      "We may update this Privacy Policy periodically to reflect changes in our practices or applicable laws. Material changes will be communicated via email, in-app notification, or prominent notice on our website. Continued use of HAMIJ GLOBAL DATA after updates constitutes acceptance of the modified policy.",
   },
   {
     title: "16. Governing Law",
@@ -86,7 +86,7 @@ const sections = [
   {
     title: "17. Contact Us",
     content:
-      "If you have any questions, concerns, or requests related to this Privacy Policy or your personal data, please contact us at: Email: support@guchordata.com | In-App Support: Available 24/7. We typically respond to privacy inquiries within 7 business days.",
+      "If you have any questions, concerns, or requests related to this Privacy Policy or your personal data, please contact us at: Email: support@hamijglobaldata.com | In-App Support: Available 24/7. We typically respond to privacy inquiries within 7 business days.",
   },
 ];
 
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
             Z
           </div>
           <span style={{ fontWeight: 800, color: "white", fontSize: "1.1rem" }}>
-            GUCHOR DATA
+            HAMIJ GLOBAL DATA
           </span>
         </Link>
         <Link
@@ -188,7 +188,7 @@ export default function PrivacyPage() {
           }}
         >
           <p style={{ color: "#64748b", lineHeight: 1.8, fontSize: ".95rem" }}>
-            GUCHOR DATA ("we", "our", "us") operates as a Virtual Top-Up service provider in Nigeria. We are committed to protecting your privacy and handling your data with transparency and care. This Privacy Policy explains what information we collect, how we use it, who we share it with, and your rights under the Nigeria Data Protection Act (NDPA, 2023).
+            HAMIJ GLOBAL DATA ("we", "our", "us") operates as a Virtual Top-Up service provider in Nigeria. We are committed to protecting your privacy and handling your data with transparency and care. This Privacy Policy explains what information we collect, how we use it, who we share it with, and your rights under the Nigeria Data Protection Act (NDPA, 2023).
           </p>
         </div>
 
@@ -231,7 +231,7 @@ export default function PrivacyPage() {
           fontSize: ".8rem",
         }}
       >
-        © {new Date().getFullYear()} GUCHOR DATA. All rights reserved. | Developed by <a href="https://zedrotech.com" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,.6)", textDecoration: "underline" }}>ZEDROTECH</a> | <Link href="/terms" style={{ color: "rgba(255,255,255,.4)", textDecoration: "underline" }}>Terms & Conditions</Link>
+        © {new Date().getFullYear()} HAMIJ GLOBAL DATA. All rights reserved. | Developed by <a href="https://zedrotech.com" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,.6)", textDecoration: "underline" }}>ZEDROTECH</a> | <Link href="/terms" style={{ color: "rgba(255,255,255,.4)", textDecoration: "underline" }}>Terms & Conditions</Link>
       </footer>
     </div>
   );

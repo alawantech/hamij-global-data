@@ -8,7 +8,7 @@ import {
 
 export const metadata: Metadata = {
   title:
-    "Guchor Data - Buy Airtime, Data, Cable TV & Pay Bills Online Nigeria",
+    "Hamij Global Data - Buy Airtime, Data, Cable TV & Pay Bills Online Nigeria",
   description:
     "Nigeria's cheapest VTU platform. Buy airtime, data bundles, pay electricity bills, cable TV subscriptions. Fast, reliable, 24/7. Airtime to cash available.",
   keywords: [
@@ -25,20 +25,20 @@ export const metadata: Metadata = {
     "GOTV",
     "electricity bill payment",
     "airtime to cash Nigeria",
-    "Guchor Data",
+    "Hamij Global Data",
     "data top up Nigeria",
     "virtual top up Nigeria",
   ],
   openGraph: {
-    title: "Guchor Data - Buy Airtime, Data, Cable TV & Pay Bills Online Nigeria",
+    title: "Hamij Global Data - Buy Airtime, Data, Cable TV & Pay Bills Online Nigeria",
     description:
       "Nigeria's cheapest VTU platform. Buy airtime, data bundles, pay electricity bills, cable TV subscriptions. Fast, reliable, 24/7.",
     type: "website",
-    url: "https://guchordata.com/home",
+    url: "https://hamijglobaldata.com/home",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Guchor Data - Buy Airtime, Data, Cable TV & Pay Bills Online Nigeria",
+    title: "Hamij Global Data - Buy Airtime, Data, Cable TV & Pay Bills Online Nigeria",
     description:
       "Nigeria's cheapest VTU platform. Buy airtime, data bundles, pay electricity bills, cable TV subscriptions. Fast, reliable, 24/7.",
   },
@@ -73,17 +73,17 @@ const FAQS = [
 export default function HomePage() {
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
-    "https://guchordata.com";
+    "https://hamijglobaldata.com";
 
   return (
     <>
       <OrganizationJsonLd
-        siteName="Guchor Data"
+        siteName="Hamij Global Data"
         siteUrl={baseUrl}
         phone="+2348032230464"
-        email="support@guchordata.com"
+        email="support@hamijglobaldata.com"
       />
-      <WebSiteJsonLd siteName="Guchor Data" siteUrl={baseUrl} />
+      <WebSiteJsonLd siteName="Hamij Global Data" siteUrl={baseUrl} />
       <FaqPageJsonLd faqs={FAQS} />
       <HomeContent />
     </>

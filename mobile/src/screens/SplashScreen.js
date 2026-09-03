@@ -218,7 +218,7 @@ export default function SplashScreen({ navigation }) {
                   lineHeight: 34,
                 }}
               >
-                Guchor
+                Hamij
               </Text>
               <Text
                 style={{

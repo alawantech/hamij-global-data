@@ -19,7 +19,7 @@ export default function AppLogo({
   subtitle = null,
 }) {
   const settings = useSiteSettings();
-  const siteName = settings?.sitename || "GUCHOR DATA";
+  const siteName = settings?.sitename || "HAMIJ GLOBAL DATA";
   const logoUrl = settings?.logoUrl || "";
 
   const tileRadius = Math.round(logoHeight * 0.22);

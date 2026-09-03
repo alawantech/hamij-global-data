@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-const API_BASE = "https://guchordata.com/api";
+const API_BASE = "https://hamijglobaldata.com/api";
 
 const client = axios.create({
   baseURL: API_BASE,

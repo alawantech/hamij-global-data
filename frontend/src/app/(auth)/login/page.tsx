@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import LoginContent from "./LoginContent";
 
 export const metadata: Metadata = {
-  title: "Login - Guchor Data",
+  title: "Login - Hamij Global Data",
   description:
-    "Login to your Guchor Data account to buy airtime, data, and pay bills.",
+    "Login to your Hamij Global Data account to buy airtime, data, and pay bills.",
   robots: {
     index: false,
     follow: false,

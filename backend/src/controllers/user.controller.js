@@ -214,7 +214,7 @@ async function getVirtualAccounts(req, res) {
         bankName: "Wema Bank",
         bankCode: "035",
         accountNumber: user.paystackWemaAccount,
-        accountName: `GUCHOR DATA/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
+        accountName: `HAMIJ GLOBAL DATA/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
         status: "active",
       });
     }
@@ -224,7 +224,7 @@ async function getVirtualAccounts(req, res) {
         bankName: "Paystack Titan",
         bankCode: "titan-paystack",
         accountNumber: user.paystackTitanAccount,
-        accountName: `GUCHOR DATA/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
+        accountName: `HAMIJ GLOBAL DATA/${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`,
         status: "active",
       });
     }
@@ -341,7 +341,7 @@ async function initializePaystackPayment(req, res) {
         lastname: user.lastname,
         purpose: "wallet_funding",
       },
-      callbackUrl: `${process.env.FRONTEND_URL || "https://guchordata.com"}/dashboard/fund-wallet?ref=${reference}`,
+      callbackUrl: `${process.env.FRONTEND_URL || "https://hamijglobaldata.com"}/dashboard/fund-wallet?ref=${reference}`,
     });
 
     return sendSuccess(res, {

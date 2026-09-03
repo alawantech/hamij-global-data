@@ -306,13 +306,13 @@ export default function ProfileScreen({ navigation }) {
             <MenuItem
               icon="document-text-outline"
               label="Terms & Conditions"
-              onPress={() => Linking.openURL("https://guchordata.com/terms")}
+              onPress={() => Linking.openURL("https://hamijglobaldata.com/terms")}
             />
             <View style={styles.divider} />
             <MenuItem
               icon="shield-checkmark-outline"
               label="Privacy Policy"
-              onPress={() => Linking.openURL("https://guchordata.com/privacy")}
+              onPress={() => Linking.openURL("https://hamijglobaldata.com/privacy")}
             />
           </Card>
 
@@ -334,7 +334,7 @@ export default function ProfileScreen({ navigation }) {
           </Card>
 
           {/* Version */}
-          <Text style={styles.version}>Guchor Data v1.0.0</Text>
+          <Text style={styles.version}>Hamij Global Data v1.0.0</Text>
           <Text style={styles.credit}>
             Developed by{" "}
             <Text

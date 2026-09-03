@@ -76,7 +76,7 @@ const SERVICES = [
     icon: "card",
     color: COLORS.datacard,
     label: "Data Card",
-    desc: "GuchorData scratch card pins",
+    desc: "HamijGlobalData scratch card pins",
     gradient: ["#f5f3ff", "#ede9fe"],
   },
   {
@@ -84,7 +84,7 @@ const SERVICES = [
     icon: "phone-portrait",
     color: COLORS.rechargecard,
     label: "Recharge Card",
-    desc: "GuchorData airtime scratch cards",
+    desc: "HamijGlobalData airtime scratch cards",
     gradient: ["#f0fdf4", "#dcfce7"],
   },
 ];

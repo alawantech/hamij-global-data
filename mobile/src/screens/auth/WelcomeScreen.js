@@ -583,7 +583,7 @@ export default function WelcomeScreen({ navigation }) {
             onError={() => setLogoUrl(null)}
           />
           <View>
-            <Text style={{ fontFamily: F.bold, fontSize: 18, fontWeight: "700", color: C.textPrimary, lineHeight: 20 }}>Guchor</Text>
+            <Text style={{ fontFamily: F.bold, fontSize: 18, fontWeight: "700", color: C.textPrimary, lineHeight: 20 }}>Hamij</Text>
             <Text style={{ fontFamily: F.medium, fontSize: 9, fontWeight: "500", color: C.lime1, letterSpacing: 2.5, marginTop: -1 }}>DATA SUB</Text>
           </View>
         </View>

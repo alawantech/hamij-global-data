@@ -2,26 +2,26 @@ import type { Metadata } from "next";
 import TermsContent from "./TermsContent";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions - Guchor Data",
+  title: "Terms & Conditions - Hamij Global Data",
   description:
-    "Read Guchor Data's terms and conditions for using our VTU platform, wallet services, and bill payment features.",
+    "Read Hamij Global Data's terms and conditions for using our VTU platform, wallet services, and bill payment features.",
   keywords: [
     "terms and conditions",
     "terms of service",
-    "Guchor Data terms",
+    "Hamij Global Data terms",
     "VTU terms Nigeria",
   ],
   openGraph: {
-    title: "Terms & Conditions - Guchor Data",
+    title: "Terms & Conditions - Hamij Global Data",
     description:
-      "Read Guchor Data's terms and conditions for using our VTU platform, wallet services, and bill payment features.",
+      "Read Hamij Global Data's terms and conditions for using our VTU platform, wallet services, and bill payment features.",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Terms & Conditions - Guchor Data",
+    title: "Terms & Conditions - Hamij Global Data",
     description:
-      "Read Guchor Data's terms and conditions for using our VTU platform, wallet services, and bill payment features.",
+      "Read Hamij Global Data's terms and conditions for using our VTU platform, wallet services, and bill payment features.",
   },
   alternates: {
     canonical: "/terms",

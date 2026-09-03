@@ -175,7 +175,7 @@ export default function RegisterScreen({ navigation }) {
         password,
         referral: form.referral.trim() || undefined,
       });
-      Toast.show({ type: "success", text1: "Account created!", text2: "Welcome to Guchor Data" });
+      Toast.show({ type: "success", text1: "Account created!", text2: "Welcome to Hamij Global Data" });
     } catch (err) {
       Toast.show({
         type: "error",
@@ -366,9 +366,9 @@ export default function RegisterScreen({ navigation }) {
                 </View>
                 <Text style={styles.tosText}>
                   I agree to the{" "}
-                  <Text style={styles.tosLink} onPress={() => Linking.openURL("https://guchordata.com/terms")}>Terms & Conditions</Text>
+                  <Text style={styles.tosLink} onPress={() => Linking.openURL("https://hamijglobaldata.com/terms")}>Terms & Conditions</Text>
                   {" "}and{" "}
-                  <Text style={styles.tosLink} onPress={() => Linking.openURL("https://guchordata.com/privacy")}>Privacy Policy</Text>
+                  <Text style={styles.tosLink} onPress={() => Linking.openURL("https://hamijglobaldata.com/privacy")}>Privacy Policy</Text>
                 </Text>
               </TouchableOpacity>
 

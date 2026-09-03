@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
-    "https://guchordata.com";
+    "https://hamijglobaldata.com";
 
   const publicPages = [
     {

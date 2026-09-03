@@ -247,7 +247,7 @@ export default function SmsScreen({ navigation }) {
                   label="Sender Name"
                   value={senderName}
                   onChangeText={setSenderName}
-                  placeholder="e.g. GuchorData (optional)"
+                  placeholder="e.g. HamijGlobalData (optional)"
                   maxLength={11}
                 />
                 <Text style={{ fontSize: 11, color: COLORS.muted, marginTop: 4 }}>
