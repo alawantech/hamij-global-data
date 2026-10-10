@@ -25,7 +25,7 @@ import client, { API_BASE } from "../../api/client";
 import { useExitConfirm } from "../../hooks/useExitConfirm";
 
 const LOGO_CACHE_KEY = "cached_logo_url";
-const LOCAL_LOGO = require("../../../assets/logo-gsub.png");
+const LOCAL_LOGO = null;
 import { Badge } from "../../components/Card";
 import { ForcedPinModal } from "../../components/ForcedPinModal";
 import { COLORS, RADIUS, SHADOW } from "../../constants/theme";
@@ -368,13 +368,20 @@ export default function HomeScreen({ navigation }) {
           {/* Top row */}
           <View style={styles.headerRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <View style={styles.homeLogoCont}>
-                <Image
-                  source={logoUrl ? { uri: logoUrl } : LOCAL_LOGO}
-                  style={styles.homeLogo}
-                  resizeMode="contain"
-                  onError={() => setLogoUrl(null)}
-                />
+              <View style={[styles.homeLogoCont, { justifyContent: "center" }]}>
+                {logoUrl || LOCAL_LOGO ? (
+                  <Image
+                    source={logoUrl ? { uri: logoUrl } : LOCAL_LOGO}
+                    style={styles.homeLogo}
+                    resizeMode="contain"
+                    onError={() => setLogoUrl(null)}
+                  />
+                ) : (
+                  <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4 }}>
+                    <Text style={{ fontSize: 14, fontWeight: "800", color: COLORS.black }}>Hamij</Text>
+                    <Text style={{ fontSize: 14, fontWeight: "800", color: COLORS.primary }}>Global Data</Text>
+                  </View>
+                )}
               </View>
               <View>
                 <Text style={styles.greet}>Good day, 👋</Text>
