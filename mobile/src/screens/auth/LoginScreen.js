@@ -44,10 +44,10 @@ function maskEmail(email = "") {
 }
 
 const LOGO_CACHE_KEY = "cached_logo_url";
-const LOCAL_LOGO = null;
+const LOCAL_LOGO = require("../../../assets/logo-kiru.png");
 
 export default function LoginScreen({ navigation }) {
-  const { login, lastUser, clearLastUser, completeOtpLogin } = useAuth();
+  const { login, lastUser, clearLastUser, completeOtpLogin, logout } = useAuth();
   const insets = useSafeAreaInsets();
   const biometric = useBiometric();
 
@@ -217,8 +217,7 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleNotYou = async () => {
-    await clearLastUser(); setPassword(""); setIdentifier(""); setLoginStep("identifier");
-    slideAnim.setValue(0); fadeAnim.setValue(1);
+    await logout();
   };
 
 
@@ -437,20 +436,14 @@ export default function LoginScreen({ navigation }) {
 
   const canShowBiometric = isReturning && biometric.isSupported && biometric.isEnrolled && biometric.isEnabled;
 
-  const Logo = ({ size = 140, style }) =>
-    logoUrl || LOCAL_LOGO ? (
-      <Image
-        source={logoUrl ? { uri: logoUrl } : LOCAL_LOGO}
-        style={[{ width: size, height: size, borderRadius: size * 0.18 }, style]}
-        resizeMode="contain"
-        onError={() => setLogoUrl(null)}
-      />
-    ) : (
-      <View style={[{ flexDirection: "row", alignItems: "baseline", gap: 6 }, style]}>
-        <Text style={{ fontSize: size * 0.22, fontWeight: "800", color: "#ffffff" }}>Hamij</Text>
-        <Text style={{ fontSize: size * 0.22, fontWeight: "800", color: "#B6FF5C" }}>Global</Text>
-      </View>
-    );
+  const Logo = ({ size = 140, style }) => (
+    <Image
+      source={logoUrl ? { uri: logoUrl } : LOCAL_LOGO}
+      style={[{ width: size, height: size, borderRadius: size * 0.18 }, style]}
+      resizeMode="contain"
+      onError={() => setLogoUrl(null)}
+    />
+  );
 
   return (
     <View style={styles.container}>
@@ -489,8 +482,8 @@ export default function LoginScreen({ navigation }) {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{
                 flexGrow: 1,
-                justifyContent: "center",
                 paddingVertical: 24,
+                paddingBottom: 160,
               }}
             >
               <Animated.View
@@ -617,7 +610,7 @@ export default function LoginScreen({ navigation }) {
               <Animated.View style={{ alignItems: "center", opacity: fadeAnim, transform: [{ scale: logoScale }] }}>
                 <Logo size={100} style={{ marginBottom: 10 }} />
                 <Text style={styles.wbGreeting}>Sign in to</Text>
-                <Text style={styles.wbName}>Hamij Global Data</Text>
+                <Text style={styles.wbName}>Kiru Data</Text>
               </Animated.View>
             ) : (
               <Animated.View style={{ alignItems: "center", opacity: fadeAnim, transform: [{ scale: logoScale }] }}>
