@@ -169,7 +169,7 @@ export default function RegisterScreen({ navigation }) {
         password,
         referral: form.referral.trim() || undefined,
       });
-      Toast.show({ type: "success", text1: "Account created!", text2: "Welcome to Kiru Data" });
+      Toast.show({ type: "success", text1: "Account created!", text2: "Welcome to Hamij Global Data" });
     } catch (err) {
       Toast.show({
         type: "error",
