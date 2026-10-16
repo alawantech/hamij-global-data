@@ -76,7 +76,7 @@ ssh root@162.35.162.189 "cd /var/www/guchor-monie/backend && npx prisma db push 
 | `Admin` | Admin panel users with roles and permissions |
 | `AdminSession` | Active admin sessions (refresh tokens, IP, fingerprint) |
 | `AdminAuditLog` | All admin actions (login, logout, CRUD, etc.) |
-| `Transaction` | All purchase transactions |
+| `Transaction` | All purchase transactions (data purchases store a frozen plan `validity`) |
 | `Network` | Network settings (MTN, Airtel, Glo, 9mobile) |
 | `DataPlan` | Data bundle plans |
 | `CableProvider` / `CablePlan` | Cable TV providers and plans |
