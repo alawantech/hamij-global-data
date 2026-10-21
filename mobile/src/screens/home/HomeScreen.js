@@ -369,9 +369,9 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.headerRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={[styles.homeLogoCont, { justifyContent: "center" }]}>
-                {logoUrl || LOCAL_LOGO ? (
+                {LOCAL_LOGO ? (
                   <Image
-                    source={logoUrl ? { uri: logoUrl } : LOCAL_LOGO}
+                    source={LOCAL_LOGO}
                     style={styles.homeLogo}
                     resizeMode="contain"
                     onError={() => setLogoUrl(null)}
