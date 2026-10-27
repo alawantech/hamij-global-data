@@ -19,7 +19,7 @@ import * as Clipboard from "expo-clipboard";
 import client from "../../api/client";
 import { COLORS, RADIUS, SHADOW } from "../../constants/theme";
 
-const LOCAL_LOGO = null;
+const LOCAL_LOGO = require("../../../assets/hamij-logo.png");
 
 const API_BASE = client.defaults?.baseURL || "";
 

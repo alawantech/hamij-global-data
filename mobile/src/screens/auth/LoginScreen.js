@@ -44,7 +44,7 @@ function maskEmail(email = "") {
 }
 
 const LOGO_CACHE_KEY = "cached_logo_url";
-const LOCAL_LOGO = null;
+const LOCAL_LOGO = require("../../../assets/hamij-logo.png");
 
 export default function LoginScreen({ navigation }) {
   const { login, lastUser, completeOtpLogin, logout } = useAuth();

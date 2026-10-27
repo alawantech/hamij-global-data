@@ -7,7 +7,7 @@ import { AuthStack, AppStack } from "./AppNavigator";
 import { COLORS } from "../constants/theme";
 
 const LOGO_CACHE_KEY = "cached_logo_url";
-const LOCAL_LOGO = null;
+const LOCAL_LOGO = require("../../assets/hamij-logo-navy.png");
 const WORDMARK_NAME = "Hamij";
 const WORDMARK_TAG = "GLOBAL DATA";
 const LOGO_W = 240;

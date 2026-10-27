@@ -21,7 +21,7 @@ import client, { API_BASE } from "../../api/client";
 
 const { width: W } = Dimensions.get("window");
 const LOGO_CACHE_KEY = "cached_logo_url";
-const LOCAL_LOGO = null;
+const LOCAL_LOGO = require("../../../assets/hamij-logo-navy.png");
 
 const LOGO_STYLE = {
               width: 170,
