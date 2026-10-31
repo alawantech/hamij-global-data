@@ -26,7 +26,12 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": [],
+      "permissions": [
+        "android.permission.READ_CONTACTS",
+        "android.permission.WRITE_CONTACTS",
+        "android.permission.READ_CONTACTS",
+        "android.permission.WRITE_CONTACTS"
+      ],
       "softwareKeyboardSoftInputMode": "adjustResize"
     },
     "privacyPolicy": "https://hamijglobaldata.com/privacy",
@@ -46,8 +51,15 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "TBD"
+        "projectId": "a4ca1958-7fd8-4983-afa6-e69e75cd5fcb"
       }
+    },
+    "owner": "hamij-global-data",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a4ca1958-7fd8-4983-afa6-e69e75cd5fcb"
     }
   }
 }
