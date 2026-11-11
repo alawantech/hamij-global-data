@@ -65,19 +65,86 @@ async function getCustomerByEmail(email) {
   return customers.length > 0 ? customers[0] : null;
 }
 
+// Detect Paystack "Customer not found" — happens when the stored customer code
+// is stale/foreign (e.g. came from another platform's Paystack account dump).
+function isCustomerNotFound(err) {
+  const data = err?.response?.data;
+  if (data?.code === "customer_not_found") return true;
+  return /customer not found/i.test(String(data?.message || err?.message || ""));
+}
+
+// Paystack refuses to create dedicated accounts when the customer record has
+// no phone number ("Customer phone number is required", code missing_params).
+function isCustomerPhoneMissing(err) {
+  const data = err?.response?.data;
+  if (data?.code === "missing_params" && /phone/i.test(String(data?.message || ""))) return true;
+  return /phone number is required/i.test(String(data?.message || err?.message || ""));
+}
+
+// Same process as registration: the customer must carry the user's phone before
+// DVA creation. Sync it whenever it's missing on the Paystack customer record.
+async function syncCustomerPhone({ userId, email, phone }) {
+  if (!phone) return;
+  try {
+    const customer = await getCustomerByEmail(email);
+    if (!customer || customer.phone) return;
+    await paystackRequest("PUT", `/customer/${customer.id}`, { phone });
+    console.log(
+      `[Paystack] Synced missing phone on customer ${customer.customer_code} for user ${userId}`
+    );
+  } catch (err) {
+    console.error(
+      "[Paystack] Failed to sync customer phone:",
+      err?.response?.data || err.message
+    );
+  }
+}
+
+// Self-heal: discard the stale/foreign customer code, recreate the customer
+// under THIS Paystack account, and return the new valid code.
+async function healCustomer({ userId, email, firstname, lastname, phone }) {
+  let customer;
+  try {
+    customer = await createCustomer({
+      email,
+      firstName: firstname,
+      lastName: lastname,
+      phone: phone || "",
+    });
+  } catch (err) {
+    // A customer with this email may already exist under our Paystack account
+    // (e.g. created earlier without a phone) — reuse it instead of failing.
+    const existing = await getCustomerByEmail(email);
+    if (!existing) throw err;
+    customer = existing;
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { paystackCustomerCode: customer.customer_code },
+  });
+  console.log(
+    `[Paystack] Healed stale customer code for user ${userId} -> ${customer.customer_code}`
+  );
+  return customer.customer_code;
+}
+
 async function ensureAllAccounts({ userId, firstname, lastname, phone, email }) {
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return;
     if (user.paystackCustomerCode && user.paystackWemaAccount && user.paystackTitanAccount) return;
 
-    // If customer already exists but DVA creation failed previously, don't retry endlessly
+    // Throttle retries (15s per user) so background checks (getMe, virtual-accounts
+    // polling) can recover automatically without hammering Paystack or racing
+    // duplicate runs when multiple endpoints fire at once.
     if (user.paystackCustomerCode && !user.paystackWemaAccount && !user.paystackTitanAccount) {
-      return;
+      const retryAt = (global.__paystackDvaRetry = global.__paystackDvaRetry || {});
+      const last = retryAt[userId] || 0;
+      if (Date.now() - last < 15 * 1000) return;
+      retryAt[userId] = Date.now();
     }
 
     let customerCode = user.paystackCustomerCode;
-    let paystackCustomerId = null;
 
     if (!customerCode) {
       const customer = await createCustomer({
@@ -87,38 +154,74 @@ async function ensureAllAccounts({ userId, firstname, lastname, phone, email }) 
         phone: phone || "",
       });
       customerCode = customer.customer_code;
-      paystackCustomerId = customer.id;
       await prisma.user.update({
         where: { id: userId },
         data: { paystackCustomerCode: customerCode },
       });
     }
 
+    // Before creating any missing DVAs, make sure the customer carries the
+    // user's phone (Paystack requires it) — same as what happens on registration.
+    await syncCustomerPhone({ userId, email, phone });
+
     if (!user.paystackWemaAccount) {
       try {
-        const dva = await createDva(customerCode, "wema-bank");
+        let dva;
+        try {
+          dva = await createDva(customerCode, "wema-bank");
+        } catch (err) {
+          if (isCustomerNotFound(err)) {
+            customerCode = await healCustomer({ userId, email, firstname, lastname, phone });
+          } else if (isCustomerPhoneMissing(err)) {
+            await syncCustomerPhone({ userId, email, phone });
+          } else {
+            throw err;
+          }
+          dva = await createDva(customerCode, "wema-bank");
+        }
         await prisma.user.update({
           where: { id: userId },
           data: { paystackWemaAccount: dva.account_number },
         });
       } catch (err) {
-        console.error("[Paystack] Failed to create Wema DVA:", err.message);
+        console.error(
+          "[Paystack] Failed to create Wema DVA:",
+          err?.response?.data || err.message
+        );
       }
     }
 
     if (!user.paystackTitanAccount) {
       try {
-        const dva = await createDva(customerCode, "titan-paystack");
+        let dva;
+        try {
+          dva = await createDva(customerCode, "titan-paystack");
+        } catch (err) {
+          if (isCustomerNotFound(err)) {
+            customerCode = await healCustomer({ userId, email, firstname, lastname, phone });
+          } else if (isCustomerPhoneMissing(err)) {
+            await syncCustomerPhone({ userId, email, phone });
+          } else {
+            throw err;
+          }
+          dva = await createDva(customerCode, "titan-paystack");
+        }
         await prisma.user.update({
           where: { id: userId },
           data: { paystackTitanAccount: dva.account_number },
         });
       } catch (err) {
-        console.error("[Paystack] Failed to create Titan DVA:", err.message);
+        console.error(
+          "[Paystack] Failed to create Titan DVA:",
+          err?.response?.data || err.message
+        );
       }
     }
   } catch (err) {
-    console.error("[Paystack] ensureAllAccounts error:", err.message);
+    console.error(
+      "[Paystack] ensureAllAccounts error:",
+      err?.response?.data || err.message
+    );
   }
 }
 

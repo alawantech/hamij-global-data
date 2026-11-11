@@ -511,8 +511,9 @@ function clearCookie(req, res) {
 async function sendLoginNotification({ admin, ip, userAgent }) {
   try {
     const axios = require("axios");
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const MAILERSEND_API_KEY = process.env.MAILERSEND_API_KEY;
-    const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@gwarzodatasub.com";
+    const MAILERSEND_FROM_EMAIL = process.env.MAILERSEND_FROM_EMAIL || "noreply@hamijglobaldata.com";
     const MAILERSEND_FROM_NAME = process.env.MAILERSEND_FROM_NAME || "HAMIJ GLOBAL DATA";
 
     const html = `
@@ -554,16 +555,29 @@ async function sendLoginNotification({ admin, ip, userAgent }) {
 </body>
 </html>`;
 
-    await axios.post("https://api.mailersend.com/v1/email", {
-      from: { email: MAILERSEND_FROM_EMAIL, name: MAILERSEND_FROM_NAME },
-      to: [{ email: admin.email }],
-      subject: "New Login Alert — HAMIJ GLOBAL DATA Admin",
-      html,
-      text: `New login detected from IP: ${ip}. Device: ${userAgent || "Unknown"}. If this wasn't you, change your password immediately.`,
-    }, {
-      headers: { Authorization: `Bearer ${MAILERSEND_API_KEY}`, "Content-Type": "application/json" },
-      timeout: 15000,
-    });
+    if (BREVO_API_KEY) {
+      await axios.post("https://api.brevo.com/v3/smtp/email", {
+        sender: { email: MAILERSEND_FROM_EMAIL, name: MAILERSEND_FROM_NAME },
+        to: [{ email: admin.email }],
+        subject: "New Login Alert — HAMIJ GLOBAL DATA Admin",
+        htmlContent: html,
+        textContent: `New login detected from IP: ${ip}. Device: ${userAgent || "Unknown"}. If this wasn't you, change your password immediately.`,
+      }, {
+        headers: { "api-key": BREVO_API_KEY, "Content-Type": "application/json" },
+        timeout: 15000,
+      });
+    } else {
+      await axios.post("https://api.mailersend.com/v1/email", {
+        from: { email: MAILERSEND_FROM_EMAIL, name: MAILERSEND_FROM_NAME },
+        to: [{ email: admin.email }],
+        subject: "New Login Alert — HAMIJ GLOBAL DATA Admin",
+        html,
+        text: `New login detected from IP: ${ip}. Device: ${userAgent || "Unknown"}. If this wasn't you, change your password immediately.`,
+      }, {
+        headers: { Authorization: `Bearer ${MAILERSEND_API_KEY}`, "Content-Type": "application/json" },
+        timeout: 15000,
+      });
+    }
   } catch (err) {
     console.error("[LoginNotification] Failed to send:", err.message);
   }
